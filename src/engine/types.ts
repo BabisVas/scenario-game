@@ -1,5 +1,7 @@
 // Game state shapes. Engine functions take a GameState and return a Step.
 
+import type { EnemyDef } from '../data/schema'
+
 export type StatKey = 'strength' | 'agility' | 'endurance' | 'spirit'
 
 export type ItemStack = { itemId: string; qty: number }
@@ -33,9 +35,27 @@ export type GameEvent = { kind: LogKind; text: string; tags?: Tag[] }
 export type Survivor = never
 export type ZoneState = never
 export type ConstellationState = never
-export type FightState = never
 export type PendingChoice = never
 export type ActiveSubScenario = never
+
+export type Combatant = {
+  name: string
+  stats: Record<StatKey, number>
+  hp: number
+  maxHp: number
+  behavior: EnemyDef['behavior'] | 'survivor'
+  weaponPower: number
+  armorPower: number
+}
+
+export type FightState = {
+  enemy: Combatant
+  enemyId?: string
+  survivorId?: string
+  round: number
+  cooldowns: Record<string, number>
+  origin: 'hunt' | 'scenario' | 'survivor' | 'sub'
+}
 
 export type GameState = {
   schemaVersion: 1

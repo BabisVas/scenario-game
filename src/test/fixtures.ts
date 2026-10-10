@@ -2,7 +2,8 @@
 
 import { newGame } from '../engine/newGame'
 import { content } from '../data'
-import type { GameState } from '../engine/types'
+import type { Rng } from '../engine/rng'
+import type { Combatant, GameState } from '../engine/types'
 
 export function baseState(): GameState {
   return newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, content)
@@ -52,4 +53,35 @@ export function withSkill(s: GameState, skillId: string, level = 1): GameState {
 
 export function withItem(s: GameState, itemId: string, qty = 1): GameState {
   return { ...s, player: { ...s.player, inventory: [...s.player.inventory, { itemId, qty }] } }
+}
+
+/** An Rng that replays the given rolls in a loop, for deterministic fight tests. */
+export function seqRng(...rolls: number[]): Rng {
+  let i = 0
+  const next = () => rolls[i++ % rolls.length]
+  return {
+    next,
+    int: (min, max) => min + Math.floor(next() * (max - min + 1)),
+    chance: (p) => next() < p,
+    pick: (arr) => arr[Math.floor(next() * arr.length)],
+    getState: () => i,
+  }
+}
+
+export function weakEnemy(): Combatant {
+  return {
+    name: 'Test Rat', stats: { strength: 3, agility: 3, endurance: 1, spirit: 1 },
+    hp: 30, maxHp: 30, behavior: 'aggressive', weaponPower: 0, armorPower: 0,
+  }
+}
+
+export function brutalEnemy(): Combatant {
+  return {
+    name: 'Test Titan', stats: { strength: 40, agility: 1, endurance: 30, spirit: 1 },
+    hp: 999, maxHp: 999, behavior: 'aggressive', weaponPower: 20, armorPower: 20,
+  }
+}
+
+export function inFight(s: GameState, enemy: Combatant, ids: { enemyId?: string; survivorId?: string } = {}): GameState {
+  return { ...s, fight: { enemy, ...ids, round: 1, cooldowns: {}, origin: 'hunt' } }
 }
