@@ -41,3 +41,15 @@ export function fakeWindow() {
     },
   }
 }
+
+export function withCoins(s: GameState, coins: number): GameState {
+  return { ...s, player: { ...s.player, coins } }
+}
+
+export function withSkill(s: GameState, skillId: string, level = 1): GameState {
+  return { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId, level, uses: 0 }] } }
+}
+
+export function withItem(s: GameState, itemId: string, qty = 1): GameState {
+  return { ...s, player: { ...s.player, inventory: [...s.player.inventory, { itemId, qty }] } }
+}
