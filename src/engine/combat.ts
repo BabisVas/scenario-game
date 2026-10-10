@@ -5,7 +5,8 @@ import { recordSkillUse } from './growth'
 import { addItem, removeItem, useConsumable } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
-import { spendHours } from './time'
+import { killPlayer } from './death'
+import { afterScenarioFight, checkScenarioClock, recordProgress, spendHours } from './scenario'
 import type { Combatant, FightState, GameEvent, GameState, Step } from './types'
 
 export type FightAction = { kind: 'attack' } | { kind: 'skill'; skillId: string } | { kind: 'item'; itemId: string } | { kind: 'run' }
@@ -57,6 +58,26 @@ export function startFight(
 const notNow = (state: GameState, text: string): FightStep => ({ state, events: [{ kind: 'system', text }], result: 'ongoing' })
 
 export function fightTurn(state: GameState, action: FightAction, rng: Rng, content: Content): FightStep {
+  const fight = state.fight
+  const step = fightRound(state, action, rng, content)
+  if (!fight || step.result === 'ongoing') return step
+
+  const events = [...step.events]
+  if (step.result === 'lost') {
+    const death = killPlayer(step.state, `Killed by ${fight.enemy.name} in round ${fight.round}.`, content, rng)
+    return { state: death.state, events: [...events, ...death.events], result: 'lost' }
+  }
+  let s = step.state
+  if (step.result === 'won') {
+    const enemyTags = content.enemies.find((e) => e.id === fight.enemyId)?.tags ?? []
+    s = recordProgress(s, 'kill', { enemyTags }, content)
+  }
+  if (fight.origin === 'scenario') s = afterScenarioFight(s, step.result)
+  const clock = checkScenarioClock(s, rng, content)
+  return { state: clock.state, events: [...events, ...clock.events], result: step.result }
+}
+
+function fightRound(state: GameState, action: FightAction, rng: Rng, content: Content): FightStep {
   const fight = state.fight
   if (!fight) return notNow(state, 'There is no fight.')
 

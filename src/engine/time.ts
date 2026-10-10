@@ -61,8 +61,3 @@ export function catchUp(
   return { state: s, events }
 }
 
-/** Spends in-game hours: the only thing that moves scenario clocks. */
-export function spendHours(state: GameState, hours: number): GameState {
-  const phase = state.phase.kind === 'dead' ? state.phase : { ...state.phase, hoursLeft: state.phase.hoursLeft - hours }
-  return { ...state, phase, inGameHour: state.inGameHour + hours }
-}

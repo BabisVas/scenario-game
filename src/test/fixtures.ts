@@ -2,8 +2,9 @@
 
 import { newGame } from '../engine/newGame'
 import { content } from '../data'
+import type { Content, ScenarioDef } from '../data/schema'
 import type { Rng } from '../engine/rng'
-import type { Combatant, GameState } from '../engine/types'
+import type { Combatant, GameState, Survivor } from '../engine/types'
 
 export function baseState(): GameState {
   return newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, content)
@@ -88,4 +89,68 @@ export function inFight(s: GameState, enemy: Combatant, ids: { enemyId?: string;
 
 export function sealZone(s: GameState, zoneId: string): GameState {
   return { ...s, zones: { ...s.zones, [zoneId]: { ...(s.zones[zoneId] ?? { dangerBonus: 0 }), sealed: true } } }
+}
+
+// --- Scenario fixtures -------------------------------------------------------
+// Scenario tests pass `fixtureContent`: the shipped content plus the fixture
+// scenario defs below, registered when a builder is called, so the engine can
+// look a def up by the phase's scenarioId like it does in the real game.
+
+export const fixtureContent: Content = { ...content, scenarios: [...content.scenarios] }
+
+function register(def: ScenarioDef): ScenarioDef {
+  const i = fixtureContent.scenarios.findIndex((d) => d.id === def.id)
+  if (i >= 0) fixtureContent.scenarios[i] = def
+  else fixtureContent.scenarios.push(def)
+  return def
+}
+
+const fixtureDef = (id: string, number: number, hours: number, goal: ScenarioDef['goal']): ScenarioDef => ({
+  id, number, title: `Fixture ${id}`, announcement: `${id} begins`, rules: [], twist: `${id} twist`,
+  hours, goal, rewards: { coins: 20 }, survivorDeathRate: 0,
+})
+
+export const surviveDef = ({ hours }: { hours: number }) => register(fixtureDef('fx-survive', 901, hours, { kind: 'survive' }))
+export const killDef = ({ hours, count }: { hours: number; count: number }) =>
+  register(fixtureDef('fx-kill', 902, hours, { kind: 'kill', count }))
+export const reachDef = ({ hours, zoneId }: { hours: number; zoneId: string }) =>
+  register(fixtureDef('fx-reach', 903, hours, { kind: 'reach', zoneId }))
+export const protectDef = ({ hours }: { hours: number }) => register(fixtureDef('fx-protect', 904, hours, { kind: 'protect' }))
+export const choiceDef = () =>
+  register(fixtureDef('fx-choice', 905, 6, {
+    kind: 'choice',
+    prompt: 'Only one of you walks out.',
+    fallbackOptionId: 'walk-away',
+    options: [
+      { id: 'kill-one', label: 'Push someone into the dark', tags: ['cruelty'], target: 'met-survivor', outcome: { kill: true } },
+      { id: 'fight-it', label: 'Fight the gatekeeper', tags: ['bravery'], outcome: { fight: 'feral-hound' } },
+      { id: 'walk-away', label: 'Walk away and pay the toll (fallback-marker)', tags: ['mercy'], outcome: { coins: -5 } },
+    ],
+  }))
+
+export function inScenario(s: GameState, def: ScenarioDef): GameState {
+  return {
+    ...s,
+    phase: { kind: 'scenario', scenarioId: def.id, hoursLeft: def.hours, progress: 0, killsAtStart: s.player.kills },
+    pendingChoice: def.goal.kind === 'choice' ? { source: 'scenario', scenarioId: def.id } : null,
+  }
+}
+
+export function inRest(s: GameState, hoursLeft: number, nextScenarioId: string | null = null): GameState {
+  return { ...s, phase: { kind: 'rest', nextScenarioId, hoursLeft } }
+}
+
+export function clearedAll(s: GameState, c: Content): GameState {
+  return { ...s, clearedScenarioIds: c.scenarios.map((d) => d.id) }
+}
+
+export function makeSurvivor(id: string, over: Partial<Survivor> = {}): Survivor {
+  return {
+    id, name: `Survivor ${id}`, personality: 'kind', stats: { strength: 5, agility: 5, endurance: 5, spirit: 5 },
+    hp: 100, alive: true, zoneId: 'old-market', partyId: null, met: false, attitude: 0, memories: [], points: 0, ...over,
+  }
+}
+
+export function withNoMetSurvivors(s: GameState): GameState {
+  return { ...s, survivors: [makeSurvivor('s-0'), makeSurvivor('s-1', { met: true, alive: false })] }
 }

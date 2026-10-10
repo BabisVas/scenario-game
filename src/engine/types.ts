@@ -1,6 +1,6 @@
 // Game state shapes. Engine functions take a GameState and return a Step.
 
-import type { EnemyDef } from '../data/schema'
+import type { EnemyDef, SurvivorTemplate } from '../data/schema'
 
 export type StatKey = 'strength' | 'agility' | 'endurance' | 'spirit'
 
@@ -21,7 +21,15 @@ export type Player = {
 }
 
 export type Phase =
-  | { kind: 'scenario'; scenarioId: string; hoursLeft: number; progress: number; protectedSurvivorId?: string }
+  | {
+      kind: 'scenario'
+      scenarioId: string
+      hoursLeft: number
+      progress: number
+      protectedSurvivorId?: string
+      /** player.kills when the scenario began, for 'kills this scenario'. */
+      killsAtStart?: number
+    }
   | { kind: 'rest'; nextScenarioId: string | null; hoursLeft: number }
   | { kind: 'dead'; cause: string }
 
@@ -32,10 +40,26 @@ export type Tag = 'bravery' | 'cruelty' | 'cunning' | 'mercy' | 'style' | 'cowar
 export type GameEvent = { kind: LogKind; text: string; tags?: Tag[] }
 
 // Filled in by the tasks that own them.
-export type Survivor = never
+export type Survivor = {
+  id: string
+  name: string
+  personality: SurvivorTemplate['personality']
+  stats: Record<StatKey, number>
+  hp: number
+  alive: boolean
+  zoneId: string
+  partyId: string | null
+  met: boolean
+  /** -100..100: how this survivor feels about the player. */
+  attitude: number
+  /** Newest 5. */
+  memories: string[]
+  points: number
+  deathNote?: string
+}
 export type ZoneState = { sealed: boolean; dangerBonus: number }
 export type ConstellationState = never
-export type PendingChoice = never
+export type PendingChoice = { source: 'scenario'; scenarioId: string } | { source: 'contract'; constellationId: string }
 export type ActiveSubScenario = { defId: string; hoursLeft: number; progress: number }
 
 export type Combatant = {

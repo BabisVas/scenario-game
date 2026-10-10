@@ -6,7 +6,7 @@ import { recordSkillUse } from './growth'
 import { addItem } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
-import { spendHours } from './time'
+import { checkScenarioClock, recordProgress, spendHours } from './scenario'
 import type { Combatant, GameEvent, GameState, StatKey, Step, ZoneState } from './types'
 
 export const ACTION_COST: Record<ActionId, { energy: number; hours: number }> = {
@@ -77,6 +77,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
   let s: GameState = { ...state, energy: state.energy - cost.energy }
   // A hunt's hour is the hour its fight takes.
   if (action !== 'hunt') s = spendHours(s, cost.hours)
+  s = recordProgress(s, 'reach', { zoneId }, content)
   const events: GameEvent[] = []
   const run = (step: Step) => {
     s = step.state
@@ -109,12 +110,8 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       break
   }
 
-  return settle({ state: s, events })
-}
-
-/** Runs after every action. Task 9 judges the scenario clock here. */
-function settle(step: Step): Step {
-  return step
+  const clock = checkScenarioClock(s, rng, content)
+  return { state: clock.state, events: [...events, ...clock.events] }
 }
 
 function scavenge(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step {

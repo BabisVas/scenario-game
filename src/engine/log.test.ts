@@ -18,6 +18,7 @@ test('entries are numbered from nextLogId and stamped with the in-game hour', ()
 });
 test('appending does not change the original state', () => {
   const s = baseState();
+  const before = s.log.length;
   appendEvents(s, [{ kind: 'system', text: 'x' }]);
-  expect(s.log).toHaveLength(1);
+  expect(s.log).toHaveLength(before);
 });

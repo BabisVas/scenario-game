@@ -1,5 +1,8 @@
 import type { Content } from '../data/schema'
 import { BACKGROUND_STAT_BONUS, ENERGY_MAX, SCHEMA_VERSION, STAT_START } from './config'
+import { appendEvents } from './log'
+import { createRng } from './rng'
+import { startScenario } from './scenario'
 import type { GameState, StatKey } from './types'
 
 export function maxHp(stats: Record<StatKey, number>): number {
@@ -22,7 +25,7 @@ export function newGame(
   }
   stats[background.statBonus] += BACKGROUND_STAT_BONUS
 
-  return {
+  const base: GameState = {
     schemaVersion: SCHEMA_VERSION,
     rngState: input.seed >>> 0,
     createdAt: input.now,
@@ -43,7 +46,7 @@ export function newGame(
     energyUpdatedAt: input.now,
     worldTickAt: input.now,
     inGameHour: 0,
-    phase: { kind: 'scenario', scenarioId: first.id, hoursLeft: first.hours, progress: 0 },
+    phase: { kind: 'rest', nextScenarioId: first.id, hoursLeft: 0 },
     clearedScenarioIds: [],
     subScenario: null,
     fight: null,
@@ -52,8 +55,12 @@ export function newGame(
     survivors: [],
     constellations: {},
     rankingOpen: false,
-    log: [{ id: 1, kind: 'system', text: first.announcement, inGameHour: 0 }],
-    nextLogId: 2,
+    log: [],
+    nextLogId: 1,
     digest: null,
   }
+
+  const rng = createRng(base.rngState)
+  const step = startScenario(base, first, rng, content)
+  return { ...appendEvents(step.state, step.events), rngState: rng.getState() }
 }
