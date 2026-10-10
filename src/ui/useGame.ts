@@ -1,7 +1,7 @@
 // The one game store: loads, catches up, runs player actions through the engine and autosaves.
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { content } from '../data'
+import { content as shippedContent } from '../data'
 import type { ActionId, Content } from '../data/schema'
 import { doAction } from '../engine/actions'
 import { fightTurn, type FightAction } from '../engine/combat'
@@ -36,6 +36,13 @@ export type GameStatus = 'loading' | 'no-save' | 'unreadable' | 'playing' | 'dea
 
 /** Where the game saves. Tests inject an in-memory Storage; the game uses localStorage. */
 export const GameStorageContext = createContext<Storage | null>(null)
+
+/** The game content. Tests inject fixture content; the game uses the shipped data. */
+export const GameContentContext = createContext<Content>(shippedContent)
+
+export function useContent(): Content {
+  return useContext(GameContentContext)
+}
 
 const refuse = (state: GameState, text: string): Step => ({ state, events: [{ kind: 'system', text }] })
 
@@ -73,7 +80,7 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
 }
 
 /** Real-time catch-up. In-tab catch-ups keep the old digest so no popup interrupts play. */
-function catchUpTo(state: GameState, now: number, showDigest: boolean): GameState {
+function catchUpTo(state: GameState, now: number, showDigest: boolean, content: Content): GameState {
   const rng = createRng(state.rngState)
   const step = catchUp(state, now, rng, (s, r) => worldTick(s, r, content))
   const s = appendEvents(step.state, step.events)
@@ -85,6 +92,7 @@ type View = { status: GameStatus; state: GameState | null }
 export function useGame() {
   const injected = useContext(GameStorageContext)
   const storage = injected ?? window.localStorage
+  const content = useContent()
   const [view, setView] = useState<View>({ status: 'loading', state: null })
   const [now, setNow] = useState(() => Date.now())
   const ref = useRef<View>(view)
@@ -117,9 +125,9 @@ export function useGame() {
     const loaded = loadGame(storage)
     if (!loaded.ok) commit(loaded.reason === 'none' ? 'no-save' : 'unreadable', null)
     else if (loaded.state.phase.kind === 'dead') commit('dead', loaded.state)
-    else commit('playing', catchUpTo(loaded.state, Date.now(), true))
+    else commit('playing', catchUpTo(loaded.state, Date.now(), true, content))
     return () => guard.dispose()
-  }, [storage, commit])
+  }, [storage, commit, content])
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -128,7 +136,7 @@ export function useGame() {
       const cur = ref.current
       if (cur.status !== 'playing' || !cur.state) return
       let s = cur.state
-      if (t - s.worldTickAt >= WORLD_TICK_MS) s = catchUpTo(s, t, false)
+      if (t - s.worldTickAt >= WORLD_TICK_MS) s = catchUpTo(s, t, false, content)
       else {
         const refilled = refillEnergy(s, t)
         if (refilled.energy !== s.energy) s = refilled
@@ -136,7 +144,7 @@ export function useGame() {
       if (s !== cur.state) commit('playing', s)
     }, 1000)
     return () => clearInterval(id)
-  }, [commit])
+  }, [commit, content])
 
   const act = useCallback(
     (a: PlayerAction) => {
@@ -149,7 +157,7 @@ export function useGame() {
       const s = { ...appendEvents(step.state, step.events), rngState: rng.getState(), lastSeenAt: t }
       commit(s.phase.kind === 'dead' ? 'dead' : 'playing', s)
     },
-    [commit],
+    [commit, content],
   )
 
   const newGame = useCallback(
@@ -157,7 +165,7 @@ export function useGame() {
       const seed = Math.floor(Math.random() * 2 ** 32)
       commit('playing', createNewGame({ name, backgroundId, seed, now: Date.now() }, content))
     },
-    [commit],
+    [commit, content],
   )
 
   const dismissDigest = useCallback(() => {
@@ -167,3 +175,5 @@ export function useGame() {
 
   return { status: view.status, state: view.state, now, act, newGame, dismissDigest }
 }
+
+export type Game = ReturnType<typeof useGame>

@@ -208,3 +208,11 @@ export function contentWith(ids: string[]): Content {
   const model = content.constellations[0]
   return { ...content, constellations: ids.map((id) => ({ ...model, id, title: `Title ${id}` })) }
 }
+
+// --- UI fixtures -------------------------------------------------------------
+
+/** A fresh game whose clocks read "just now", so loading it does not catch up or refill. */
+export function playingState(): GameState {
+  const now = Date.now()
+  return { ...baseState(), createdAt: now, lastSeenAt: now, energyUpdatedAt: now, worldTickAt: now }
+}
