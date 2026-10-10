@@ -43,6 +43,17 @@ export function canAct(state: GameState, zoneId: string, action: ActionId, conte
   return { ok: true }
 }
 
+/** Survive scenarios are never safe: any action in one can be ambushed. */
+export function ambushChance(danger: number): number {
+  return 0.1 + 0.05 * danger
+}
+
+function inSurviveScenario(state: GameState, content: Content): boolean {
+  if (state.phase.kind !== 'scenario') return false
+  const id = state.phase.scenarioId
+  return content.scenarios.find((d) => d.id === id)?.goal.kind === 'survive'
+}
+
 /** An enemy as a fighter, tougher the more dangerous the zone. */
 export function combatantFromEnemy(def: EnemyDef, danger: number): Combatant {
   const f = 1 + 0.15 * Math.max(0, danger - 1)
@@ -112,6 +123,11 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
     case 'trade':
       run(findTrader(s, zoneId, rng))
       break
+  }
+
+  if (!s.fight && inSurviveScenario(s, content) && zone.enemyIds.length > 0 && rng.chance(ambushChance(zoneDanger(s, zone)))) {
+    events.push({ kind: 'fight', text: 'Ambush! Something was waiting for you.' })
+    run(randomFight(s, zone, rng, content, 'hunt'))
   }
 
   const clock = checkScenarioClock(s, rng, content)
