@@ -70,7 +70,9 @@ function ScenarioChoice({
           <p>{prompt}</p>
           <div className="options">
             {options.map((o) =>
-              o.target === 'met-survivor' ? (
+              o.outcome.spareCount !== undefined ? (
+                <SpareOption key={o.id} option={o} spareCount={o.outcome.spareCount} people={metAlive} act={act} />
+              ) : o.target === 'met-survivor' ? (
                 metAlive.length > 0 ? <TargetOption key={o.id} option={o} people={metAlive} act={act} /> : null
               ) : (
                 <button key={o.id} className="btn" onClick={() => act({ kind: 'choice', optionId: o.id, targetSurvivorId: null })}>
@@ -100,5 +102,59 @@ function TargetOption({ option, people, act }: { option: ChoiceOption; people: S
         {option.label}
       </button>
     </div>
+  )
+}
+
+function SpareOption({
+  option,
+  spareCount,
+  people,
+  act,
+}: {
+  option: ChoiceOption
+  spareCount: number
+  people: Survivor[]
+  act: (a: PlayerAction) => void
+}) {
+  const [picked, setPicked] = useState<string[]>([])
+  const choose = () => act({ kind: 'choice', optionId: option.id, targetSurvivorId: null, spareIds: picked })
+  if (people.length < spareCount) {
+    return (
+      <div className="option">
+        <p className="small muted">
+          {people.length === 0
+            ? 'You do not know anyone here. The system will choose for you.'
+            : `You know only ${people.length}. All of them will be spared.`}
+        </p>
+        <button className="btn" onClick={choose}>
+          {option.label}
+        </button>
+      </div>
+    )
+  }
+  const full = picked.length >= spareCount
+  return (
+    <fieldset className="option spare">
+      <legend className="small">
+        Spare up to {spareCount}. Everyone you know who is not chosen dies.
+      </legend>
+      {people.map((v) => {
+        const on = picked.includes(v.id)
+        return (
+          <label key={v.id} className="check">
+            <input
+              type="checkbox"
+              checked={on}
+              disabled={!on && full}
+              onChange={() => setPicked(on ? picked.filter((id) => id !== v.id) : [...picked, v.id])}
+            />
+            {v.name}
+          </label>
+        )
+      })}
+      <button className="btn danger" onClick={choose}>
+        {option.label}
+      </button>
+    </fieldset>
   )
 }

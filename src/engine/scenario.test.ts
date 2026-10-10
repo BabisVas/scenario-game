@@ -5,7 +5,7 @@ import { createRng } from './rng'
 import type { GameState } from './types'
 import {
   baseState, choiceDef, clearedAll, fixtureContent as content, inFight, inRest, inScenario, killDef, makeSurvivor,
-  protectDef, reachDef, surviveDef, weakEnemy, withNoMetSurvivors, brutalEnemy,
+  protectDef, reachDef, spareDef, surviveDef, weakEnemy, withNoMetSurvivors, brutalEnemy,
 } from '../test/fixtures'
 
 test('surviving the clock clears a survive scenario and opens the ranking', () => {
@@ -152,4 +152,35 @@ test('meeting a sub-scenario goal pays its reward', () => {
   const r = checkScenarioClock(recordProgress(s, 'reach', { zoneId }, content), createRng(1), content).state;
   expect(r.subScenario).toBeNull();
   expect(r.player.coins).toBe(s.player.coins + sub.rewards.coins);
+});
+
+describe('only some of a group survive', () => {
+  const alive = (s: GameState, id: string) => s.survivors.find(v => v.id === id)!.alive;
+  const four = () => ['s-0', 's-1', 's-2', 's-3'].map(id => makeSurvivor(id, { met: true }));
+
+  test('the player picks who is spared; every other met survivor dies; strangers are untouched', () => {
+    const s = inScenario({ ...baseState(), survivors: [...four(), makeSurvivor('s-9')] }, spareDef(2));
+    const r = resolveChoice(s, 'choose', null, createRng(1), content, ['s-1', 's-3']).state;
+    expect(['s-0', 's-1', 's-2', 's-3', 's-9'].map(id => alive(r, id))).toEqual([false, true, false, true, true]);
+    expect(r.phase.kind).toBe('rest');
+  });
+  test('picking fewer than allowed spares only those picked', () => {
+    const s = inScenario({ ...baseState(), survivors: four() }, spareDef(2));
+    const r = resolveChoice(s, 'choose', null, createRng(1), content, ['s-2']).state;
+    expect(r.survivors.filter(v => v.alive).map(v => v.id)).toEqual(['s-2']);
+  });
+  test('picks of strangers, the dead, or beyond the limit do not count', () => {
+    const s = inScenario({ ...baseState(), survivors: [...four(), makeSurvivor('s-8', { met: true, alive: false }), makeSurvivor('s-9')] }, spareDef(2));
+    const r = resolveChoice(s, 'choose', null, createRng(1), content, ['s-9', 's-8', 's-0', 's-1', 's-2']).state;
+    expect(['s-0', 's-1', 's-2', 's-3', 's-9'].map(id => alive(r, id))).toEqual([true, true, false, false, true]);
+  });
+  test('with fewer met than the count, all met live and the rest of the group is chosen by attitude', () => {
+    const survivors = [
+      makeSurvivor('s-0', { met: true, attitude: -90 }),
+      makeSurvivor('s-1', { attitude: 10 }), makeSurvivor('s-2', { attitude: 80 }), makeSurvivor('s-3', { attitude: -10 }),
+    ];
+    const s = inScenario({ ...baseState(), survivors }, spareDef(2));
+    const r = resolveChoice(s, 'choose', null, createRng(1), content, []).state;
+    expect(['s-0', 's-1', 's-2', 's-3'].map(id => alive(r, id))).toEqual([true, false, true, false]);
+  });
 });

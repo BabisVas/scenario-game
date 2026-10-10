@@ -133,6 +133,17 @@ export const choiceDef = () =>
     ],
   }))
 
+export const spareDef = (spareCount = 2) =>
+  register(fixtureDef('fx-spare', 906, 6, {
+    kind: 'choice',
+    prompt: 'The bridge holds two. Choose who crosses.',
+    fallbackOptionId: 'refuse',
+    options: [
+      { id: 'choose', label: 'Choose who crosses', tags: ['cunning'], outcome: { spareCount } },
+      { id: 'refuse', label: 'Refuse and pay the toll', tags: ['mercy'], outcome: { coins: -5 } },
+    ],
+  }))
+
 export function inScenario(s: GameState, def: ScenarioDef): GameState {
   return {
     ...s,

@@ -22,7 +22,7 @@ import { createTabGuard } from '../save/tabGuard'
 export type PlayerAction =
   | { kind: 'zone'; zoneId: string; action: ActionId }
   | { kind: 'fight'; turn: FightAction }
-  | { kind: 'choice'; optionId: string; targetSurvivorId: string | null }
+  | { kind: 'choice'; optionId: string; targetSurvivorId: string | null; spareIds?: string[] }
   | { kind: 'contract'; accept: boolean }
   | { kind: 'buyStat'; stat: StatKey }
   | { kind: 'shop'; mode: 'buy' | 'sell'; itemId: string }
@@ -53,7 +53,7 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
     case 'fight':
       return state.fight ? fightTurn(state, a.turn, rng, c) : refuse(state, 'There is no fight.')
     case 'choice':
-      return resolveChoice(state, a.optionId, a.targetSurvivorId, rng, c)
+      return resolveChoice(state, a.optionId, a.targetSurvivorId, rng, c, a.spareIds)
     case 'contract':
       return resolveContract(state, a.accept, c)
     case 'zone':

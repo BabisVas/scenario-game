@@ -216,6 +216,7 @@ export function resolveChoice(
   targetSurvivorId: string | null,
   rng: Rng,
   content: Content,
+  spareIds: string[] = [],
 ): Step {
   const pending = state.pendingChoice
   if (state.phase.kind !== 'scenario' || pending?.source !== 'scenario') return { state, events: [] }
@@ -253,7 +254,7 @@ export function resolveChoice(
     events.push({ kind: 'survivor', text: `${victim.name} is gone. The ones who saw it will not forget.` })
   }
   if (out.spareCount !== undefined) {
-    const step = cullGroup(s, out.spareCount, rng)
+    const step = cullGroup(s, out.spareCount, spareIds, rng)
     s = step.state
     events.push(...step.events)
   }
@@ -268,23 +269,38 @@ export function resolveChoice(
   return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
 
-/** "Only some of you walk out": a group of survivors forms; the ones who like the player most are spared. */
-function cullGroup(state: GameState, spareCount: number, rng: Rng): Step {
-  const pool = [...livingMet(state), ...living(state).filter((v) => !v.met)]
-  const group: Survivor[] = []
-  while (group.length < spareCount + 2 && group.length < pool.length) {
-    const pick = rng.pick(pool.filter((v) => !group.includes(v)))
-    group.push(pick)
+/**
+ * "Only some of you walk out". If the player knows at least spareCount living
+ * survivors, they pick who is spared and every other survivor they know dies.
+ * Otherwise everyone they know is spared, a group forms around them with
+ * strangers, and the strangers who like the player most fill the remaining places.
+ */
+function cullGroup(state: GameState, spareCount: number, spareIds: string[], rng: Rng): Step {
+  const known = livingMet(state)
+  let group: Survivor[]
+  let spared: Survivor[]
+  if (known.length >= spareCount) {
+    const picked = new Set(spareIds)
+    group = known
+    spared = known.filter((v) => picked.has(v.id)).slice(0, spareCount)
+  } else {
+    const strangers = living(state).filter((v) => !v.met)
+    group = [...known]
+    while (group.length < spareCount + 2 && strangers.length > 0) {
+      group.push(strangers.splice(rng.int(0, strangers.length - 1), 1)[0])
+    }
+    const byAttitude = group.filter((v) => !v.met).sort((a, b) => b.attitude - a.attitude)
+    spared = [...known, ...byAttitude.slice(0, spareCount - known.length)]
   }
-  const spared = [...group].sort((a, b) => b.attitude - a.attitude).slice(0, spareCount)
   const lost = group.filter((v) => !spared.includes(v))
   const lostIds = new Set(lost.map((v) => v.id))
+  const sparedIds = new Set(spared.map((v) => v.id))
   return {
     state: {
       ...state,
       survivors: state.survivors.map((v) => {
-        if (lostIds.has(v.id)) return { ...v, alive: false, hp: 0, deathNote: 'Left behind by the scenario.' }
-        if (spared.includes(v)) return remember(v, 'spared', 20)
+        if (lostIds.has(v.id)) return { ...v, alive: false, hp: 0, partyId: null, deathNote: 'Left behind by the scenario.' }
+        if (sparedIds.has(v.id)) return remember(v, 'spared', 20)
         return v
       }),
     },

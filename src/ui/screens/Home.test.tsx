@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { SAVE_KEY } from '../../engine/config'
 import { loadGame } from '../../save/save'
-import { choiceDef, inScenario, makeSurvivor, memoryStorage, playingState, sealZone } from '../../test/fixtures'
+import { choiceDef, inScenario, makeSurvivor, memoryStorage, playingState, sealZone, spareDef } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
 
 test('home shows scenario hours and disables an action without energy', () => {
@@ -73,4 +73,22 @@ test('met survivors are named in their zone, strangers are someone', () => {
   const zone = screen.getByRole('region', { name: /zone/i });
   expect(within(zone).getByText(/mara/i)).toBeInTheDocument();
   expect(within(zone).getByText(/someone/i)).toBeInTheDocument();
+});
+test('a "some survive" choice lets you tick who is spared, up to the limit', () => {
+  const people = ['Mara', 'Kofi', 'Ines'].map((name, i) => makeSurvivor(`s-${i}`, { met: true, name }));
+  const { storage } = renderWithGame(inScenario({ ...playingState(), survivors: people }, spareDef(2)));
+  const dialog = screen.getByRole('dialog', { name: /choice/i });
+  expect(within(dialog).getByText(/everyone you know who is not chosen dies/i)).toBeInTheDocument();
+  fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Mara' }));
+  fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Ines' }));
+  expect(within(dialog).getByRole('checkbox', { name: 'Kofi' })).toBeDisabled();
+  fireEvent.click(within(dialog).getByRole('button', { name: /choose who crosses/i }));
+  const saved = loadGame(storage);
+  expect(saved.ok && saved.state.survivors.map(v => v.alive)).toEqual([true, false, true]);
+});
+test('knowing fewer people than the limit spares them all', () => {
+  renderWithGame(inScenario({ ...playingState(), survivors: [makeSurvivor('s-0', { met: true, name: 'Mara' })] }, spareDef(2)));
+  const dialog = screen.getByRole('dialog', { name: /choice/i });
+  expect(within(dialog).queryByRole('checkbox')).toBeNull();
+  expect(within(dialog).getByText(/all of them will be spared/i)).toBeInTheDocument();
 });

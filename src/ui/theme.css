@@ -872,3 +872,28 @@ h3 {
   padding-left: 18px;
   color: var(--star);
 }
+
+.spare {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+}
+
+.spare legend {
+  padding: 0 4px;
+  color: var(--danger);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
