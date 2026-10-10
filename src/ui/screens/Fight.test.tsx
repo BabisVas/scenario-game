@@ -49,10 +49,10 @@ test('buying a stat point raises it', () => {
   expect(saved.ok && saved.state.player.stats.strength).toBe(6);
 });
 test('gear can be equipped from the inventory', () => {
-  const { storage } = renderWithGame(playingState());
-  fireEvent.click(screen.getByRole('button', { name: /equip bike chain/i }));
+  const { storage } = renderWithGame(withItem(playingState(), 'crowbar'));
+  fireEvent.click(screen.getByRole('button', { name: /equip crowbar/i }));
   const saved = loadGame(storage);
-  expect(saved.ok && saved.state.player.equipped.weapon).toBe('bike-chain');
+  expect(saved.ok && saved.state.player.equipped.weapon).toBe('crowbar');
 });
 test('after the first clear the ranking shows, the dead struck through and you highlighted', () => {
   const s = { ...playingState(), rankingOpen: true, survivors: [makeSurvivor('s-0', { name: 'Mara', points: 9 }), makeSurvivor('s-1', { name: 'Kofi', alive: false })] };

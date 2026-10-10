@@ -26,3 +26,9 @@ test('timestamps start at now', () => {
 test('max hp grows with endurance', () => {
   expect(maxHp({ strength: 5, agility: 5, endurance: 7, spirit: 5 })).toBe(120);
 });
+test('starting gear starts equipped; a starting consumable does not', () => {
+  const start = (backgroundId: string) => newGame({ name: 'Ari', backgroundId, seed: 1, now: 0 }, content).player.equipped;
+  expect(start('courier')).toEqual({ weapon: 'bike-chain' });
+  expect(start('night-guard')).toEqual({ armor: 'padded-jacket' });
+  expect(start('night-nurse')).toEqual({});
+});

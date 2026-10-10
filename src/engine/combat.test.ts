@@ -1,7 +1,7 @@
 import { fightTurn, runChance, startFight } from './combat'
 import { createRng } from './rng'
 import { content } from '../data'
-import { baseState, brutalEnemy, inFight, seqRng, weakEnemy, withItem, withSkill } from '../test/fixtures'
+import { baseState, brutalEnemy, inFight, seqRng, unarmed, weakEnemy, withItem, withSkill } from '../test/fixtures'
 
 test('attack lowers enemy hp and logs it', () => {
   const s = inFight(baseState(), weakEnemy());
@@ -34,7 +34,7 @@ test('a skill on cooldown cannot be used', () => {
 
 test('damage follows the formula: 5 str, no weapon, vs 1 endurance, middle roll', () => {
   // (5*2 + 0 - 1 - 0) * (0.85 + 0.5*0.3 = 1.0) = 9; crit roll 0.5 misses.
-  const s = inFight(baseState(), weakEnemy());
+  const s = inFight(unarmed(baseState()), weakEnemy());
   const r = fightTurn(s, { kind: 'attack' }, seqRng(0.5), content);
   expect(r.state.fight!.enemy.hp).toBe(21);
 });
@@ -45,7 +45,7 @@ test('an equipped weapon adds its power to damage', () => {
 });
 test('a critical hit does half again as much damage', () => {
   // crit chance = min(0.3, 7 agility * 0.02) = 0.14; roll 0.1 crits; damage roll 0.5 → 9 * 1.5 = 13.5 → 14
-  const s = inFight(baseState(), weakEnemy());
+  const s = inFight(unarmed(baseState()), weakEnemy());
   const r = fightTurn(s, { kind: 'attack' }, seqRng(0.5, 0.1, 0.5, 0.9), content);
   expect(r.state.fight!.enemy.hp).toBe(16);
 });

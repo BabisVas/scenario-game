@@ -18,6 +18,8 @@ export function newGame(
   const background = content.backgrounds.find((b) => b.id === input.backgroundId)
   if (!background) throw new Error(`Unknown background: ${input.backgroundId}`)
   const first = content.scenarios[0]
+  const startingItem = content.items.find((i) => i.id === background.startingItemId)
+  const equipped = startingItem?.kind === 'weapon' || startingItem?.kind === 'armor' ? { [startingItem.kind]: startingItem.id } : {}
 
   const stats: Record<StatKey, number> = {
     strength: STAT_START,
@@ -40,7 +42,7 @@ export function newGame(
       hp: maxHp(stats),
       coins: 0,
       inventory: [{ itemId: background.startingItemId, qty: 1 }],
-      equipped: {},
+      equipped,
       skills: [],
       points: 0,
       kills: 0,

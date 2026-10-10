@@ -53,6 +53,10 @@ export function withSkill(s: GameState, skillId: string, level = 1): GameState {
   return { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId, level, uses: 0 }] } }
 }
 
+export function unarmed(s: GameState): GameState {
+  return { ...s, player: { ...s.player, equipped: {} } }
+}
+
 export function withItem(s: GameState, itemId: string, qty = 1): GameState {
   return { ...s, player: { ...s.player, inventory: [...s.player.inventory, { itemId, qty }] } }
 }
