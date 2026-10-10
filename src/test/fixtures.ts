@@ -155,6 +155,38 @@ export function withNoMetSurvivors(s: GameState): GameState {
   return { ...s, survivors: [makeSurvivor('s-0'), makeSurvivor('s-1', { met: true, alive: false })] }
 }
 
+// --- Survivor fixtures -------------------------------------------------------
+
+export function baseStateWithSurvivors(): GameState {
+  return baseState()
+}
+
+export function protecting(s: GameState, survivorId: string): GameState {
+  const phase = s.phase.kind === 'scenario' ? s.phase : { kind: 'scenario' as const, scenarioId: 's01', hoursLeft: 12, progress: 0 }
+  return { ...s, phase: { ...phase, protectedSurvivorId: survivorId } }
+}
+
+export function metOnly(s: GameState, ids: string[]): GameState {
+  return { ...s, survivors: s.survivors.map((v) => ({ ...v, met: ids.includes(v.id) })) }
+}
+
+export function killSurvivor(s: GameState, id: string): GameState {
+  return { ...s, survivors: s.survivors.map((v) => (v.id === id ? { ...v, alive: false } : v)) }
+}
+
+export function twoInZone(s: GameState, zoneId: string, ids: string[]): GameState {
+  return { ...s, survivors: s.survivors.map((v) => (ids.includes(v.id) ? { ...v, zoneId } : v)) }
+}
+
+/** Only the given survivors live, all standing in a zone made absurdly deadly. */
+export function deadlyZoneWith(s: GameState, ids: string[]): GameState {
+  return {
+    ...s,
+    zones: { ...s.zones, 'subway-tunnels': { sealed: false, dangerBonus: 95 } },
+    survivors: s.survivors.map((v) => ({ ...v, alive: ids.includes(v.id), zoneId: 'subway-tunnels' })),
+  }
+}
+
 // --- Constellation fixtures --------------------------------------------------
 
 export function braveryLover(c: Content): string {

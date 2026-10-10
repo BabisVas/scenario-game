@@ -72,6 +72,10 @@ export function fightTurn(state: GameState, action: FightAction, rng: Rng, conte
   if (step.result === 'won') {
     const enemyTags = content.enemies.find((e) => e.id === fight.enemyId)?.tags ?? []
     s = recordProgress(s, 'kill', { enemyTags }, content)
+    if (fight.survivorId) {
+      const note = 'Killed by ' + s.player.name + '.'
+      s = { ...s, survivors: s.survivors.map((v) => (v.id === fight.survivorId ? { ...v, alive: false, hp: 0, partyId: null, deathNote: note } : v)) }
+    }
   }
   if (fight.origin === 'scenario') s = afterScenarioFight(s, step.result)
   const clock = checkScenarioClock(s, rng, content)

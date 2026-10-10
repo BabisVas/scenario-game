@@ -4,6 +4,7 @@ import { initConstellations } from './constellations'
 import { appendEvents } from './log'
 import { createRng } from './rng'
 import { startScenario } from './scenario'
+import { generateSurvivors } from './survivors'
 import type { GameState, StatKey } from './types'
 
 export function maxHp(stats: Record<StatKey, number>): number {
@@ -26,6 +27,7 @@ export function newGame(
   }
   stats[background.statBonus] += BACKGROUND_STAT_BONUS
 
+  const rng = createRng(input.seed >>> 0)
   const base: GameState = {
     schemaVersion: SCHEMA_VERSION,
     rngState: input.seed >>> 0,
@@ -53,7 +55,7 @@ export function newGame(
     fight: null,
     pendingChoice: null,
     zones: Object.fromEntries(content.zones.map((z) => [z.id, { sealed: !!z.startsSealed, dangerBonus: 0 }])),
-    survivors: [],
+    survivors: generateSurvivors(content, rng),
     constellations: initConstellations(content),
     rankingOpen: false,
     log: [],
@@ -61,7 +63,6 @@ export function newGame(
     digest: null,
   }
 
-  const rng = createRng(base.rngState)
   const step = startScenario(base, first, rng, content)
   return { ...appendEvents(step.state, step.events), rngState: rng.getState() }
 }

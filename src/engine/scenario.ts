@@ -10,6 +10,7 @@ import { onScenarioCleared, withReactions } from './constellations'
 import { killPlayer } from './death'
 import { addItem } from './inventory'
 import type { Rng } from './rng'
+import { resolveScenarioForSurvivors } from './survivors'
 import type { GameEvent, GameState, Step, Survivor } from './types'
 
 const scenarioDef = (content: Content, id: string) => content.scenarios.find((d) => d.id === id)
@@ -89,11 +90,6 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
 
 const nextScenario = (state: GameState, content: Content) =>
   content.scenarios.find((d) => !state.clearedScenarioIds.includes(d.id))
-
-/** Hands rewards to the survivors' side of the city. Task 11 fills this in. */
-function resolveScenarioForSurvivors(state: GameState, _def: ScenarioDef, _rng: Rng): Step {
-  return { state, events: [] }
-}
 
 export function clearScenario(state: GameState, rng: Rng, content: Content): Step {
   if (state.phase.kind !== 'scenario') return { state, events: [] }

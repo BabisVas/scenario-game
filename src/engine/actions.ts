@@ -7,6 +7,7 @@ import { recordSkillUse } from './growth'
 import { addItem } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
+import { findTrader, meetSurvivor } from './survivors'
 import { checkScenarioClock, recordProgress, spendHours } from './scenario'
 import type { Combatant, GameEvent, GameState, StatKey, Step, ZoneState } from './types'
 
@@ -106,8 +107,10 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       run(randomFight(s, zone, rng, content, 'hunt'))
       break
     case 'talk':
+      run(meetSurvivor(s, zoneId, rng))
+      break
     case 'trade':
-      events.push({ kind: 'survivor', text: 'Nobody here is ready to deal with you yet.' })
+      run(findTrader(s, zoneId, rng))
       break
   }
 
