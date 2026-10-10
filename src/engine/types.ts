@@ -39,7 +39,6 @@ export type LogEntry = { id: number; kind: LogKind; text: string; inGameHour: nu
 export type Tag = 'bravery' | 'cruelty' | 'cunning' | 'mercy' | 'style' | 'cowardice' | 'greed' | 'loyalty'
 export type GameEvent = { kind: LogKind; text: string; tags?: Tag[] }
 
-// Filled in by the tasks that own them.
 export type Survivor = {
   id: string
   name: string
@@ -58,7 +57,12 @@ export type Survivor = {
   deathNote?: string
 }
 export type ZoneState = { sealed: boolean; dangerBonus: number }
-export type ConstellationState = never
+export type ConstellationState = {
+  /** -100..100 */
+  interest: number
+  contract: 'none' | 'offered' | 'active' | 'declined' | 'broken'
+  demandMetThisScenario: boolean
+}
 export type PendingChoice = { source: 'scenario'; scenarioId: string } | { source: 'contract'; constellationId: string }
 export type ActiveSubScenario = { defId: string; hoursLeft: number; progress: number }
 

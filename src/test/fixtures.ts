@@ -4,7 +4,7 @@ import { newGame } from '../engine/newGame'
 import { content } from '../data'
 import type { Content, ScenarioDef } from '../data/schema'
 import type { Rng } from '../engine/rng'
-import type { Combatant, GameState, Survivor } from '../engine/types'
+import type { Combatant, ConstellationState, GameState, Survivor } from '../engine/types'
 
 export function baseState(): GameState {
   return newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, content)
@@ -153,4 +153,26 @@ export function makeSurvivor(id: string, over: Partial<Survivor> = {}): Survivor
 
 export function withNoMetSurvivors(s: GameState): GameState {
   return { ...s, survivors: [makeSurvivor('s-0'), makeSurvivor('s-1', { met: true, alive: false })] }
+}
+
+// --- Constellation fixtures --------------------------------------------------
+
+export function braveryLover(c: Content): string {
+  return c.constellations.find((k) => (k.likes.bravery ?? 0) > 0)!.id
+}
+
+export function withInterest(s: GameState, id: string, interest: number): GameState {
+  const prev = s.constellations[id] ?? { interest: 0, contract: 'none', demandMetThisScenario: false }
+  return { ...s, constellations: { ...s.constellations, [id]: { ...prev, interest } } }
+}
+
+export function withContract(s: GameState, id: string, over: Partial<ConstellationState> = {}): GameState {
+  const prev = s.constellations[id] ?? { interest: 0, contract: 'none', demandMetThisScenario: false }
+  return { ...s, constellations: { ...s.constellations, [id]: { ...prev, contract: 'active', ...over } } }
+}
+
+/** Content whose constellations are exactly the given ids, each cloned from the first shipped one. */
+export function contentWith(ids: string[]): Content {
+  const model = content.constellations[0]
+  return { ...content, constellations: ids.map((id) => ({ ...model, id, title: `Title ${id}` })) }
 }

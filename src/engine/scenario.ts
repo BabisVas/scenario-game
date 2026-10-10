@@ -6,6 +6,7 @@ import { SYSTEM } from '../data/names'
 import { combatantFromEnemy } from './actions'
 import { startFight } from './combat'
 import { REST_PERIOD_HOURS } from './config'
+import { onScenarioCleared, withReactions } from './constellations'
 import { killPlayer } from './death'
 import { addItem } from './inventory'
 import type { Rng } from './rng'
@@ -120,6 +121,9 @@ export function clearScenario(state: GameState, rng: Rng, content: Content): Ste
   }
 
   const events: GameEvent[] = [{ kind: 'system', text: `Scenario cleared: ${def.title}! Rewards: ${loot.join(', ')}.` }]
+  const paid = onScenarioCleared(s, content)
+  s = paid.state
+  events.push(...paid.events)
   const survivors = resolveScenarioForSurvivors(s, def, rng)
   s = survivors.state
   events.push(...survivors.events)
@@ -260,12 +264,12 @@ export function resolveChoice(
   if (out.fight) {
     const enemy = content.enemies.find((e) => e.id === out.fight)!
     const fight = startFight(s, combatantFromEnemy(enemy, 1 + Math.floor(def.number / 3)), 'scenario', { enemyId: enemy.id })
-    return { state: fight.state, events: [...events, ...fight.events] }
+    return withReactions({ state: fight.state, events: [...events, ...fight.events] }, rng, content)
   }
 
   s = { ...s, phase: { ...s.phase, progress: 1 } as GameState['phase'] }
   const clock = checkScenarioClock(s, rng, content)
-  return { state: clock.state, events: [...events, ...clock.events] }
+  return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
 
 /** "Only some of you walk out": a group of survivors forms; the ones who like the player most are spared. */

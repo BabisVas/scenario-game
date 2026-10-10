@@ -2,6 +2,7 @@
 
 import type { ActionId, Content, EnemyDef, ZoneDef } from '../data/schema'
 import { startFight } from './combat'
+import { withReactions } from './constellations'
 import { recordSkillUse } from './growth'
 import { addItem } from './inventory'
 import { maxHp } from './newGame'
@@ -111,7 +112,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
   }
 
   const clock = checkScenarioClock(s, rng, content)
-  return { state: clock.state, events: [...events, ...clock.events] }
+  return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
 
 function scavenge(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step {

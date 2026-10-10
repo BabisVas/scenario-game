@@ -1,5 +1,6 @@
 import type { Content } from '../data/schema'
 import { BACKGROUND_STAT_BONUS, ENERGY_MAX, SCHEMA_VERSION, STAT_START } from './config'
+import { initConstellations } from './constellations'
 import { appendEvents } from './log'
 import { createRng } from './rng'
 import { startScenario } from './scenario'
@@ -53,7 +54,7 @@ export function newGame(
     pendingChoice: null,
     zones: Object.fromEntries(content.zones.map((z) => [z.id, { sealed: !!z.startsSealed, dangerBonus: 0 }])),
     survivors: [],
-    constellations: {},
+    constellations: initConstellations(content),
     rankingOpen: false,
     log: [],
     nextLogId: 1,

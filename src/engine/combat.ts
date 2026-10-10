@@ -5,6 +5,7 @@ import { recordSkillUse } from './growth'
 import { addItem, removeItem, useConsumable } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
+import { withReactions } from './constellations'
 import { killPlayer } from './death'
 import { afterScenarioFight, checkScenarioClock, recordProgress, spendHours } from './scenario'
 import type { Combatant, FightState, GameEvent, GameState, Step } from './types'
@@ -74,7 +75,8 @@ export function fightTurn(state: GameState, action: FightAction, rng: Rng, conte
   }
   if (fight.origin === 'scenario') s = afterScenarioFight(s, step.result)
   const clock = checkScenarioClock(s, rng, content)
-  return { state: clock.state, events: [...events, ...clock.events], result: step.result }
+  const reacted = withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
+  return { ...reacted, result: step.result }
 }
 
 function fightRound(state: GameState, action: FightAction, rng: Rng, content: Content): FightStep {
