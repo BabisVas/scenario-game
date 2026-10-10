@@ -48,7 +48,7 @@ export function newGame(
     subScenario: null,
     fight: null,
     pendingChoice: null,
-    zones: {},
+    zones: Object.fromEntries(content.zones.map((z) => [z.id, { sealed: !!z.startsSealed, dangerBonus: 0 }])),
     survivors: [],
     constellations: {},
     rankingOpen: false,

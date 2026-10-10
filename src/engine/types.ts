@@ -33,10 +33,10 @@ export type GameEvent = { kind: LogKind; text: string; tags?: Tag[] }
 
 // Filled in by the tasks that own them.
 export type Survivor = never
-export type ZoneState = never
+export type ZoneState = { sealed: boolean; dangerBonus: number }
 export type ConstellationState = never
 export type PendingChoice = never
-export type ActiveSubScenario = never
+export type ActiveSubScenario = { defId: string; hoursLeft: number; progress: number }
 
 export type Combatant = {
   name: string

@@ -85,3 +85,7 @@ export function brutalEnemy(): Combatant {
 export function inFight(s: GameState, enemy: Combatant, ids: { enemyId?: string; survivorId?: string } = {}): GameState {
   return { ...s, fight: { enemy, ...ids, round: 1, cooldowns: {}, origin: 'hunt' } }
 }
+
+export function sealZone(s: GameState, zoneId: string): GameState {
+  return { ...s, zones: { ...s.zones, [zoneId]: { ...(s.zones[zoneId] ?? { dangerBonus: 0 }), sealed: true } } }
+}
