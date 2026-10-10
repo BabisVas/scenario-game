@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Death } from './screens/Death'
 import { NewGame } from './screens/NewGame'
 import { Home } from './screens/Home'
 import { TakenOver } from './screens/TakenOver'
@@ -27,19 +28,7 @@ export function App() {
     case 'taken-over':
       return <TakenOver />
     case 'dead':
-      return (
-        <main className="page">
-          <section className="panel">
-            <h2>You died</h2>
-            <div className="panel-body">
-              <p>{game.state?.phase.kind === 'dead' ? game.state.phase.cause : ''}</p>
-              <button className="btn primary" onClick={() => setCreating(true)}>
-                Start a new life
-              </button>
-            </div>
-          </section>
-        </main>
-      )
+      return game.state ? <Death state={game.state} onNewLife={() => setCreating(true)} /> : null
     case 'playing':
       return game.state ? <Home game={game} state={game.state} /> : null
   }

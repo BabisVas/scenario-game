@@ -725,3 +725,150 @@ h3 {
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+/* --- Lists of rows (shop, stats, inventory) ------------------------------- */
+
+.rows {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.rows li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.equipped {
+  color: var(--ok);
+}
+
+/* --- Ranking --------------------------------------------------------------- */
+
+.ranking {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.ranking td {
+  padding: 5px 12px;
+  border-bottom: 1px solid rgba(31, 44, 61, 0.5);
+}
+
+.ranking td:last-child {
+  text-align: right;
+  color: var(--accent);
+}
+
+.ranking s {
+  color: var(--faint);
+}
+
+.ranking tr.you td {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* --- Fight ------------------------------------------------------------------ */
+
+.fight {
+  border-color: color-mix(in srgb, var(--fight) 60%, transparent);
+  box-shadow: 0 0 32px rgba(255, 143, 90, 0.12);
+}
+
+.fight > h2 {
+  color: var(--fight);
+}
+
+.fighters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.fighters h3 {
+  font-size: 0.95rem;
+}
+
+.fight-log {
+  min-height: 7.5em;
+  margin: 12px 0;
+  padding: 8px 10px;
+  list-style: none;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 0.9rem;
+}
+
+.fight-log li {
+  padding: 2px 0;
+}
+
+.fight-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.fight-actions .btn {
+  flex-direction: column;
+  min-height: 48px;
+}
+
+.fight-actions .cost {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+@media (max-width: 480px) {
+  .fighters {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* --- Death ------------------------------------------------------------------ */
+
+.death {
+  border-color: color-mix(in srgb, var(--danger) 60%, transparent);
+}
+
+.death > h2 {
+  color: var(--danger);
+}
+
+.cause {
+  font-size: 1.1rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.facts div {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid var(--border);
+}
+
+.facts strong {
+  font-family: var(--mono);
+  font-size: 1.2rem;
+}
+
+.farewells {
+  margin: 12px 0;
+  padding-left: 18px;
+  color: var(--star);
+}

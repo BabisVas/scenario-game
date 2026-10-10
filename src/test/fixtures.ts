@@ -1,5 +1,6 @@
 // Shared test helpers. Test-only: nothing in src/engine, src/data or src/ui imports this.
 
+import { appendEvents } from '../engine/log'
 import { newGame } from '../engine/newGame'
 import { content } from '../data'
 import type { Content, ScenarioDef } from '../data/schema'
@@ -210,6 +211,22 @@ export function contentWith(ids: string[]): Content {
 }
 
 // --- UI fixtures -------------------------------------------------------------
+
+/** A run that just ended: the death and two farewell lines are the newest log entries. */
+export function deadState(cause: string): GameState {
+  const s = playingState()
+  const dead: GameState = {
+    ...s,
+    phase: { kind: 'dead', cause },
+    inGameHour: 50,
+    clearedScenarioIds: ['s01'],
+    player: { ...s.player, hp: 0, kills: 7, coins: 42 },
+  }
+  return appendEvents(dead, [
+    { kind: 'system', text: `You died. ${cause}` },
+    { kind: 'constellation', text: 'The constellation «A Lamp» watches you fall: "Burn bright, small one."' },
+  ])
+}
 
 /** A fresh game whose clocks read "just now", so loading it does not catch up or refill. */
 export function playingState(): GameState {
