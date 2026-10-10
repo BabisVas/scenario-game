@@ -2,8 +2,8 @@
 
 A single-player, menu-driven browser game: an ordinary survivor lives through deadly system-issued scenarios in an original modern city, with one life per game.
 
-- Spec: `docs/superpowers/plans/2026-10-10-scenario-game-design.md`
-- Plan: `docs/superpowers/specs/2026-10-10-scenario-game.md`
+- Spec: `docs/superpowers/specs/2026-10-10-scenario-game-design.md`
+- Plan: `docs/superpowers/plans/2026-10-10-scenario-game.md`
 
 ## Global Constraints
 
