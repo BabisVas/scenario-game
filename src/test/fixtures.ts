@@ -1,11 +1,11 @@
 // Shared test helpers. Test-only: nothing in src/engine, src/data or src/ui imports this.
 
 import { newGame } from '../engine/newGame'
-import { testContent } from '../engine/testContent'
+import { content } from '../data'
 import type { GameState } from '../engine/types'
 
 export function baseState(): GameState {
-  return newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, testContent)
+  return newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, content)
 }
 
 /** An in-memory Storage, so tests never touch the real localStorage. */
