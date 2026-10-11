@@ -1,10 +1,11 @@
 import { fightTurn } from './combat'
+import { resolveChoice } from './scenario'
 import { onScenarioCleared } from './constellations'
 import { checkHiddenTriggers } from './hidden'
 import { giveToSurvivor, tradeWithSurvivor } from './survivors'
 import type { GameEvent, GameState, Tag } from './types'
 import {
-  baseState, clearHiddenDefs, fixtureContent as content, hiddenDef, inFight, inRest, makeSurvivor, seqRng, weakEnemy,
+  baseState, choiceDef, clearHiddenDefs, inScenario, fixtureContent as content, hiddenDef, inFight, inRest, makeSurvivor, seqRng, weakEnemy,
   withCoins, withItem, withSkill, withStigma,
 } from '../test/fixtures'
 
@@ -95,3 +96,26 @@ describe('cunning', () => {
   });
 });
 
+
+describe('bravery', () => {
+  const lastLegs = (maxHp: number) => ({ ...weakEnemy(), hp: 1, maxHp });
+  test('beating a weaker enemy at full health is not brave', () => {
+    const r = fightTurn(inFight(baseState(), lastLegs(30)), { kind: 'attack' }, seqRng(0.5, 0.9), content);
+    expect(r.result).toBe('won');
+    expect(tags(r.events)).not.toContain('bravery');
+  });
+  test('beating an enemy at least as strong as you is brave', () => {
+    const r = fightTurn(inFight(baseState(), lastLegs(400)), { kind: 'attack' }, seqRng(0.5, 0.9), content);
+    expect(tags(r.events)).toContain('bravery');
+  });
+  test('winning at 25% HP or less is brave', () => {
+    const low = { ...baseState(), player: { ...baseState().player, hp: 25 } };
+    expect(tags(fightTurn(inFight(low, lastLegs(30)), { kind: 'attack' }, seqRng(0.5, 0.9), content).events)).toContain('bravery');
+    const notLow = { ...baseState(), player: { ...baseState().player, hp: 26 } };
+    expect(tags(fightTurn(inFight(notLow, lastLegs(30)), { kind: 'attack' }, seqRng(0.5, 0.9), content).events)).not.toContain('bravery');
+  });
+  test('choosing to fight in a choice scenario is brave', () => {
+    const r = resolveChoice(inScenario(baseState(), choiceDef()), 'fight-it', null, seqRng(0.5), content);
+    expect(tags(r.events)).toContain('bravery');
+  });
+});

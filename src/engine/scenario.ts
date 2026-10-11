@@ -13,7 +13,7 @@ import { checkHiddenTriggers, judgeHidden, windowRumors } from './hidden'
 import { addItem } from './inventory'
 import type { Rng } from './rng'
 import { resolveScenarioForSurvivors } from './survivors'
-import type { GameEvent, GameState, Step, Survivor } from './types'
+import type { GameEvent, GameState, Step, Survivor, Tag } from './types'
 
 const scenarioDef = (content: Content, id: string) => content.scenarios.find((d) => d.id === id)
 
@@ -274,7 +274,9 @@ export function resolveChoice(
   }
 
   let s: GameState = { ...state, pendingChoice: null }
-  const events: GameEvent[] = [{ kind: 'player', text: `You chose: ${option.label}.`, tags: option.tags }]
+  // Choosing to fight is brave, whatever else the option is.
+  const choiceTags: Tag[] = option.outcome.fight && !option.tags.includes('bravery') ? [...option.tags, 'bravery'] : option.tags
+  const events: GameEvent[] = [{ kind: 'player', text: `You chose: ${option.label}.`, tags: choiceTags }]
   const found = checkHiddenTriggers(s, { choice: { scenarioId: def.id, optionId: option.id } }, content)
   s = found.state
   events.push(...found.events)

@@ -21,6 +21,13 @@ export type FightResult = 'ongoing' | 'won' | 'lost' | 'fled'
 export type FightStep = Step & { result: FightResult }
 
 const GUARD_EVERY = 3
+/** Winning at or below this share of max HP is brave. */
+const BRAVE_HP_SHARE = 0.25
+
+/** How dangerous a fighter is, all in: health, body and gear. Beating an equal or better is brave. */
+export function combatRating(c: Combatant): number {
+  return c.maxHp + 5 * (c.stats.strength + c.stats.agility + c.stats.endurance) + 5 * (c.weaponPower + c.armorPower)
+}
 /** Stigmas are lent by constellations: stronger than a skill of the same power. */
 const STIGMA_POWER = 1.5
 export const STIGMA_COOLDOWN_PREFIX = 'stigma:'
@@ -203,6 +210,8 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
 
   if (enemy.hp <= 0) {
     const flair: Tag[] = []
+    const me = playerCombatant(s, content)
+    if (combatRating(fight.enemy) >= combatRating(me) || s.player.hp <= me.maxHp * BRAVE_HP_SHARE) flair.push('bravery')
     if ((fight.damageTaken ?? 0) === 0 || finishedWithCrit) flair.push('style')
     if (action.kind !== 'attack') flair.push('cunning')
     return win(s, enemy, fight, rng, content, events, flair)
@@ -272,7 +281,7 @@ function enemyActs(
 function win(s: GameState, enemy: Combatant, fight: FightState, rng: Rng, content: Content, events: GameEvent[], flair: Tag[]): FightStep {
   const def = fight.enemyId ? content.enemies.find((e) => e.id === fight.enemyId) : undefined
   let next: GameState = { ...s, fight: null, player: { ...s.player, kills: s.player.kills + 1 } }
-  events.push({ kind: 'fight', text: `${enemy.name} goes down.`, tags: ['bravery', ...flair] })
+  events.push({ kind: 'fight', text: `${enemy.name} goes down.`, tags: flair })
   if (fight.loot) {
     next = addItem(next, fight.loot)
     events.push({ kind: 'player', text: `You take the ${content.items.find((i) => i.id === fight.loot)?.name ?? fight.loot}.` })

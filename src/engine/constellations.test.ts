@@ -103,7 +103,8 @@ test('meeting the demand pays the contract at scenario clear and resets the flag
 });
 test('winning a fight reaches the constellations', () => {
   const id = braveryLover(content);
-  const s = inFight(baseState(), { ...weakEnemy(), hp: 1 });
+  // a worthy enemy (at least as strong as you) on its last legs: a brave win
+  const s = inFight(baseState(), { ...weakEnemy(), hp: 1, maxHp: 400 });
   expect(interest(fightTurn(s, { kind: 'attack' }, createRng(1), content).state, id)).toBeGreaterThan(0);
 });
 test('dying brings last words from interested constellations', () => {

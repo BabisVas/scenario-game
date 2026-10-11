@@ -136,7 +136,7 @@ export const choiceDef = () =>
     fallbackOptionId: 'walk-away',
     options: [
       { id: 'kill-one', label: 'Push someone into the dark', tags: ['cruelty'], target: 'met-survivor', outcome: { kill: true } },
-      { id: 'fight-it', label: 'Fight the gatekeeper', tags: ['bravery'], outcome: { fight: 'feral-hound' } },
+      { id: 'fight-it', label: 'Fight the gatekeeper', tags: ['style'], outcome: { fight: 'feral-hound' } },
       { id: 'walk-away', label: 'Walk away and pay the toll (fallback-marker)', tags: ['mercy'], outcome: { coins: -5 } },
     ],
   }))

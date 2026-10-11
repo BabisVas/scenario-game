@@ -89,12 +89,11 @@ test('a damage item hurts the enemy and is used up', () => {
   expect(r.state.fight!.enemy.hp).toBe(10);
   expect(r.state.player.inventory.some(i => i.itemId === 'flare')).toBe(false);
 });
-test('winning against a known enemy pays coins in its range and tags bravery', () => {
+test('winning against a known enemy pays coins in its range', () => {
   const s = inFight(baseState(), { ...weakEnemy(), hp: 1 }, { enemyId: 'feral-hound' });
   const r = fightTurn(s, { kind: 'attack' }, createRng(4), content);
   expect(r.state.player.coins).toBeGreaterThanOrEqual(4);
   expect(r.state.player.coins).toBeLessThanOrEqual(9);
-  expect(r.events.some(e => e.tags?.includes('bravery'))).toBe(true);
 });
 test('starting a fight costs one hour and announces the enemy', () => {
   const s = baseState();
