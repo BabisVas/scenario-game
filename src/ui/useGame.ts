@@ -73,7 +73,7 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
     case 'useItem':
       return useConsumable(state, a.itemId, c)
     case 'trade':
-      return withReactions(tradeWithSurvivor(state, a.survivorId, a.itemId, a.mode, c), rng, c)
+      return withReactions(tradeWithSurvivor(state, a.survivorId, a.itemId, a.mode, c, rng), rng, c)
     case 'give':
       return withReactions(giveToSurvivor(state, a.survivorId, a.itemId, c), rng, c)
     case 'attack':

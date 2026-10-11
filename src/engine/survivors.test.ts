@@ -5,10 +5,10 @@ import {
 import { doAction } from './actions'
 import { fightTurn } from './combat'
 import { createRng } from './rng'
-import type { GameState } from './types'
+import type { GameState, Survivor } from './types'
 import { content } from '../data'
 import {
-  baseStateWithSurvivors, choiceDef, deadlyZoneWith, inScenario, metOnly, protecting, seqRng, twoInZone, withCoins,
+  baseStateWithSurvivors, choiceDef, deadlyZoneWith, inScenario, makeSurvivor, metOnly, protecting, seqRng, twoInZone, withCoins,
   withItem,
 } from '../test/fixtures'
 
@@ -94,7 +94,7 @@ test('friends sell cheaper; buying spends coins and makes them remember the trad
   expect(tradePrice(100, 100)).toBe(50);
   expect(tradePrice(100, -100)).toBe(150);
   const s = withCoins(metOnly(baseStateWithSurvivors(), ['s-1']), 100);
-  const r = tradeWithSurvivor(s, 's-1', 'crowbar', 'buy', content).state;
+  const r = tradeWithSurvivor(s, 's-1', 'crowbar', 'buy', content, createRng(1)).state;
   expect(r.player.coins).toBe(40);
   expect(r.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
   expect(byId(r, 's-1').memories[0]).toBe('traded');
@@ -102,12 +102,12 @@ test('friends sell cheaper; buying spends coins and makes them remember the trad
 test('selling to a survivor never pays more than buying it back', () => {
   const s = withItem(withCoins(metOnly(baseStateWithSurvivors(), ['s-1']), 0), 'crowbar');
   const friendly = { ...s, survivors: s.survivors.map(v => v.id === 's-1' ? { ...v, attitude: 100 } : v) };
-  const sold = tradeWithSurvivor(friendly, 's-1', 'crowbar', 'sell', content).state;
+  const sold = tradeWithSurvivor(friendly, 's-1', 'crowbar', 'sell', content, createRng(1)).state;
   expect(sold.player.coins).toBeLessThanOrEqual(tradePrice(60, 100));
 });
 test('strangers and the dead do not trade', () => {
   const s = withCoins(baseStateWithSurvivors(), 100);
-  expect(tradeWithSurvivor(s, 's-1', 'crowbar', 'buy', content).state).toEqual(s);
+  expect(tradeWithSurvivor(s, 's-1', 'crowbar', 'buy', content, createRng(1)).state).toEqual(s);
 });
 test('memories keep the newest 5 and attitude stays within -100..100', () => {
   let s = baseStateWithSurvivors();
@@ -148,4 +148,41 @@ test('survivorsInZone lists only the living in that zone', () => {
   const ids = survivorsInZone(dead, 'glass-towers').map(v => v.id);
   expect(ids).toContain('s-1');
   expect(ids).not.toContain('s-2');
+});
+
+describe('robbing has consequences', () => {
+  const scene = (personality: Survivor['personality']): GameState => ({
+    ...baseStateWithSurvivors(),
+    survivors: [
+      makeSurvivor('victim', { met: true, personality, zoneId: 'old-market' }),
+      makeSurvivor('witness', { zoneId: 'old-market', attitude: 20 }),
+      makeSurvivor('far', { zoneId: 'glass-towers', attitude: 20 }),
+    ],
+  });
+  const who = (s: GameState, id: string) => s.survivors.find(v => v.id === id)!;
+
+  test.each(['kind', 'cautious', 'schemer'] as const)('a %s survivor fights back 30% of the time', (p) => {
+    expect(tradeWithSurvivor(scene(p), 'victim', 'crowbar', 'rob', content, seqRng(0.29)).state.fight).toMatchObject({ origin: 'survivor', survivorId: 'victim' });
+    expect(tradeWithSurvivor(scene(p), 'victim', 'crowbar', 'rob', content, seqRng(0.31)).state.fight).toBeNull();
+  });
+  test.each(['brave', 'ruthless'] as const)('a %s survivor fights back 50% of the time', (p) => {
+    expect(tradeWithSurvivor(scene(p), 'victim', 'crowbar', 'rob', content, seqRng(0.49)).state.fight).toMatchObject({ survivorId: 'victim' });
+    expect(tradeWithSurvivor(scene(p), 'victim', 'crowbar', 'rob', content, seqRng(0.51)).state.fight).toBeNull();
+  });
+  test('you are caught holding the item: it is yours either way', () => {
+    for (const roll of [0.1, 0.9]) {
+      const r = tradeWithSurvivor(scene('kind'), 'victim', 'crowbar', 'rob', content, seqRng(roll)).state;
+      expect(r.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
+    }
+  });
+  test('everyone else in the zone thinks less of you; the rest of the city does not know', () => {
+    const r = tradeWithSurvivor(scene('kind'), 'victim', 'crowbar', 'rob', content, seqRng(0.9)).state;
+    expect(who(r, 'victim').attitude).toBe(-40);
+    expect(who(r, 'witness').attitude).toBe(10);
+    expect(who(r, 'far').attitude).toBe(20);
+  });
+  test('a fight back is announced', () => {
+    const r = tradeWithSurvivor(scene('brave'), 'victim', 'crowbar', 'rob', content, seqRng(0.1));
+    expect(r.events.some(e => /fights back/i.test(e.text))).toBe(true);
+  });
 });

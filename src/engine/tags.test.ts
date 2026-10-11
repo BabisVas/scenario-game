@@ -15,14 +15,14 @@ const byId = (s: GameState) => s.survivors.find(v => v.id === 's-1')!;
 describe('greed', () => {
   test('overcharging a survivor sells at full price, and they remember being robbed', () => {
     const s = withItem(withCoins(friend(0)(baseState()), 0), 'crowbar');
-    const r = tradeWithSurvivor(s, 's-1', 'crowbar', 'overcharge', content);
+    const r = tradeWithSurvivor(s, 's-1', 'crowbar', 'overcharge', content, seqRng(0.99));
     expect(r.state.player.coins).toBe(60);
     expect(tags(r.events)).toContain('greed');
     expect(byId(r.state)).toMatchObject({ attitude: -15, memories: ['robbed'] });
   });
   test('robbing a survivor takes an item for nothing', () => {
     const s = withCoins(friend(0)(baseState()), 0);
-    const r = tradeWithSurvivor(s, 's-1', 'crowbar', 'rob', content);
+    const r = tradeWithSurvivor(s, 's-1', 'crowbar', 'rob', content, seqRng(0.99));
     expect(r.state.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
     expect(r.state.player.coins).toBe(0);
     expect(tags(r.events)).toEqual(expect.arrayContaining(['greed', 'cruelty']));
@@ -30,7 +30,7 @@ describe('greed', () => {
   });
   test('a fair trade is not greedy', () => {
     const s = withCoins(friend(0)(baseState()), 100);
-    expect(tags(tradeWithSurvivor(s, 's-1', 'crowbar', 'buy', content).events)).not.toContain('greed');
+    expect(tags(tradeWithSurvivor(s, 's-1', 'crowbar', 'buy', content, seqRng(0.99)).events)).not.toContain('greed');
   });
 });
 

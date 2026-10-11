@@ -11,7 +11,7 @@ import { maxHp } from './newGame'
 import type { Rng } from './rng'
 import type { Combatant, GameEvent, GameState, StatKey, Step, Survivor, Tag } from './types'
 
-export type Memory = 'helped' | 'robbed' | 'spared' | 'attacked' | 'betrayed' | 'traded'
+export type Memory = 'helped' | 'robbed' | 'spared' | 'attacked' | 'betrayed' | 'traded' | 'witnessed'
 export type TradeMode = 'buy' | 'sell' | 'overcharge' | 'rob'
 
 /** Helping someone whose attitude is at least this counts as loyalty. */
@@ -240,6 +240,7 @@ export function tradeWithSurvivor(
   itemId: string,
   mode: TradeMode,
   content: Content,
+  rng: Rng,
 ): Step {
   const v = state.survivors.find((x) => x.id === survivorId)
   const def = content.items.find((i) => i.id === itemId)
@@ -250,10 +251,7 @@ export function tradeWithSurvivor(
 
   if (mode === 'rob') {
     if (def.kind === 'rare') return refuse(`${v.name} does not have that.`)
-    return {
-      state: remember(addItem(state, itemId), v.id, 'robbed', -40),
-      events: [{ kind: 'player', text: `You take the ${def.name} from ${v.name} and do not pay.`, tags: ['greed', 'cruelty'] }],
-    }
+    return rob(state, v, itemId, def.name, rng)
   }
   if (mode === 'buy') {
     if (def.kind === 'rare') return refuse(`${v.name} is not selling that.`)
@@ -280,6 +278,25 @@ export function tradeWithSurvivor(
     state: remember(sold, v.id, 'traded', 3),
     events: [{ kind: 'survivor', text: `You sell a ${def.name} to ${v.name} for ${price} coins.` }],
   }
+}
+
+/**
+ * Taking an item without paying. The victim never forgets (−40), everyone else
+ * in the zone saw it (−10), and the victim may fight back on the spot: 30%, or
+ * 50% for the brave and the ruthless. The item is taken either way.
+ */
+function rob(state: GameState, v: Survivor, itemId: string, itemName: string, rng: Rng): Step {
+  let s = remember(addItem(state, itemId), v.id, 'robbed', -40)
+  for (const w of survivorsInZone(s, v.zoneId)) if (w.id !== v.id) s = remember(s, w.id, 'witnessed', -10)
+  const events: GameEvent[] = [{ kind: 'player', text: `You take the ${itemName} from ${v.name} and do not pay.`, tags: ['greed', 'cruelty'] }]
+  const fightBack = v.personality === 'brave' || v.personality === 'ruthless' ? 0.5 : 0.3
+  if (rng.chance(fightBack)) {
+    const victim = s.survivors.find((x) => x.id === v.id)!
+    const fight = startFight(s, survivorCombatant(victim), 'survivor', { survivorId: v.id })
+    s = fight.state
+    events.push({ kind: 'fight', text: `${v.name} catches you and fights back!` }, ...fight.events)
+  }
+  return { state: s, events }
 }
 
 /** Helping someone: a gift. Always merciful; loyal when they already like you (30+). */
