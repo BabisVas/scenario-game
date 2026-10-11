@@ -4,18 +4,20 @@ Draft for Task 15. Nothing here is in the game yet: the data files get written o
 
 Placeholders `«CITY»`, `«SYSTEM»` and `«ANNOUNCER»` stay as they are until you pick names.
 
-**Updated again 2026-10-11** with your four answers (Final Wave, protect ambushes, tag triggers, scenario groups). All four are now built and tested. See [what changed](#what-changed-in-this-round).
+**Latest update, 2026-10-11:** your answers on the Lifeboat crates, rumor timing, the stigma cap and robbing. Rumor timing and robbing are built and tested. The crates consequence is written up here and gets built with the data files. See [what changed](#what-changed-in-this-round).
+
+**Earlier on 2026-10-11:** Final Wave, protect ambushes, tag triggers and scenario groups were built.
 
 **Earlier on 2026-10-11:** added the three new systems: [16 attributes](#attributes-16), [8 stigmas](#stigmas-8-one-per-constellation) and [6 hidden scenarios](#hidden-scenarios-6). Constellation contracts now lend a stigma instead of a skill. Scenario 4 and 8 options now have ids, because hidden scenarios can trigger on them.
 
 ## What changed in this round
 
-- **The Final Wave is in.** When a survive scenario's clock hits zero, one last enemy always comes. You must beat it to clear the scenario, and there is no running from it.
-- **Protect scenarios have ambushes too**, at the same 10% + 5% × danger per action.
-- **The quiet constellations have triggers** ([listed below](#what-each-tag-comes-from)). Shop buying is not one of them.
-- **"Only some can survive" uses the group present.** When such a scenario starts, it gathers 4–6 living survivors where you stand, people you know first. You pick who is spared, and the rest of that group dies. Nobody outside the group is touched.
-- **New:** you can now **rob**, **overcharge** or **give** to survivors you know, because greed and loyalty needed those actions.
-- **New:** the game tracks **where you stand**: the zone of your last action. The group and the Final Wave both use it.
+- **Lifeboat crates stay, and the city hears about it.** If you load the crates, every living survivor's attitude toward you drops by 25, the choice carries greed and cruelty, and «ANNOUNCER» tells the whole city. *(Written up below; built with the data files, because it needs one new choice outcome.)*
+- **Rare hidden scenarios stay rare, but you always get a fair warning.** For a hidden scenario tied to scenario N, a survivor whispers its rumor when the scenario before N starts. The random rumors (10% per world tick) continue too. *(Built and tested.)*
+- **Stigmas stop at level 5** in v1.
+- **Robbing can go wrong.** The victim fights back on the spot 30% of the time (50% if brave or ruthless). Everyone else in that zone thinks 10 points less of you. You keep the item either way: you are caught holding it. *(Built and tested.)*
+
+**Built in the previous round** (for reference): the Final Wave; ambushes in protect scenarios; tag triggers for the quiet constellations; "only some can survive" uses the group present; rob, overcharge and give; the game tracks where you stand.
 
 ## How waiting is never safe
 
@@ -122,6 +124,8 @@ Difficulty rises through danger bumps, stronger enemies and a survivor death rat
   - **The group:** when the scenario starts, it gathers 4–6 living survivors where you stand, people you know first. If the zone is nearly empty, others are drawn in. You see them all by name.
   - **Choose who boards** (`choose-boarders`). You tick up to 2 of the group. The rest of the group drowns. Nobody else in the city is affected. Tags: loyalty, cunning.
   - **Load the reward crates instead** (`load-the-crates`). Nobody from the group boards; the seats go to the system's reward crates. +150 coins. The whole group drowns. Tags: greed, cruelty. This is the "keep a reward someone else needed" choice.
+    - **The city hears.** Every living survivor's attitude toward you drops by 25, met or not.
+    - **«ANNOUNCER»:** *"Attention, «CITY»! Our survivor of the hour just swapped a boatful of neighbors for a stack of crates. Everyone heard that? Lovely. Do wave."*
   - **Give up your seat and swim** (`swim`, fallback). A fight against a Salt Eel in the flood. You must win to pass. The group is not culled. Tags: bravery, mercy.
 - **Twist:** The harbor goes under, and the tunnels flood.
 - **Zone changes:** seal Harbor Cranes; Subway Tunnels danger +2.
@@ -192,6 +196,8 @@ Each one likes a different tag most, so how you play decides who watches. Every 
 
 Robbing and overcharging make the survivor remember you badly (−40 and −15 attitude). Giving makes them like you more (+15).
 
+**Robbing is a risk.** The victim fights back on the spot 30% of the time, or 50% if they are brave or ruthless. That is a real fight, and losing it is death. Everyone else in that zone saw it and loses 10 attitude toward you. The rest of the city does not know. You keep the item either way.
+
 ---
 
 ## Attributes (16)
@@ -223,7 +229,7 @@ The mix is 10 common, 4 rare and 2 legendary. Each attribute has exactly one eff
 
 ## Stigmas (8, one per constellation)
 
-A stigma is a constellation's own power, lent to the survivor it sponsors. It replaces the plain skill a contract used to give. It has its own **Stigma** button in fights, hits 1.5× harder than a skill of the same power, and levels with use up to level 5.
+A stigma is a constellation's own power, lent to the survivor it sponsors. It replaces the plain skill a contract used to give. It has its own **Stigma** button in fights, hits 1.5× harder than a skill of the same power, and levels with use up to level 5. Level 5 is the cap in v1; stigmas do not evolve.
 
 You can have only one sponsor. Accepting a new contract ends the old one: the old stigma is taken back, and the old sponsor's interest drops 30. If you break a sponsor's demand in a scenario, the stigma is **sealed** until you clear a scenario with the demand kept.
 
@@ -277,7 +283,16 @@ Hidden rewards are two to four times a sub-scenario's.
 5. "Somebody saw the university library lights on during the pest hunt. Nobody works there anymore."
 6. "They say the bridge remembers who paid it honestly."
 
-Hidden scenarios 4 and 5 can only be found during one scenario each, and 6 only by one choice. Missing them is part of the game.
+Hidden scenarios 4 and 5 can only be found during one scenario each, and 6 only by one choice. Missing them is part of the game, but you always hear about them in time.
+
+**When each rumor is guaranteed to appear.** Every rumor can also turn up at random (10% per world tick) any time before the scenario is found. The time-limited ones also get one guaranteed whisper before their window:
+
+| Hidden scenario | Window | Guaranteed rumor |
+| --- | --- | --- |
+| 4. The Last Train | during scenario 5 | when scenario 4 starts |
+| 5. Overdue | during scenario 2 | when scenario 1 starts, on the first morning |
+| 6. The Honest Toll | the choice in scenario 4 | when scenario 3 starts |
+| 1–3 | any time | random rumors only (they never close) |
 
 ---
 
@@ -303,16 +318,19 @@ Hidden scenarios 4 and 5 can only be found during one scenario each, and 6 only 
 
 ---
 
-## Decided this round
+## Decided
 
-1. Final Wave: yes, and it must be beaten (no running). Built.
-2. Protect scenarios have ambushes. Built.
-3. Quiet constellations: your trigger list. Built (see [What each tag comes from](#what-each-tag-comes-from)).
-4. "Only some can survive": the group present in the scenario (4–6 where you stand, met first), you pick who is spared, the rest of the group dies. Built. The choice screen now says "Everyone else in this group dies."
+**This round:**
+1. Lifeboat crates: kept, with consequences (−25 attitude citywide, greed and cruelty, «ANNOUNCER» tells the city). To build with the data files.
+2. Rare hidden scenarios stay rare; time-limited ones get a guaranteed rumor before their window. Built.
+3. Stigmas cap at level 5 for v1.
+4. Robbing: 30% fight-back (50% brave or ruthless), −10 attitude from everyone else in the zone. Built.
+
+**Earlier rounds:** Final Wave (must be beaten, no running), ambushes in protect scenarios, the tag triggers, and "only some can survive" using the group present (4–6 where you stand, met first).
 
 ## Questions for you
 
-1. **Lifeboat's greed option.** I added *Load the reward crates instead*: the whole group drowns for +150 coins. It is the clearest "keep a reward someone else needed" choice, but it is the darkest line in the game. Keep it, soften it (for example, only one person drowns), or cut it?
-2. **Hidden scenarios found by one choice or during one scenario** (4, 5 and 6) can be missed for good. Keep them that rare, or give each a second trigger?
-3. **A stigma levels to 5 and stops.** Should a maxed stigma do anything more later (for example, "evolve"), or is level 5 the end for v1?
-4. **Robbing has no direct risk** beyond the survivor's attitude (−40, so they may attack you the next time you meet). Is that enough, or should a robbery sometimes fail and start a fight on the spot?
+1. **A robbery that ends in a fight back:** right now you keep the item even if they catch you. Should a caught robbery instead fail (no item) and start the fight?
+2. **The crates outcome needs one small engine addition:** a choice outcome that lowers every survivor's attitude and has «ANNOUNCER» speak. I will build it test-first together with the data files, unless you want it as its own step first.
+
+Everything else in this draft is ready to become data files once you approve it.
