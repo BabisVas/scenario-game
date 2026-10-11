@@ -3,7 +3,7 @@
 import { appendEvents } from '../engine/log'
 import { newGame } from '../engine/newGame'
 import { content } from '../data'
-import type { AttributeDef, AttributeEffect, Content, ScenarioDef } from '../data/schema'
+import type { AttributeDef, AttributeEffect, Content, HiddenScenarioDef, ScenarioDef } from '../data/schema'
 import type { Rng } from '../engine/rng'
 import type { Combatant, ConstellationState, GameState, StigmaState, Survivor, Tag } from '../engine/types'
 
@@ -104,7 +104,12 @@ export function sealZone(s: GameState, zoneId: string): GameState {
 // scenario defs below, registered when a builder is called, so the engine can
 // look a def up by the phase's scenarioId like it does in the real game.
 
-export const fixtureContent: Content = { ...content, scenarios: [...content.scenarios], attributes: [...content.attributes] }
+export const fixtureContent: Content = {
+  ...content,
+  scenarios: [...content.scenarios],
+  attributes: [...content.attributes],
+  hiddenScenarios: [...content.hiddenScenarios],
+}
 
 function register(def: ScenarioDef): ScenarioDef {
   const i = fixtureContent.scenarios.findIndex((d) => d.id === def.id)
@@ -166,7 +171,7 @@ export function clearedAll(s: GameState, c: Content): GameState {
 export function makeSurvivor(id: string, over: Partial<Survivor> = {}): Survivor {
   return {
     id, name: `Survivor ${id}`, personality: 'kind', stats: { strength: 5, agility: 5, endurance: 5, spirit: 5 },
-    hp: 100, alive: true, zoneId: 'old-market', partyId: null, met: false, attitude: 0, memories: [], points: 0, attributeId: null, ...over,
+    hp: 100, alive: true, zoneId: 'old-market', partyId: null, met: false, attitude: 0, memories: [], points: 0, attributeId: null, timesMet: 0, ...over,
   }
 }
 
@@ -280,4 +285,23 @@ export function withAttribute(s: GameState, effect: AttributeEffect, tags: Tag[]
 /** Shipped content whose only attribute is the given one, so every roll lands on it. */
 export function onlyAttribute(def: AttributeDef): Content {
   return { ...content, attributes: [def] }
+}
+
+// --- Hidden scenario fixtures ------------------------------------------------
+
+/** A fixture hidden scenario, registered in fixtureContent under the given id. */
+export function hiddenDef(id: string, trigger: HiddenScenarioDef['trigger'], over: Partial<HiddenScenarioDef> = {}): HiddenScenarioDef {
+  const def: HiddenScenarioDef = {
+    id, title: 'Hidden ' + id, announcement: id + ' was here all along.', trigger, goal: { kind: 'survive' }, hours: 6,
+    rewards: { coins: 100 }, rumor: 'They say ' + id + ' is real.', ...over,
+  }
+  const i = fixtureContent.hiddenScenarios.findIndex((d) => d.id === id)
+  if (i >= 0) fixtureContent.hiddenScenarios[i] = def
+  else fixtureContent.hiddenScenarios.push(def)
+  return def
+}
+
+/** Removes every fixture hidden scenario, so a test controls exactly which exist. */
+export function clearHiddenDefs(): void {
+  fixtureContent.hiddenScenarios.length = 0
 }

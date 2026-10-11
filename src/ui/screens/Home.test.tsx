@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { SAVE_KEY } from '../../engine/config'
 import { loadGame } from '../../save/save'
-import { choiceDef, inScenario, makeSurvivor, memoryStorage, playingState, sealZone, spareDef } from '../../test/fixtures'
+import { choiceDef, clearHiddenDefs, hiddenDef, inScenario, makeSurvivor, memoryStorage, playingState, sealZone, spareDef } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
 import { content } from '../../data'
 
@@ -110,4 +110,15 @@ test("a survivor's attribute shows only once you have met them", () => {
   const zone = screen.getByRole('region', { name: /zone/i });
   expect(within(zone).getByText(new RegExp(a.name))).toBeInTheDocument();
   expect(within(zone).queryByText(new RegExp(b.name))).toBeNull();
+});
+test('undiscovered hidden scenarios appear nowhere; a discovered one shows in the scenario panel', () => {
+  clearHiddenDefs();
+  const def = hiddenDef('secret-stage', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 9 }, { title: 'The Secret Stage' });
+  const { unmount } = renderWithGame(playingState());
+  expect(screen.queryByText(/secret stage/i)).toBeNull();
+  expect(screen.queryByText(/hidden/i)).toBeNull();
+  unmount();
+  renderWithGame({ ...playingState(), hiddenScenario: { defId: def.id, hoursLeft: 5, progress: 0 }, foundHiddenIds: [def.id] });
+  const panel = screen.getByRole('region', { name: /scenario/i });
+  expect(within(panel).getByText(/the secret stage/i)).toBeInTheDocument();
 });

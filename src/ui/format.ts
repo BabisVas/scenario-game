@@ -1,6 +1,6 @@
 // Small display helpers shared by screens and panels.
 
-import type { Content, ScenarioDef, SubScenarioDef } from '../data/schema'
+import type { Content, HiddenScenarioDef, ScenarioDef, SubScenarioDef } from '../data/schema'
 import type { GameState, LogKind } from '../engine/types'
 
 /** "Day 2, 06:00" for an in-game hour count that started at day 1, 00:00. */
@@ -44,6 +44,13 @@ export function subGoalText(def: SubScenarioDef, progress: number, content: Cont
   const g = def.goal
   if (g.kind === 'kill') return `Kill ${g.count} (${Math.min(progress, g.count)}/${g.count})`
   return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
+}
+
+export function hiddenGoalText(def: HiddenScenarioDef, progress: number, content: Content): string {
+  const g = def.goal
+  if (g.kind === 'kill') return `Kill ${g.count}${g.enemyTag ? ` ${g.enemyTag}` : ''} (${Math.min(progress, g.count)}/${g.count})`
+  if (g.kind === 'reach') return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
+  return 'Stay alive until its clock runs out'
 }
 
 export const LOG_LABEL: Record<LogKind, string> = {

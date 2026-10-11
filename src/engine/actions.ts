@@ -5,6 +5,7 @@ import { withCoinBonus, withHealingBonus } from './attributes'
 import { startFight } from './combat'
 import { withReactions } from './constellations'
 import { recordSkillUse } from './growth'
+import { checkHiddenTriggers, countAction } from './hidden'
 import { addItem } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
@@ -130,6 +131,10 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
     events.push({ kind: 'fight', text: 'Ambush! Something was waiting for you.' })
     run(randomFight(s, zone, rng, content, 'hunt'))
   }
+
+  s = countAction(s, zoneId, action)
+  const carried = state.player.inventory.map((i) => i.itemId)
+  run(checkHiddenTriggers(s, { zoneId, action, carried }, content))
 
   const clock = checkScenarioClock(s, rng, content)
   return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)

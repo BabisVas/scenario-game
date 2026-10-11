@@ -61,6 +61,8 @@ export type Survivor = {
   points: number
   deathNote?: string
   attributeId: string | null
+  /** How many times the player has talked with them. */
+  timesMet: number
 }
 export type ZoneState = { sealed: boolean; dangerBonus: number }
 export type ConstellationState = {
@@ -72,6 +74,7 @@ export type ConstellationState = {
 }
 export type PendingChoice = { source: 'scenario'; scenarioId: string } | { source: 'contract'; constellationId: string }
 export type ActiveSubScenario = { defId: string; hoursLeft: number; progress: number }
+export type ActiveHiddenScenario = { defId: string; hoursLeft: number; progress: number }
 
 export type Combatant = {
   name: string
@@ -105,6 +108,11 @@ export type GameState = {
   phase: Phase
   clearedScenarioIds: string[]
   subScenario: ActiveSubScenario | null
+  hiddenScenario: ActiveHiddenScenario | null
+  /** Hidden scenarios found this game: each can be found once. */
+  foundHiddenIds: string[]
+  /** Times each action was taken in each zone, keyed "zoneId/action". */
+  actionCounts: Record<string, number>
   fight: FightState | null
   pendingChoice: PendingChoice | null
   zones: Record<string, ZoneState>

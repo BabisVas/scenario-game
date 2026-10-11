@@ -1,6 +1,6 @@
 import { content } from './index'
 import { validateContent } from './validate'
-import type { ScenarioDef } from './schema'
+import type { HiddenScenarioDef, ScenarioDef } from './schema'
 
 test('shipped content is valid', () => {
   expect(validateContent(content)).toEqual([]);
@@ -52,4 +52,14 @@ test('ids must be kebab-case', () => {
 test('an attribute weighted for an unknown background is reported', () => {
   const bad = { ...content, attributes: [{ ...content.attributes[0], backgroundWeights: { 'ghost-job': 2 } }] };
   expect(validateContent(bad)).toContainEqual(expect.stringContaining('ghost-job'));
+});
+test.each([
+  ['an unknown zone', { kind: 'repeat-action', zoneId: 'ghost-zone', action: 'rest', count: 2 }, 'ghost-zone'],
+  ['an unknown item', { kind: 'carry-item', itemId: 'ghost-item', zoneId: 'old-market' }, 'ghost-item'],
+  ['an unknown scenario number', { kind: 'zone-during-scenario', zoneId: 'old-market', scenarioNumber: 99 }, '99'],
+  ['an unknown scenario', { kind: 'choose-option', scenarioId: 'ghost-scenario', optionId: 'a' }, 'ghost-scenario'],
+  ['an option the scenario does not have', { kind: 'choose-option', scenarioId: 's01', optionId: 'ghost-option' }, 'ghost-option'],
+] as const)('a hidden trigger pointing at %s is reported', (_, trigger, needle) => {
+  const def = { id: 'hidden-x', title: 'X', announcement: 'x', trigger, goal: { kind: 'survive' }, hours: 4, rewards: { coins: 1 }, rumor: 'r' } as HiddenScenarioDef;
+  expect(validateContent({ ...content, hiddenScenarios: [def] })).toContainEqual(expect.stringContaining(needle));
 });

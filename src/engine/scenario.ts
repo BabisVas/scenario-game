@@ -9,6 +9,7 @@ import { startFight } from './combat'
 import { REST_PERIOD_HOURS } from './config'
 import { onScenarioCleared, withReactions } from './constellations'
 import { killPlayer } from './death'
+import { checkHiddenTriggers, judgeHidden } from './hidden'
 import { addItem } from './inventory'
 import type { Rng } from './rng'
 import { resolveScenarioForSurvivors } from './survivors'
@@ -19,7 +20,8 @@ const scenarioDef = (content: Content, id: string) => content.scenarios.find((d)
 export function spendHours(state: GameState, hours: number): GameState {
   const phase = state.phase.kind === 'dead' ? state.phase : { ...state.phase, hoursLeft: state.phase.hoursLeft - hours }
   const subScenario = state.subScenario && { ...state.subScenario, hoursLeft: state.subScenario.hoursLeft - hours }
-  return { ...state, phase, subScenario, inGameHour: state.inGameHour + hours }
+  const hiddenScenario = state.hiddenScenario && { ...state.hiddenScenario, hoursLeft: state.hiddenScenario.hoursLeft - hours }
+  return { ...state, phase, subScenario, hiddenScenario, inGameHour: state.inGameHour + hours }
 }
 
 export function recordProgress(
@@ -43,6 +45,12 @@ export function recordProgress(
     const def = content.subScenarios.find((d) => d.id === s.subScenario!.defId)
     if (def && counts(def.goal)) {
       s = { ...s, subScenario: { ...s.subScenario, progress: kind === 'kill' ? s.subScenario.progress + 1 : 1 } }
+    }
+  }
+  if (s.hiddenScenario) {
+    const def = content.hiddenScenarios.find((d) => d.id === s.hiddenScenario!.defId)
+    if (def && def.goal.kind !== 'survive' && counts(def.goal)) {
+      s = { ...s, hiddenScenario: { ...s.hiddenScenario, progress: kind === 'kill' ? s.hiddenScenario.progress + 1 : 1 } }
     }
   }
   return s
@@ -176,6 +184,10 @@ export function checkScenarioClock(state: GameState, rng: Rng, content: Content)
     }
   }
 
+  const hidden = judgeHidden(s, content)
+  s = hidden.state
+  events.push(...hidden.events)
+
   const phase = s.phase
   if (phase.kind === 'scenario') {
     const def = scenarioDef(content, phase.scenarioId)
@@ -240,6 +252,9 @@ export function resolveChoice(
 
   let s: GameState = { ...state, pendingChoice: null }
   const events: GameEvent[] = [{ kind: 'player', text: `You chose: ${option.label}.`, tags: option.tags }]
+  const found = checkHiddenTriggers(s, { choice: { scenarioId: def.id, optionId: option.id } }, content)
+  s = found.state
+  events.push(...found.events)
   const out = option.outcome
 
   if (out.coins) s = { ...s, player: { ...s.player, coins: Math.max(0, s.player.coins + out.coins) } }

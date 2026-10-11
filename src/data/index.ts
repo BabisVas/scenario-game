@@ -2,6 +2,7 @@ import { attributes } from './attributes'
 import { backgrounds } from './backgrounds'
 import { constellations } from './constellations'
 import { enemies } from './enemies'
+import { hiddenScenarios } from './hiddenScenarios'
 import { items } from './items'
 import type { Content } from './schema'
 import { scenarios } from './scenarios'
@@ -23,4 +24,5 @@ export const content: Content = {
   subScenarios,
   attributes,
   stigmas,
+  hiddenScenarios,
 }

@@ -1,6 +1,6 @@
 import { SYSTEM } from '../../data/names'
 import type { GameState } from '../../engine/types'
-import { goalText, hoursText, subGoalText } from '../format'
+import { goalText, hiddenGoalText, hoursText, subGoalText } from '../format'
 import { useContent } from '../useGame'
 
 export function ScenarioPanel({ state }: { state: GameState }) {
@@ -8,6 +8,8 @@ export function ScenarioPanel({ state }: { state: GameState }) {
   const phase = state.phase
   const sub = state.subScenario
   const subDef = sub ? content.subScenarios.find((d) => d.id === sub.defId) : undefined
+  const hidden = state.hiddenScenario
+  const hiddenDef = hidden ? content.hiddenScenarios.find((d) => d.id === hidden.defId) : undefined
 
   let body
   if (phase.kind === 'scenario') {
@@ -57,6 +59,14 @@ export function ScenarioPanel({ state }: { state: GameState }) {
       <h2 id="scenario-title">Scenario</h2>
       <div className="panel-body">
         {body}
+        {hidden && hiddenDef && (
+          <div className="sub hidden-scenario">
+            <p className="mono small">Hidden scenario · {hiddenDef.title}</p>
+            <p className="small">
+              {hiddenGoalText(hiddenDef, hidden.progress, content)} · {Math.max(0, hidden.hoursLeft)}h remaining · reward {hiddenDef.rewards.coins} coins
+            </p>
+          </div>
+        )}
         {sub && subDef && (
           <div className="sub">
             <p className="mono small">Sub-scenario · {subDef.title}</p>

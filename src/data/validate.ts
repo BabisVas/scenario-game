@@ -70,6 +70,7 @@ export function validateContent(c: Content): string[] {
     subScenarios: c.subScenarios,
     attributes: c.attributes,
     stigmas: c.stigmas,
+    hiddenScenarios: c.hiddenScenarios,
   }
   for (const [name, list] of Object.entries(collections)) {
     const seen = new Set<string>()
@@ -131,6 +132,26 @@ export function validateContent(c: Content): string[] {
     for (const z of s.zoneIds) ref('zone', z, zoneIds, where)
     for (const it of s.rewards.itemIds ?? []) ref('item', it, itemIds, `${where} reward`)
     if (s.goal.kind === 'reach') ref('zone', s.goal.zoneId, zoneIds, `${where} goal`)
+  }
+
+  for (const h of c.hiddenScenarios) {
+    const where = `hidden scenario ${h.id}`
+    const t = h.trigger
+    if (t.kind === 'repeat-action' || t.kind === 'carry-item' || t.kind === 'zone-during-scenario') ref('zone', t.zoneId, zoneIds, `${where} trigger`)
+    if (t.kind === 'carry-item') ref('item', t.itemId, itemIds, `${where} trigger`)
+    if (t.kind === 'zone-during-scenario' && !c.scenarios.some((s) => s.number === t.scenarioNumber)) {
+      problems.push(`${where} trigger: unknown scenario number ${t.scenarioNumber}`)
+    }
+    if (t.kind === 'choose-option') {
+      const s = c.scenarios.find((x) => x.id === t.scenarioId)
+      if (!s) problems.push(`${where} trigger: unknown scenario "${t.scenarioId}"`)
+      else if (s.goal.kind !== 'choice' || !s.goal.options.some((o) => o.id === t.optionId)) {
+        problems.push(`${where} trigger: scenario ${s.id} has no option "${t.optionId}"`)
+      }
+    }
+    if (h.goal.kind === 'reach') ref('zone', h.goal.zoneId, zoneIds, `${where} goal`)
+    for (const it of h.rewards.itemIds ?? []) ref('item', it, itemIds, `${where} reward`)
+    if (h.rewards.skillId) ref('skill', h.rewards.skillId, skillIds, `${where} reward`)
   }
 
   const texts: string[] = []

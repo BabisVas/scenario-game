@@ -5,6 +5,7 @@ import { zoneDanger } from './actions'
 import { rollAttribute } from './attributes'
 import { startFight } from './combat'
 import { SURVIVOR_COUNT } from './config'
+import { hiddenRumor } from './hidden'
 import { addItem, removeItem, sellPrice } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
@@ -52,6 +53,7 @@ export function generateSurvivors(content: Content, rng: Rng): Survivor[] {
       memories: [],
       points: 0,
       attributeId: rollAttribute(content, rng),
+      timesMet: 0,
     }
   })
 }
@@ -159,6 +161,7 @@ export function worldTick(state: GameState, rng: Rng, content: Content): Step {
       }
     }
   }
+  events.push(...hiddenRumor(s, rng, content))
   return { state: s, events }
 }
 
@@ -207,7 +210,7 @@ export function meetSurvivor(state: GameState, zoneId: string, rng: Rng): Step {
   if (here.length === 0) return { state, events: [{ kind: 'survivor', text: 'Nobody here wants to be found.' }] }
   const strangers = here.filter((v) => !v.met)
   const v = rng.pick(strangers.length > 0 ? strangers : here)
-  const s = withSurvivor(state, { ...v, met: true })
+  const s = withSurvivor(state, { ...v, met: true, timesMet: v.timesMet + 1 })
   const events: GameEvent[] = [{ kind: 'survivor', text: greeting(v) }]
   if (v.attitude <= -50 && rng.chance(0.5)) {
     const fight = startFight(s, survivorCombatant(v), 'survivor', { survivorId: v.id })

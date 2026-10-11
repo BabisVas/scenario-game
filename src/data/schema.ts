@@ -138,6 +138,27 @@ export type AttributeDef = {
   backgroundWeights: Record<string, number>
 }
 
+/** The unusual condition that uncovers a hidden scenario. */
+export type HiddenTrigger =
+  | { kind: 'repeat-action'; zoneId: string; action: ActionId; count: number }
+  | { kind: 'carry-item'; itemId: string; zoneId: string }
+  | { kind: 'meet-survivor'; count: number }
+  | { kind: 'zone-during-scenario'; zoneId: string; scenarioNumber: number }
+  | { kind: 'choose-option'; scenarioId: string; optionId: string }
+
+/** Never listed before it is found; hinted only by survivor rumors. Failing costs rewards, not life. */
+export type HiddenScenarioDef = {
+  id: string
+  title: string
+  announcement: string
+  trigger: HiddenTrigger
+  goal: { kind: 'kill'; count: number; enemyTag?: string } | { kind: 'reach'; zoneId: string } | { kind: 'survive' }
+  hours: number
+  rewards: { coins: number; itemIds?: string[]; skillId?: string }
+  /** What survivors whisper about it while it is undiscovered. */
+  rumor: string
+}
+
 export type Content = {
   backgrounds: Background[]
   zones: ZoneDef[]
@@ -151,4 +172,5 @@ export type Content = {
   subScenarios: SubScenarioDef[]
   attributes: AttributeDef[]
   stigmas: StigmaDef[]
+  hiddenScenarios: HiddenScenarioDef[]
 }
