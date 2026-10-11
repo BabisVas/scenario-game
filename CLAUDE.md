@@ -36,3 +36,5 @@ A single-player, menu-driven browser game: an ordinary survivor lives through de
 ## Working rules
 
 - Stop and ask Babis at every STOP step in the plan.
+- **Task 15 (content) is a surprise for Babis.** Never show him scenario text, hidden-scenario details, rumors, announcer lines, constellation lines, item lore or survivor dialogue: not in chat, not in summaries, not in commit messages. At a Task 15 STOP, tell him only what was built (mechanics, in general terms), the test/typecheck/build status, and that the draft (`docs/content/scenarios-draft.md`) is ready to attach to his chat for his reviewer. Questions for Babis must be spoiler-free; anything that needs the content to answer goes in a "Questions for the reviewer" section at the top of the draft.
+- All player-facing game text follows the abyssal-epic-style skill (`.claude/skills/abyssal-epic-style/SKILL.md`) in its Browser Game mode.
