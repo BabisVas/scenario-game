@@ -70,8 +70,14 @@ export type ChoiceOption = {
   tags: Tag[]
   /** The player picks a living survivor they have met. */
   target?: 'met-survivor'
-  /** `fight` names an enemy the player must beat. */
-  outcome: { kill?: boolean; spareCount?: number; coins?: number; fight?: string }
+  /**
+   * `kill`: the picked target dies (needs `target`). `spareCount`: the player spares up to
+   * this many of the scenario's group; the rest of the group die (0 = nobody is spared).
+   * `fight`: an enemy the player must beat. `cityAttitude`: news spreads; every living
+   * survivor's attitude toward the player changes by this much. `announce`: a line «ANNOUNCER»
+   * says to the whole city.
+   */
+  outcome: { kill?: boolean; spareCount?: number; coins?: number; fight?: string; cityAttitude?: number; announce?: string }
 }
 
 export type ScenarioGoal =

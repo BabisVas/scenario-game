@@ -65,3 +65,20 @@ test('the world never kills or moves a group member while the choice is open', (
   for (let i = 0; i < 2000; i++) s = worldTick(s, createRng(i), content).state;
   for (const id of g) expect(s.survivors.find(v => v.id === id)).toMatchObject({ alive: true, zoneId: 'old-market' });
 });
+
+describe('the city hears', () => {
+  test('a "nobody is spared" option culls the whole group, and the news drops everyone\'s attitude', () => {
+    const started = startScenario(crowd(), spareDef(2), createRng(4), content).state;
+    const g = groupOf(started);
+    const r = resolveChoice(started, 'crates', null, createRng(1), content, [g[0]]);
+    for (const id of g) expect(alive(r.state, id)).toBe(false);
+    for (const v of r.state.survivors.filter(v => v.alive)) {
+      expect(v.attitude).toBe(started.survivors.find(x => x.id === v.id)!.attitude - 25);
+    }
+    // +150 from the choice, plus the scenario's own clear reward
+    const clearReward = content.scenarios.find(d => d.id === 'fx-spare')!.rewards.coins;
+    expect(r.state.player.coins).toBe(started.player.coins + 150 + clearReward);
+    expect(r.events.some(e => e.kind === 'system' && e.text.includes('FX-ANNOUNCE') && e.text.includes('«ANNOUNCER»'))).toBe(true);
+    expect(r.events.flatMap(e => e.tags ?? [])).toEqual(expect.arrayContaining(['greed', 'cruelty']));
+  });
+});

@@ -149,6 +149,7 @@ export const spareDef = (spareCount = 2) =>
     options: [
       { id: 'choose', label: 'Choose who crosses', tags: ['cunning'], outcome: { spareCount } },
       { id: 'refuse', label: 'Refuse and pay the toll', tags: ['mercy'], outcome: { coins: -5 } },
+      { id: 'crates', label: 'Send the crates across instead', tags: ['greed', 'cruelty'], outcome: { spareCount: 0, coins: 150, cityAttitude: -25, announce: 'FX-ANNOUNCE the whole city heard.' } },
     ],
   }))
 

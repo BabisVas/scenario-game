@@ -1,6 +1,6 @@
 // Content checks, run at test time. An empty list means the content is valid.
 
-import type { Content } from './schema'
+import type { ChoiceOption, Content } from './schema'
 
 /** Proper nouns from Omniscient Reader. The world is original: none of these may appear in content. */
 export const BANNED_NAMES: string[] = [
@@ -55,6 +55,26 @@ export const BANNED_NAMES: string[] = [
 ]
 
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*$/
+
+const OUTCOME_FIELDS = ['kill', 'spareCount', 'coins', 'fight', 'cityAttitude', 'announce']
+
+/** Choice outcomes the engine cannot run, explained. */
+function outcomeProblems(o: ChoiceOption, where: string): string[] {
+  const p: string[] = []
+  const out = o.outcome as Record<string, unknown>
+  for (const key of Object.keys(out)) if (!OUTCOME_FIELDS.includes(key)) p.push(`${where}: unknown outcome field "${key}"`)
+  if (o.target !== undefined && o.target !== 'met-survivor') p.push(`${where}: unknown target "${String(o.target)}"`)
+  if (o.outcome.kill && o.target !== 'met-survivor') p.push(`${where}: kill needs target "met-survivor"`)
+  const spare = o.outcome.spareCount
+  if (spare !== undefined) {
+    if (!Number.isInteger(spare) || spare < 0) p.push(`${where}: spareCount must be a whole number, 0 or more`)
+    if (o.target) p.push(`${where}: spareCount works on the scenario's group and cannot take a target`)
+  }
+  const city = o.outcome.cityAttitude
+  if (city !== undefined && (typeof city !== 'number' || city < -100 || city > 100)) p.push(`${where}: cityAttitude must be between -100 and 100`)
+  if (o.outcome.announce !== undefined && !o.outcome.announce.trim()) p.push(`${where}: announce must not be empty`)
+  return p
+}
 
 export function validateContent(c: Content): string[] {
   const problems: string[] = []
@@ -124,7 +144,10 @@ export function validateContent(c: Content): string[] {
       const fallback = g.options.find((o) => o.id === g.fallbackOptionId)
       if (!fallback) problems.push(`${where}: fallback option "${g.fallbackOptionId}" is not one of its options`)
       else if (fallback.target) problems.push(`${where}: fallback option "${fallback.id}" must not need a target`)
-      for (const o of g.options) if (o.outcome.fight) ref('enemy', o.outcome.fight, enemyIds, `${where} option ${o.id}`)
+      for (const o of g.options) {
+        if (o.outcome.fight) ref('enemy', o.outcome.fight, enemyIds, `${where} option ${o.id}`)
+        problems.push(...outcomeProblems(o, `${where} option ${o.id}`))
+      }
     }
   })
 

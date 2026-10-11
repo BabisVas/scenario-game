@@ -128,6 +128,16 @@ function SpareOption({
 }) {
   const [picked, setPicked] = useState<string[]>([])
   const choose = () => act({ kind: 'choice', optionId: option.id, targetSurvivorId: null, spareIds: picked })
+  if (spareCount === 0) {
+    return (
+      <div className="option">
+        <p className="small why">Nobody in this group is spared.</p>
+        <button className="btn danger" onClick={choose}>
+          {option.label}
+        </button>
+      </div>
+    )
+  }
   if (people.length === 0) {
     return (
       <div className="option">

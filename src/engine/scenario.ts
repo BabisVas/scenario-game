@@ -2,7 +2,7 @@
 // when the player spends in-game hours.
 
 import type { Content, ScenarioDef } from '../data/schema'
-import { SYSTEM } from '../data/names'
+import { ANNOUNCER, SYSTEM } from '../data/names'
 import { combatantFromEnemy, zoneDanger } from './actions'
 import { withCoinBonus } from './attributes'
 import { startFight } from './combat'
@@ -284,6 +284,11 @@ export function resolveChoice(
     s = step.state
     events.push(...step.events)
   }
+  if (out.cityAttitude) {
+    const delta = out.cityAttitude
+    s = { ...s, survivors: s.survivors.map((v) => (v.alive ? { ...v, attitude: Math.max(-100, Math.min(100, v.attitude + delta)) } : v)) }
+  }
+  if (out.announce) events.push({ kind: 'system', text: `${ANNOUNCER}: "${out.announce}"` })
   if (out.fight) {
     const enemy = content.enemies.find((e) => e.id === out.fight)!
     const fight = startFight(s, combatantFromEnemy(enemy, 1 + Math.floor(def.number / 3)), 'scenario', { enemyId: enemy.id })

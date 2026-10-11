@@ -129,3 +129,12 @@ test('a "some survive" choice lists the group and lets you tick who is spared, u
   const saved = loadGame(storage);
   expect(saved.ok && saved.state.survivors.map(v => v.alive)).toEqual([true, false, true, false, true]);
 });
+test('a "nobody is spared" option is a plain button with a warning, not a picker', () => {
+  const people = ['Mara', 'Kofi', 'Ines', 'Pia'].map((name, i) => makeSurvivor(`s-${i}`, { met: true, name }));
+  const base = inScenario({ ...playingState(), survivors: people }, spareDef(2));
+  renderWithGame({ ...base, phase: { ...base.phase, groupIds: ['s-0', 's-1', 's-2', 's-3'] } as typeof base.phase });
+  const dialog = screen.getByRole('dialog', { name: /choice/i });
+  expect(within(dialog).getByText(/nobody in this group is spared/i)).toBeInTheDocument();
+  expect(within(dialog).getByRole('button', { name: /send the crates across instead/i })).toBeEnabled();
+  expect(within(dialog).queryByText(/spare up to 0/i)).toBeNull();
+});

@@ -67,3 +67,25 @@ test('a Final Wave naming an unknown enemy is reported', () => {
   const bad = { ...content, scenarios: [{ ...content.scenarios[0], finalWave: 'ghost-enemy' }] };
   expect(validateContent(bad)).toContainEqual(expect.stringContaining('ghost-enemy'));
 });
+describe('choice outcomes the engine cannot run are rejected', () => {
+  const withOption = (option: object) => ({
+    ...content,
+    scenarios: [{ ...content.scenarios[0], goal: { kind: 'choice', prompt: 'p', fallbackOptionId: 'ok',
+      options: [{ id: 'ok', label: 'OK', tags: [], outcome: {} }, { id: 'odd', label: 'Odd', tags: [], ...option }] } } as ScenarioDef],
+  });
+  test.each([
+    ['an unknown outcome field', { outcome: { teleport: true } }, 'teleport'],
+    ['kill without a target', { outcome: { kill: true } }, 'kill'],
+    ['a negative spare count', { outcome: { spareCount: -1 } }, 'spareCount'],
+    ['a fractional spare count', { outcome: { spareCount: 1.5 } }, 'spareCount'],
+    ['a spare count with a target', { target: 'met-survivor', outcome: { spareCount: 1, kill: true } }, 'spareCount'],
+    ['a city attitude out of range', { outcome: { cityAttitude: -500 } }, 'cityAttitude'],
+    ['an empty announcement', { outcome: { announce: '' } }, 'announce'],
+  ])('%s', (_, option, needle) => {
+    expect(validateContent(withOption(option))).toContainEqual(expect.stringContaining(needle));
+  });
+  test('every outcome the engine can run passes', () => {
+    expect(validateContent(withOption({ target: 'met-survivor', outcome: { kill: true, coins: 5 } }))).toEqual([]);
+    expect(validateContent(withOption({ outcome: { spareCount: 0, cityAttitude: -25, announce: 'x', coins: 150 } }))).toEqual([]);
+  });
+});
