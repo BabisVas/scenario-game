@@ -169,11 +169,17 @@ describe('robbing has consequences', () => {
     expect(tradeWithSurvivor(scene(p), 'victim', 'crowbar', 'rob', content, seqRng(0.49)).state.fight).toMatchObject({ survivorId: 'victim' });
     expect(tradeWithSurvivor(scene(p), 'victim', 'crowbar', 'rob', content, seqRng(0.51)).state.fight).toBeNull();
   });
-  test('you are caught holding the item: it is yours either way', () => {
-    for (const roll of [0.1, 0.9]) {
-      const r = tradeWithSurvivor(scene('kind'), 'victim', 'crowbar', 'rob', content, seqRng(roll)).state;
-      expect(r.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
-    }
+  test('an unnoticed robbery takes the item', () => {
+    const r = tradeWithSurvivor(scene('kind'), 'victim', 'crowbar', 'rob', content, seqRng(0.9)).state;
+    expect(r.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
+  });
+  test('a caught robbery fails: no item, the fight starts, and winning it takes the item', () => {
+    const caught = tradeWithSurvivor(scene('kind'), 'victim', 'crowbar', 'rob', content, seqRng(0.1)).state;
+    expect(caught.player.inventory.some(i => i.itemId === 'crowbar')).toBe(false);
+    expect(caught.fight).toMatchObject({ survivorId: 'victim', loot: 'crowbar' });
+    const winning = { ...caught, fight: { ...caught.fight!, enemy: { ...caught.fight!.enemy, hp: 1 } } };
+    const won = fightTurn(winning, { kind: 'attack' }, createRng(1), content).state;
+    expect(won.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
   });
   test('everyone else in the zone thinks less of you; the rest of the city does not know', () => {
     const r = tradeWithSurvivor(scene('kind'), 'victim', 'crowbar', 'rob', content, seqRng(0.9)).state;

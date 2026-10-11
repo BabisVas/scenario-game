@@ -281,22 +281,30 @@ export function tradeWithSurvivor(
 }
 
 /**
- * Taking an item without paying. The victim never forgets (−40), everyone else
- * in the zone saw it (−10), and the victim may fight back on the spot: 30%, or
- * 50% for the brave and the ruthless. The item is taken either way.
+ * Taking an item without paying. The victim never forgets (−40), and everyone
+ * else in the zone saw it (−10). The victim may catch you: 30%, or 50% for the
+ * brave and the ruthless. A caught robbery fails and a fight starts; the item
+ * is yours only if you win it.
  */
 function rob(state: GameState, v: Survivor, itemId: string, itemName: string, rng: Rng): Step {
-  let s = remember(addItem(state, itemId), v.id, 'robbed', -40)
+  let s = remember(state, v.id, 'robbed', -40)
   for (const w of survivorsInZone(s, v.zoneId)) if (w.id !== v.id) s = remember(s, w.id, 'witnessed', -10)
-  const events: GameEvent[] = [{ kind: 'player', text: `You take the ${itemName} from ${v.name} and do not pay.`, tags: ['greed', 'cruelty'] }]
-  const fightBack = v.personality === 'brave' || v.personality === 'ruthless' ? 0.5 : 0.3
-  if (rng.chance(fightBack)) {
+  const caughtChance = v.personality === 'brave' || v.personality === 'ruthless' ? 0.5 : 0.3
+  if (rng.chance(caughtChance)) {
     const victim = s.survivors.find((x) => x.id === v.id)!
-    const fight = startFight(s, survivorCombatant(victim), 'survivor', { survivorId: v.id })
-    s = fight.state
-    events.push({ kind: 'fight', text: `${v.name} catches you and fights back!` }, ...fight.events)
+    const fight = startFight(s, survivorCombatant(victim), 'survivor', { survivorId: v.id, loot: itemId })
+    return {
+      state: fight.state,
+      events: [
+        { kind: 'fight', text: `${v.name} catches your hand on the ${itemName} and fights back!`, tags: ['greed', 'cruelty'] },
+        ...fight.events,
+      ],
+    }
   }
-  return { state: s, events }
+  return {
+    state: addItem(s, itemId),
+    events: [{ kind: 'player', text: `You take the ${itemName} from ${v.name} and do not pay.`, tags: ['greed', 'cruelty'] }],
+  }
 }
 
 /** Helping someone: a gift. Always merciful; loyal when they already like you (30+). */

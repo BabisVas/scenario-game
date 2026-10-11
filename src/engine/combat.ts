@@ -64,7 +64,7 @@ export function startFight(
   state: GameState,
   enemy: Combatant,
   origin: FightState['origin'],
-  ids: { enemyId?: string; survivorId?: string },
+  ids: { enemyId?: string; survivorId?: string; loot?: string },
 ): Step {
   const fight: FightState = { enemy, ...ids, round: 1, cooldowns: {}, origin }
   return {
@@ -273,6 +273,10 @@ function win(s: GameState, enemy: Combatant, fight: FightState, rng: Rng, conten
   const def = fight.enemyId ? content.enemies.find((e) => e.id === fight.enemyId) : undefined
   let next: GameState = { ...s, fight: null, player: { ...s.player, kills: s.player.kills + 1 } }
   events.push({ kind: 'fight', text: `${enemy.name} goes down.`, tags: ['bravery', ...flair] })
+  if (fight.loot) {
+    next = addItem(next, fight.loot)
+    events.push({ kind: 'player', text: `You take the ${content.items.find((i) => i.id === fight.loot)?.name ?? fight.loot}.` })
+  }
   if (def) {
     const coins = withCoinBonus(s, content, rng.int(def.coins[0], def.coins[1]))
     const drops = def.drops.filter((d) => rng.chance(d.chance)).map((d) => d.itemId)

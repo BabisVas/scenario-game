@@ -98,6 +98,8 @@ export type FightState = {
   cooldowns: Record<string, number>
   /** Damage the player has taken in this fight. */
   damageTaken?: number
+  /** An item the player takes if they win (a caught robbery). */
+  loot?: string
   origin: 'hunt' | 'scenario' | 'survivor' | 'sub' | 'final-wave'
 }
 
