@@ -35,29 +35,32 @@ export function attributeDef(content: Content, id: string | null | undefined): A
   return id ? content.attributes.find((a) => a.id === id) : undefined
 }
 
-function effect<K extends AttributeEffect['kind']>(state: GameState, content: Content, kind: K) {
-  const e = attributeDef(content, state.player.attributeId)?.effect
-  return e?.kind === kind ? (e as Extract<AttributeEffect, { kind: K }>) : undefined
+/** Every effect of the given kind on the player's attribute (legendary attributes have two). */
+function effectsOf<K extends AttributeEffect['kind']>(state: GameState, content: Content, kind: K) {
+  const all = attributeDef(content, state.player.attributeId)?.effects ?? []
+  return all.filter((e): e is Extract<AttributeEffect, { kind: K }> => e.kind === kind)
 }
+
+const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0)
 
 /** Coins the player actually receives when they find or earn `base`. */
 export function withCoinBonus(state: GameState, content: Content, base: number): number {
-  const e = effect(state, content, 'coins')
-  return e ? Math.floor(base * (1 + e.percent / 100)) : base
+  const pct = sum(effectsOf(state, content, 'coins').map((e) => e.percent))
+  return pct ? Math.floor(base * (1 + pct / 100)) : base
 }
 
 /** HP the player actually recovers from a heal of `base`. */
 export function withHealingBonus(state: GameState, content: Content, base: number): number {
-  const e = effect(state, content, 'healing')
-  return e ? Math.round(base * (1 + e.percent / 100)) : base
+  const pct = sum(effectsOf(state, content, 'healing').map((e) => e.percent))
+  return pct ? Math.round(base * (1 + pct / 100)) : base
 }
 
 export function attributeRunBonus(state: GameState, content: Content): number {
-  return effect(state, content, 'run')?.bonus ?? 0
+  return sum(effectsOf(state, content, 'run').map((e) => e.bonus))
 }
 
 /** Damage multiplier against an enemy with these tags. */
 export function damageMultiplier(state: GameState, content: Content, enemyTags: string[]): number {
-  const e = effect(state, content, 'damage-vs')
-  return e && enemyTags.includes(e.enemyTag) ? 1 + e.percent / 100 : 1
+  const pct = sum(effectsOf(state, content, 'damage-vs').filter((e) => enemyTags.includes(e.enemyTag)).map((e) => e.percent))
+  return 1 + pct / 100
 }

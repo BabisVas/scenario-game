@@ -34,7 +34,7 @@ export function newGame(
   const rng = createRng(input.seed >>> 0)
   const attributeId = rollAttribute(content, rng, background.id)
   const attribute = attributeDef(content, attributeId)
-  if (attribute?.effect.kind === 'stat') stats[attribute.effect.stat] += attribute.effect.amount
+  for (const e of attribute?.effects ?? []) if (e.kind === 'stat') stats[e.stat] += e.amount
 
   const constellations = initConstellations(content)
   for (const c of content.constellations) {

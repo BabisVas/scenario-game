@@ -116,6 +116,11 @@ export function validateContent(c: Content): string[] {
   }
 
   const backgroundIds = ids(c.backgrounds)
+  for (const a of c.attributes) {
+    const want = a.rarity === 'legendary' ? 2 : 1
+    if (a.effects.length !== want) problems.push(`attribute ${a.id}: a ${a.rarity} attribute has exactly ${want} effect${want > 1 ? 's' : ''}, not ${a.effects.length}`)
+    if (new Set(a.effects.map((e) => e.kind)).size !== a.effects.length) problems.push(`attribute ${a.id}: its effects must be of different kinds`)
+  }
   for (const a of c.attributes) for (const b of Object.keys(a.backgroundWeights)) ref('background', b, backgroundIds, 'attribute ' + a.id)
   for (const b of c.backgrounds) ref('item', b.startingItemId, itemIds, `background ${b.id}`)
   for (const z of c.zones) {

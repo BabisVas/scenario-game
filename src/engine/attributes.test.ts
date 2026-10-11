@@ -5,6 +5,8 @@ import { newGame } from './newGame'
 import { createRng } from './rng'
 import { generateSurvivors } from './survivors'
 import { content } from '../data'
+import type { AttributeDef } from '../data/schema'
+import { validateContent } from '../data/validate'
 import {
   at, attributeDef, baseState, fixtureContent, inFight, onlyAttribute, seqRng, unarmed, weakEnemy, withAttribute,
 } from '../test/fixtures'
@@ -90,5 +92,24 @@ describe('passive effects', () => {
     expect(doAction(hurt, 'old-market', 'rest', seqRng(0.99), fixtureContent).state.player.hp).toBe(50);
     const healer = withAttribute(hurt, { kind: 'healing', percent: 50 });
     expect(doAction(healer, 'old-market', 'rest', seqRng(0.99), fixtureContent).state.player.hp).toBe(65);
+  });
+});
+
+describe('legendary attributes have two effects', () => {
+  test('both effects apply', () => {
+    const def = attributeDef({ kind: 'coins', percent: 50 }, { id: 'twofold', rarity: 'legendary', effects: [{ kind: 'coins', percent: 50 }, { kind: 'stat', stat: 'strength', amount: 3 }] });
+    const s = start('courier', 1, onlyAttribute(def));
+    expect(s.player.stats.strength).toBe(8);
+    const rolls = () => seqRng(0.0, 0.99, 0.99, 0.99);
+    const c = onlyAttribute(def);
+    expect(doAction(at({ ...baseState(), player: { ...baseState().player, attributeId: 'twofold' } }, 'subway-tunnels'), 'subway-tunnels', 'scavenge', rolls(), c).state.player.coins).toBe(13);
+  });
+  test.each([
+    ['a legendary with one effect', { rarity: 'legendary', effects: [{ kind: 'coins', percent: 10 }] }],
+    ['a common with two effects', { rarity: 'common', effects: [{ kind: 'coins', percent: 10 }, { kind: 'run', bonus: 0.1 }] }],
+    ['a legendary with the same effect twice', { rarity: 'legendary', effects: [{ kind: 'coins', percent: 10 }, { kind: 'coins', percent: 20 }] }],
+  ] as const)('the validator rejects %s', (_, over) => {
+    const def = { ...attributeDef({ kind: 'coins', percent: 10 }), id: 'odd-one', ...over } as unknown as AttributeDef;
+    expect(validateContent({ ...content, attributes: [...content.attributes, def] })).toContainEqual(expect.stringContaining('odd-one'));
   });
 });

@@ -141,7 +141,8 @@ export type AttributeDef = {
   name: string
   blurb: string
   rarity: 'common' | 'rare' | 'legendary'
-  effect: AttributeEffect
+  /** One effect for common and rare attributes; two different ones for legendary. */
+  effects: AttributeEffect[]
   /** Constellations that like any of these notice the holder sooner. */
   tags: Tag[]
   /** Likelihood multiplier per background id; missing means 1. */

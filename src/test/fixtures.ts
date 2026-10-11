@@ -271,7 +271,7 @@ export function playingState(): GameState {
 // --- Attribute fixtures --------------------------------------------------------
 
 export function attributeDef(effect: AttributeEffect, over: Partial<AttributeDef> = {}): AttributeDef {
-  return { id: 'fx-attr-' + effect.kind, name: 'Fixture ' + effect.kind, blurb: 'A fixture.', rarity: 'common', effect, tags: [], backgroundWeights: {}, ...over }
+  return { id: 'fx-attr-' + effect.kind, name: 'Fixture ' + effect.kind, blurb: 'A fixture.', rarity: 'common', effects: [effect], tags: [], backgroundWeights: {}, ...over }
 }
 
 /** Gives the player a fixture attribute, registered in fixtureContent. */
