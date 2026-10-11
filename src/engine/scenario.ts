@@ -6,7 +6,7 @@ import { ANNOUNCER, SYSTEM } from '../data/names'
 import { combatantFromEnemy, zoneDanger } from './actions'
 import { withCoinBonus } from './attributes'
 import { startFight } from './combat'
-import { REST_PERIOD_HOURS } from './config'
+import { REST_PERIOD_HOURS, WARD_WOUNDS } from './config'
 import { onScenarioCleared, withReactions } from './constellations'
 import { killPlayer } from './death'
 import { checkHiddenTriggers, judgeHidden, windowRumors } from './hidden'
@@ -96,7 +96,7 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
       hoursLeft: def.hours,
       progress: 0,
       killsAtStart: state.player.kills,
-      ...(protectedSurvivorId ? { protectedSurvivorId } : {}),
+      ...(protectedSurvivorId ? { protectedSurvivorId, wardWounds: WARD_WOUNDS } : {}),
       ...(gathered ? { groupIds: gathered.ids } : {}),
     },
     pendingChoice: def.goal.kind === 'choice' ? { source: 'scenario', scenarioId: def.id } : state.pendingChoice,

@@ -32,6 +32,8 @@ export type Phase =
       hoursLeft: number
       progress: number
       protectedSurvivorId?: string
+      /** Protect scenarios: how many more attacks the ward can survive. */
+      wardWounds?: number
       /** player.kills when the scenario began, for 'kills this scenario'. */
       killsAtStart?: number
       /** Survive scenarios only: the last enemy that comes when the clock hits zero has been beaten. */

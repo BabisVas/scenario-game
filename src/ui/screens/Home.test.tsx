@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { SAVE_KEY } from '../../engine/config'
 import { loadGame } from '../../save/save'
-import { choiceDef, clearHiddenDefs, hiddenDef, inRest, inScenario, makeSurvivor, memoryStorage, playingState, sealZone, spareDef } from '../../test/fixtures'
+import { choiceDef, clearHiddenDefs, hiddenDef, inRest, inScenario, makeSurvivor, memoryStorage, playingState, protectDef, sealZone, spareDef } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
 import { content } from '../../data'
 
@@ -154,4 +154,11 @@ test('a zone you are not in shows its actions as out of reach', () => {
   const zone = screen.getByRole('region', { name: /zone/i });
   expect(within(zone).getByRole('button', { name: /scavenge/i })).toBeDisabled();
   expect(within(zone).getAllByText(/you are not here/i).length).toBeGreaterThan(0);
+});
+test('a protect scenario shows where the ward is and how many wounds they can take', () => {
+  const base = inScenario({ ...playingState(), survivors: [makeSurvivor('w', { met: true, name: 'Mara', zoneId: 'glass-towers' })] }, protectDef({ hours: 10 }));
+  renderWithGame({ ...base, phase: { ...base.phase, protectedSurvivorId: 'w', wardWounds: 2 } as typeof base.phase });
+  const panel = screen.getByRole('region', { name: /scenario/i });
+  expect(within(panel).getByText(/2 wounds left/i)).toBeInTheDocument();
+  expect(within(panel).getByText(/glass towers/i)).toBeInTheDocument();
 });

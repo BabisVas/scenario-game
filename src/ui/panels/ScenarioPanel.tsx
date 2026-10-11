@@ -19,6 +19,7 @@ export function ScenarioPanel({ state }: { state: GameState }) {
         <p className="mono small muted">Main Scenario {def.number}</p>
         <h3 className="scenario-title">{def.title}</h3>
         <p>{goalText(def, state, content)}</p>
+        {phase.protectedSurvivorId && <WardLine state={state} />}
         <p className="clock">{`${hoursText(Math.max(0, phase.hoursLeft))} left`}</p>
         <p className="twist">{def.twist}</p>
         {def.rules.length > 0 && (
@@ -78,4 +79,15 @@ export function ScenarioPanel({ state }: { state: GameState }) {
       </div>
     </section>
   )
+}
+
+function WardLine({ state }: { state: GameState }) {
+  const content = useContent()
+  if (state.phase.kind !== 'scenario') return null
+  const id = state.phase.protectedSurvivorId
+  const ward = state.survivors.find((v) => v.id === id)
+  if (!ward) return null
+  const zone = content.zones.find((z) => z.id === ward.zoneId)?.name ?? ward.zoneId
+  const wounds = state.phase.wardWounds ?? 0
+  return <p className="small ward">{`${ward.name} waits in the ${zone} · ${wounds} ${wounds === 1 ? 'wound' : 'wounds'} left`}</p>
 }

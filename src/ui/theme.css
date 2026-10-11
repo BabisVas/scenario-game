@@ -962,3 +962,8 @@ h3 {
 .zone-here > .zone-btn {
   border-color: color-mix(in srgb, var(--ok) 60%, transparent);
 }
+
+.ward {
+  color: var(--survivor);
+  font-family: var(--mono);
+}

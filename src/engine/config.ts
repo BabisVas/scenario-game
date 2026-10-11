@@ -16,4 +16,7 @@ export const BACKGROUND_STAT_BONUS = 2
 export const CONTRACT_INTEREST = 60
 export const HOSTILE_INTEREST = -40
 export const SAVE_KEY = 'scenario-game/save/v1'
+/** Protect scenarios: wounds the ward can take, and the chance per action away from them. */
+export const WARD_WOUNDS = 3
+export const WARD_ATTACK_CHANCE = 0.2
 export const SCHEMA_VERSION = 3

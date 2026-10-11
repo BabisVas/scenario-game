@@ -10,8 +10,9 @@ import { addItem } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
 import { findTrader, meetSurvivor } from './survivors'
+import { WARD_ATTACK_CHANCE, WARD_WOUNDS } from './config'
 import { checkScenarioClock, recordProgress, spendHours } from './scenario'
-import type { Combatant, GameEvent, GameState, StatKey, Step, ZoneState } from './types'
+import type { Combatant, GameEvent, GameState, StatKey, Step, Survivor, ZoneState } from './types'
 
 export const ACTION_COST: Record<ActionId, { energy: number; hours: number }> = {
   scavenge: { energy: 10, hours: 2 },
@@ -89,10 +90,7 @@ export function travel(state: GameState, toZoneId: string, rng: Rng, content: Co
     events.push(...step.events)
   }
   s = recordProgress(s, 'reach', { zoneId: to.id }, content)
-  if (inScenarioOf(s, content, ['survive', 'protect', 'reach']) && to.enemyIds.length > 0 && rng.chance(ambushChance(zoneDanger(s, to)))) {
-    events.push({ kind: 'fight', text: `Ambush on the way into the ${to.name}!` })
-    run(randomFight(s, to, rng, content, 'hunt'))
-  }
+  run(dangerAfter(s, to, rng, content, ['survive', 'protect', 'reach'], `Ambush on the way into the ${to.name}!`))
   const carried = state.player.inventory.map((i) => i.itemId)
   run(checkHiddenTriggers(s, { zoneId: to.id, carried }, content))
   const clock = checkScenarioClock(s, rng, content)
@@ -111,9 +109,37 @@ function inScenarioOf(state: GameState, content: Content, kinds: string[]): bool
   return !!kind && kinds.includes(kind)
 }
 
-/** Survive and protect scenarios are never safe: any action in them can be ambushed. */
-function inAmbushScenario(state: GameState, content: Content): boolean {
-  return inScenarioOf(state, content, ['survive', 'protect'])
+/** The ward of a running protect scenario, if they are still alive. */
+function wardOf(state: GameState): Survivor | undefined {
+  if (state.phase.kind !== 'scenario' || !state.phase.protectedSurvivorId) return undefined
+  const id = state.phase.protectedSurvivorId
+  return state.survivors.find((v) => v.id === id && v.alive)
+}
+
+/**
+ * The danger that follows an action or an arrival. While guarding a ward, being
+ * away from them puts the ward at risk instead of you. Otherwise, in the listed
+ * scenario kinds, the zone may ambush you.
+ */
+function dangerAfter(s: GameState, zone: ZoneDef, rng: Rng, content: Content, ambushKinds: string[], ambushLine: string): Step {
+  const ward = wardOf(s)
+  if (ward && s.phase.kind === 'scenario' && s.zoneId !== ward.zoneId) {
+    if (!rng.chance(WARD_ATTACK_CHANCE)) return { state: s, events: [] }
+    const left = Math.max(0, (s.phase.wardWounds ?? WARD_WOUNDS) - 1)
+    const wardZone = content.zones.find((z) => z.id === ward.zoneId)?.name ?? ward.zoneId
+    let next: GameState = { ...s, phase: { ...s.phase, wardWounds: left } }
+    const events: GameEvent[] = [{ kind: 'survivor', text: `While you are away, ${ward.name} is attacked in the ${wardZone}. ${left} wounds left.` }]
+    if (left === 0) {
+      next = { ...next, survivors: next.survivors.map((v) => (v.id === ward.id ? { ...v, alive: false, hp: 0, deathNote: 'Fell while waiting for help.' } : v)) }
+      events.push({ kind: 'survivor', text: `${ward.name} has fallen.` })
+    }
+    return { state: next, events }
+  }
+  if (inScenarioOf(s, content, ambushKinds) && zone.enemyIds.length > 0 && rng.chance(ambushChance(zoneDanger(s, zone)))) {
+    const fight = randomFight(s, zone, rng, content, 'hunt')
+    return { state: fight.state, events: [{ kind: 'fight', text: ambushLine }, ...fight.events] }
+  }
+  return { state: s, events: [] }
 }
 
 /** An enemy as a fighter, tougher the more dangerous the zone. */
@@ -187,10 +213,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       break
   }
 
-  if (!s.fight && inAmbushScenario(s, content) && zone.enemyIds.length > 0 && rng.chance(ambushChance(zoneDanger(s, zone)))) {
-    events.push({ kind: 'fight', text: 'Ambush! Something was waiting for you.' })
-    run(randomFight(s, zone, rng, content, 'hunt'))
-  }
+  if (!s.fight) run(dangerAfter(s, zone, rng, content, ['survive', 'protect'], 'Ambush! Something was waiting for you.'))
 
   s = countAction(s, zoneId, action)
   const carried = state.player.inventory.map((i) => i.itemId)
