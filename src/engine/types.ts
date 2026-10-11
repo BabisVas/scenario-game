@@ -36,6 +36,8 @@ export type Phase =
       killsAtStart?: number
       /** Survive scenarios only: the last enemy that comes when the clock hits zero has been beaten. */
       finalWaveBeaten?: boolean
+      /** "Only some survive" choices: the survivors present, from whom the player picks who is spared. */
+      groupIds?: string[]
     }
   | { kind: 'rest'; nextScenarioId: string | null; hoursLeft: number }
   | { kind: 'dead'; cause: string }

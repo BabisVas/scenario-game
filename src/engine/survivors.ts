@@ -86,8 +86,14 @@ function choiceAtStake(state: GameState, content: Content): boolean {
   return state.phase.kind !== 'scenario' || state.phase.progress < 1
 }
 
+/** A group member of an open "only some survive" choice: the scenario depends on them. */
+function inOpenGroup(state: GameState, id: string): boolean {
+  return state.phase.kind === 'scenario' && state.phase.progress < 1 && !!state.phase.groupIds?.includes(id)
+}
+
 function canDie(state: GameState, v: Survivor, content: Content): boolean {
   if (state.phase.kind === 'scenario' && state.phase.protectedSurvivorId === v.id) return false
+  if (inOpenGroup(state, v.id)) return false
   if (v.met && choiceAtStake(state, content)) {
     const livingMet = state.survivors.filter((x) => x.alive && x.met).length
     if (livingMet <= 1) return false
@@ -148,7 +154,7 @@ export function worldTick(state: GameState, rng: Rng, content: Content): Step {
       }
     } else if (roll === 3) {
       events.push({ kind: 'survivor', text: `${v.name} trades supplies with a stranger in the ${zone?.name ?? 'city'}.` })
-    } else if (roll === 4 && !(s.phase.kind === 'scenario' && s.phase.protectedSurvivorId === v.id)) {
+    } else if (roll === 4 && !(s.phase.kind === 'scenario' && s.phase.protectedSurvivorId === v.id) && !inOpenGroup(s, v.id)) {
       const open = content.zones.filter((z) => z.id !== v.zoneId && !(s.zones[z.id]?.sealed ?? z.startsSealed))
       if (open.length > 0) {
         const to = rng.pick(open)

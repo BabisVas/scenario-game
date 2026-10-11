@@ -75,24 +75,6 @@ test('met survivors are named in their zone, strangers are someone', () => {
   expect(within(zone).getByText(/mara/i)).toBeInTheDocument();
   expect(within(zone).getByText(/someone/i)).toBeInTheDocument();
 });
-test('a "some survive" choice lets you tick who is spared, up to the limit', () => {
-  const people = ['Mara', 'Kofi', 'Ines'].map((name, i) => makeSurvivor(`s-${i}`, { met: true, name }));
-  const { storage } = renderWithGame(inScenario({ ...playingState(), survivors: people }, spareDef(2)));
-  const dialog = screen.getByRole('dialog', { name: /choice/i });
-  expect(within(dialog).getByText(/everyone you know who is not chosen dies/i)).toBeInTheDocument();
-  fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Mara' }));
-  fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Ines' }));
-  expect(within(dialog).getByRole('checkbox', { name: 'Kofi' })).toBeDisabled();
-  fireEvent.click(within(dialog).getByRole('button', { name: /choose who crosses/i }));
-  const saved = loadGame(storage);
-  expect(saved.ok && saved.state.survivors.map(v => v.alive)).toEqual([true, false, true]);
-});
-test('knowing fewer people than the limit spares them all', () => {
-  renderWithGame(inScenario({ ...playingState(), survivors: [makeSurvivor('s-0', { met: true, name: 'Mara' })] }, spareDef(2)));
-  const dialog = screen.getByRole('dialog', { name: /choice/i });
-  expect(within(dialog).queryByRole('checkbox')).toBeNull();
-  expect(within(dialog).getByText(/all of them will be spared/i)).toBeInTheDocument();
-});
 test('the status window shows your attribute and its rarity', () => {
   const def = content.attributes[0];
   const s = { ...playingState(), player: { ...playingState().player, attributeId: def.id } };
@@ -131,4 +113,19 @@ test('trading with someone you know offers buy, rob, sell, overcharge and give',
   fireEvent.click(screen.getByRole('button', { name: /rob mara of crowbar/i }));
   const saved = loadGame(storage);
   expect(saved.ok && saved.state.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
+});
+test('a "some survive" choice lists the group and lets you tick who is spared, up to the limit', () => {
+  const people = ['Mara', 'Kofi', 'Ines', 'Pia'].map((name, i) => makeSurvivor(`s-${i}`, { met: true, name }));
+  const base = inScenario({ ...playingState(), survivors: [...people, makeSurvivor('s-9', { met: true, name: 'Far Away' })] }, spareDef(2));
+  const s = { ...base, phase: { ...base.phase, groupIds: ['s-0', 's-1', 's-2', 's-3'] } as typeof base.phase };
+  const { storage } = renderWithGame(s);
+  const dialog = screen.getByRole('dialog', { name: /choice/i });
+  expect(within(dialog).getByText(/everyone else in this group dies/i)).toBeInTheDocument();
+  expect(within(dialog).queryByRole('checkbox', { name: 'Far Away' })).toBeNull();
+  fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Mara' }));
+  fireEvent.click(within(dialog).getByRole('checkbox', { name: 'Ines' }));
+  expect(within(dialog).getByRole('checkbox', { name: 'Kofi' })).toBeDisabled();
+  fireEvent.click(within(dialog).getByRole('button', { name: /choose who crosses/i }));
+  const saved = loadGame(storage);
+  expect(saved.ok && saved.state.survivors.map(v => v.alive)).toEqual([true, false, true, false, true]);
 });

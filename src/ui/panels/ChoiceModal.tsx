@@ -69,6 +69,8 @@ function ScenarioChoice({
   act: (a: PlayerAction) => void
 }) {
   const metAlive = state.survivors.filter((v) => v.alive && v.met)
+  const groupIds = state.phase.kind === 'scenario' ? (state.phase.groupIds ?? []) : []
+  const group = state.survivors.filter((v) => v.alive && groupIds.includes(v.id))
   return (
     <div className="overlay">
       <section className="panel modal" role="dialog" aria-modal="true" aria-label="Scenario choice">
@@ -79,7 +81,7 @@ function ScenarioChoice({
           <div className="options">
             {options.map((o) =>
               o.outcome.spareCount !== undefined ? (
-                <SpareOption key={o.id} option={o} spareCount={o.outcome.spareCount} people={metAlive} act={act} />
+                <SpareOption key={o.id} option={o} spareCount={o.outcome.spareCount} people={group} act={act} />
               ) : o.target === 'met-survivor' ? (
                 metAlive.length > 0 ? <TargetOption key={o.id} option={o} people={metAlive} act={act} /> : null
               ) : (
@@ -126,14 +128,10 @@ function SpareOption({
 }) {
   const [picked, setPicked] = useState<string[]>([])
   const choose = () => act({ kind: 'choice', optionId: option.id, targetSurvivorId: null, spareIds: picked })
-  if (people.length < spareCount) {
+  if (people.length === 0) {
     return (
       <div className="option">
-        <p className="small muted">
-          {people.length === 0
-            ? 'You do not know anyone here. The system will choose for you.'
-            : `You know only ${people.length}. All of them will be spared.`}
-        </p>
+        <p className="small muted">There is no one here but you.</p>
         <button className="btn" onClick={choose}>
           {option.label}
         </button>
@@ -144,7 +142,7 @@ function SpareOption({
   return (
     <fieldset className="option spare">
       <legend className="small">
-        Spare up to {spareCount}. Everyone you know who is not chosen dies.
+        Spare up to {spareCount}. Everyone else in this group dies.
       </legend>
       {people.map((v) => {
         const on = picked.includes(v.id)

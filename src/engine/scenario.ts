@@ -72,8 +72,10 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
     protectedSurvivorId = pool.length > 0 ? rng.pick(pool).id : undefined
   }
 
+  const needsGroup = def.goal.kind === 'choice' && def.goal.options.some((o) => o.outcome.spareCount !== undefined)
+  const gathered = needsGroup ? gatherGroup(state, rng) : null
   const s: GameState = {
-    ...state,
+    ...(gathered?.state ?? state),
     zones,
     phase: {
       kind: 'scenario',
@@ -82,6 +84,7 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
       progress: 0,
       killsAtStart: state.player.kills,
       ...(protectedSurvivorId ? { protectedSurvivorId } : {}),
+      ...(gathered ? { groupIds: gathered.ids } : {}),
     },
     pendingChoice: def.goal.kind === 'choice' ? { source: 'scenario', scenarioId: def.id } : state.pendingChoice,
   }
@@ -90,6 +93,10 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
     { kind: 'system', text: def.announcement },
     { kind: 'system', text: `Main Scenario ${def.number}: ${def.title}. ${def.hours} hours. ${def.rules.join(' ')}`.trim() },
   ]
+  if (gathered && gathered.ids.length > 0) {
+    const names = gathered.ids.map((id) => s.survivors.find((v) => v.id === id)!.name)
+    events.push({ kind: 'system', text: `The scenario gathers you with ${names.join(', ')}. Not all of you will leave.` })
+  }
   if (protectedSurvivorId) {
     const who = state.survivors.find((v) => v.id === protectedSurvivorId)!
     events.push({ kind: 'system', text: `Keep ${who.name} alive until the clock runs out.` })
@@ -272,7 +279,7 @@ export function resolveChoice(
     events.push({ kind: 'survivor', text: `${victim.name} is gone. The ones who saw it will not forget.` })
   }
   if (out.spareCount !== undefined) {
-    const step = cullGroup(s, out.spareCount, spareIds, rng)
+    const step = cullGroup(s, out.spareCount, spareIds)
     s = step.state
     events.push(...step.events)
   }
@@ -287,29 +294,52 @@ export function resolveChoice(
   return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
 
+const GROUP_MIN = 4
+const GROUP_MAX = 6
+
 /**
- * "Only some of you walk out". If the player knows at least spareCount living
- * survivors, they pick who is spared and every other survivor they know dies.
- * Otherwise everyone they know is spared, a group forms around them with
- * strangers, and the strangers who like the player most fill the remaining places.
+ * "Only some of you walk out": 4–6 living survivors where the player stands,
+ * people they know first. If the zone is short, others are drawn in. Everyone
+ * gathered is now someone the player has met.
  */
-function cullGroup(state: GameState, spareCount: number, spareIds: string[], rng: Rng): Step {
-  const known = livingMet(state)
-  let group: Survivor[]
-  let spared: Survivor[]
-  if (known.length >= spareCount) {
-    const picked = new Set(spareIds)
-    group = known
-    spared = known.filter((v) => picked.has(v.id)).slice(0, spareCount)
-  } else {
-    const strangers = living(state).filter((v) => !v.met)
-    group = [...known]
-    while (group.length < spareCount + 2 && strangers.length > 0) {
-      group.push(strangers.splice(rng.int(0, strangers.length - 1), 1)[0])
+function gatherGroup(state: GameState, rng: Rng): { state: GameState; ids: string[] } {
+  const size = rng.int(GROUP_MIN, GROUP_MAX)
+  const shuffle = <T,>(list: T[]) => {
+    const out = [...list]
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = rng.int(0, i)
+      ;[out[i], out[j]] = [out[j], out[i]]
     }
-    const byAttitude = group.filter((v) => !v.met).sort((a, b) => b.attitude - a.attitude)
-    spared = [...known, ...byAttitude.slice(0, spareCount - known.length)]
+    return out
   }
+  const here = living(state).filter((v) => v.zoneId === state.zoneId)
+  const elsewhere = living(state).filter((v) => v.zoneId !== state.zoneId)
+  const order = [
+    ...shuffle(here.filter((v) => v.met)),
+    ...shuffle(here.filter((v) => !v.met)),
+    ...shuffle(elsewhere.filter((v) => v.met)),
+    ...shuffle(elsewhere.filter((v) => !v.met)),
+  ]
+  const ids = order.slice(0, size).map((v) => v.id)
+  const chosen = new Set(ids)
+  return {
+    state: {
+      ...state,
+      survivors: state.survivors.map((v) => (chosen.has(v.id) ? { ...v, met: true, zoneId: state.zoneId } : v)),
+    },
+    ids,
+  }
+}
+
+/** The player picks up to spareCount of the group to spare; the rest of the group die. */
+function cullGroup(state: GameState, spareCount: number, spareIds: string[]): Step {
+  const groupIds = state.phase.kind === 'scenario' ? (state.phase.groupIds ?? []) : []
+  const group = state.survivors.filter((v) => v.alive && groupIds.includes(v.id))
+  // The first picks count; picks of anyone outside the group are ignored.
+  const spared = [...new Set(spareIds)]
+    .map((id) => group.find((v) => v.id === id))
+    .filter((v): v is Survivor => !!v)
+    .slice(0, spareCount)
   const lost = group.filter((v) => !spared.includes(v))
   const lostIds = new Set(lost.map((v) => v.id))
   const sparedIds = new Set(spared.map((v) => v.id))
