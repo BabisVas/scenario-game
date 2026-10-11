@@ -1,4 +1,5 @@
 import { playerRunChance, STIGMA_COOLDOWN_PREFIX } from '../../engine/combat'
+import { isUsable } from '../../engine/inventory'
 import { maxHp } from '../../engine/newGame'
 import type { GameState } from '../../engine/types'
 import { Meter } from '../panels/StatusPanel'
@@ -19,7 +20,7 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
   const stigmaCooldown = stigma ? (fight.cooldowns[STIGMA_COOLDOWN_PREFIX + stigma.stigmaId] ?? 0) : 0
   const consumables = p.inventory
     .map((stack) => ({ stack, def: content.items.find((i) => i.id === stack.itemId) }))
-    .filter((x) => x.def?.kind === 'consumable')
+    .filter((x) => !!x.def && isUsable(x.def))
 
   // The newest run of fight lines at the end of the log tells this fight's story.
   const lines = []

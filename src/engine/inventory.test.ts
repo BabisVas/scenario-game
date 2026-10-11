@@ -1,6 +1,7 @@
 import { addItem, buyFromShop, equip, removeItem, sellToShop, useConsumable } from './inventory'
 import { content } from '../data'
-import { baseState, withCoins, withItem } from '../test/fixtures'
+import { baseState, inFight, seqRng, weakEnemy, withCoins, withItem } from '../test/fixtures'
+import { fightTurn } from './combat'
 
 const qty = (s: ReturnType<typeof baseState>, id: string) => s.player.inventory.find(i => i.itemId === id)?.qty ?? 0;
 
@@ -57,4 +58,23 @@ test('selling pays half the price, rounded down', () => {
 test('selling your last equipped weapon unequips it', () => {
   const s = equip(baseState(), 'bike-chain', content);
   expect(sellToShop(s, 'bike-chain', content).state.player.equipped.weapon).toBeUndefined();
+});
+describe('rare items with an effect can be used, once', () => {
+  const rareHeal = { id: 'fx-rare-heal', name: 'Fixture Relic', kind: 'rare' as const, power: 0, price: 200, inShop: false, effect: { heal: 40 } };
+  const rareBlast = { id: 'fx-rare-blast', name: 'Fixture Star', kind: 'rare' as const, power: 0, price: 200, inShop: false, effect: { damage: 25 } };
+  const c = { ...content, items: [...content.items, rareHeal, rareBlast] };
+  test('a healing relic heals and is used up', () => {
+    const s = withItem({ ...baseState(), player: { ...baseState().player, hp: 30 } }, 'fx-rare-heal');
+    const r = useConsumable(s, 'fx-rare-heal', c).state;
+    expect(r.player.hp).toBe(70);
+    expect(r.player.inventory.some(i => i.itemId === 'fx-rare-heal')).toBe(false);
+  });
+  test('a damaging relic works in a fight', () => {
+    const s = inFight(withItem(baseState(), 'fx-rare-blast'), { ...weakEnemy(), hp: 100, maxHp: 100 });
+    expect(fightTurn(s, { kind: 'item', itemId: 'fx-rare-blast' }, seqRng(0.5, 0.9), c).state.fight!.enemy.hp).toBe(75);
+  });
+  test('a rare item with no effect cannot be used', () => {
+    const s = withItem(baseState(), 'mirror-shard');
+    expect(useConsumable(s, 'mirror-shard', content).state).toEqual(s);
+  });
 });

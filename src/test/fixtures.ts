@@ -109,6 +109,7 @@ export const fixtureContent: Content = {
   scenarios: [...content.scenarios],
   attributes: [...content.attributes],
   hiddenScenarios: [...content.hiddenScenarios],
+  items: [...content.items],
 }
 
 function register(def: ScenarioDef): ScenarioDef {

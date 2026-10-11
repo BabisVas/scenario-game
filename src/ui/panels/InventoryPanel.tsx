@@ -1,3 +1,4 @@
+import { isUsable } from '../../engine/inventory'
 import type { GameState } from '../../engine/types'
 import { useContent, type PlayerAction } from '../useGame'
 
@@ -36,7 +37,7 @@ export function InventoryPanel({ state, act }: { state: GameState; act: (a: Play
                         Equip
                       </button>
                     ))}
-                  {def.kind === 'consumable' && def.effect?.heal ? (
+                  {isUsable(def) && def.effect?.heal ? (
                     <button className="btn small" aria-label={`Use ${def.name}`} onClick={() => act({ kind: 'useItem', itemId: def.id })}>
                       Use
                     </button>

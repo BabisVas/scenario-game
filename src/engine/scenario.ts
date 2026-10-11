@@ -393,14 +393,18 @@ export function afterFinalWave(state: GameState): GameState {
 
 /**
  * When a survive scenario's clock hits zero, one last enemy always comes: the
- * scenario's named Final Wave, or the toughest enemy where the player stands.
+ * scenario's named Final Wave at normal strength, or the toughest enemy where
+ * the player stands, one danger level stronger.
  */
 function startFinalWave(state: GameState, def: ScenarioDef, content: Content): Step {
   const zone = content.zones.find((z) => z.id === state.zoneId) ?? content.zones[0]
   const local = content.enemies.filter((e) => zone.enemyIds.includes(e.id))
   const pool = local.length > 0 ? local : content.enemies
-  const enemy = (def.finalWave && content.enemies.find((e) => e.id === def.finalWave)) || [...pool].sort((a, b) => b.hp - a.hp)[0]
-  const fight = startFight(state, combatantFromEnemy(enemy, zoneDanger(state, zone) + 1), 'final-wave', { enemyId: enemy.id })
+  const named = def.finalWave ? content.enemies.find((e) => e.id === def.finalWave) : undefined
+  const enemy = named ?? [...pool].sort((a, b) => b.hp - a.hp)[0]
+  // A named wave is chosen by the scenario at normal strength; the default is the local toughest, a step stronger.
+  const danger = zoneDanger(state, zone) + (named ? 0 : 1)
+  const fight = startFight(state, combatantFromEnemy(enemy, danger), 'final-wave', { enemyId: enemy.id })
   return {
     state: fight.state,
     events: [{ kind: 'system', text: `The clock hits zero. The Final Wave arrives: ${enemy.name}! Beat it to clear "${def.title}".` }, ...fight.events],

@@ -68,10 +68,15 @@ export function sellToShop(state: GameState, itemId: string, content: Content): 
   }
 }
 
+/** Consumables, and rare items that carry an effect, can be used (once). */
+export function isUsable(def: ItemDef): boolean {
+  return (def.kind === 'consumable' || def.kind === 'rare') && !!def.effect
+}
+
 /** Uses a healing consumable outside a fight. Damage consumables only work in fights. */
 export function useConsumable(state: GameState, itemId: string, content: Content): Step {
   const def = itemDef(content, itemId)
-  if (!def || def.kind !== 'consumable' || !def.effect?.heal) return refuse(state, 'That cannot be used here.')
+  if (!def || !isUsable(def) || !def.effect?.heal) return refuse(state, 'That cannot be used here.')
   const removed = removeItem(state, itemId)
   if (!removed) return refuse(state, `You have no ${def.name} left.`)
   const hp = Math.min(maxHp(removed.player.stats), removed.player.hp + withHealingBonus(removed, content, def.effect.heal))

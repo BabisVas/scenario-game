@@ -1,6 +1,6 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { loadGame } from '../../save/save'
-import { inFight, makeSurvivor, playingState, weakEnemy, withCoins, withItem, withSkill, withStigma } from '../../test/fixtures'
+import { fixtureContent, inFight, makeSurvivor, playingState, weakEnemy, withCoins, withItem, withSkill, withStigma } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
 import { content } from '../../data'
 
@@ -75,4 +75,14 @@ test('the Final Wave disables Run', () => {
   const s = inFight(playingState(), weakEnemy());
   renderWithGame({ ...s, fight: { ...s.fight!, origin: 'final-wave' } });
   expect(screen.getByRole('button', { name: /run/i })).toBeDisabled();
+});
+test('usable rare items show up in fights and in the inventory', () => {
+  fixtureContent.items.push({ id: 'fx-relic', name: 'Fixture Relic', kind: 'rare', power: 0, price: 300, inShop: false, effect: { heal: 30 } });
+  renderWithGame(inFight(withItem(playingState(), 'fx-relic'), weakEnemy()));
+  expect(screen.getByRole('button', { name: /fixture relic/i })).toBeEnabled();
+});
+test('the inventory offers Use for a usable rare item', () => {
+  if (!fixtureContent.items.some(i => i.id === 'fx-relic')) fixtureContent.items.push({ id: 'fx-relic', name: 'Fixture Relic', kind: 'rare', power: 0, price: 300, inShop: false, effect: { heal: 30 } });
+  renderWithGame(withItem(playingState(), 'fx-relic'));
+  expect(screen.getByRole('button', { name: /use fixture relic/i })).toBeInTheDocument();
 });

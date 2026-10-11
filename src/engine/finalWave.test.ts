@@ -44,3 +44,13 @@ test('protect scenarios have ambushes too', () => {
   const s = { ...inScenario(baseState(), protectDef({ hours: 20 })), survivors: [makeSurvivor('s-0')] };
   expect(doAction(s, 'old-market', 'rest', seqRng(0.0, 0.0, 0.5), content).state.fight).not.toBeNull();
 });
+test('a named Final Wave comes at the normal strength of where you stand; the default one is a step stronger', () => {
+  const named = surviveDef({ hours: 2 });
+  content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = { ...named, finalWave: 'feral-hound' };
+  const hound = content.enemies.find(e => e.id === 'feral-hound')!;
+  const s = spendHours(inScenario(baseState(), { ...named, finalWave: 'feral-hound' }), 2);
+  expect(checkScenarioClock(s, createRng(1), content).state.fight!.enemy.maxHp).toBe(hound.hp);
+  content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = named;
+  const strongest = content.enemies.filter(e => content.zones.find(z => z.id === 'old-market')!.enemyIds.includes(e.id)).sort((a, b) => b.hp - a.hp)[0];
+  expect(checkScenarioClock(clockOut(), createRng(1), content).state.fight!.enemy.maxHp).toBeGreaterThan(strongest.hp);
+});

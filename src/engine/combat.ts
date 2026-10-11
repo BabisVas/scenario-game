@@ -3,7 +3,7 @@
 import type { Content, SkillDef } from '../data/schema'
 import { attributeRunBonus, damageMultiplier, withCoinBonus, withHealingBonus } from './attributes'
 import { recordSkillUse, recordStigmaUse } from './growth'
-import { addItem, removeItem, useConsumable } from './inventory'
+import { addItem, isUsable, removeItem, useConsumable } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
 import { withReactions } from './constellations'
@@ -189,7 +189,7 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
     }
     case 'item': {
       const def = content.items.find((i) => i.id === action.itemId)
-      if (!def || def.kind !== 'consumable' || !def.effect) return notNow(state, 'That cannot be used in a fight.')
+      if (!def || !isUsable(def) || !def.effect) return notNow(state, 'That cannot be used in a fight.')
       if (def.effect.damage) {
         const removed = removeItem(s, def.id)
         if (!removed) return notNow(state, `You have no ${def.name} left.`)
