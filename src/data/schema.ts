@@ -53,6 +53,17 @@ export type SkillDef = {
   cooldown: number
 }
 
+/** A constellation's lent power: a skill that is stronger and levels up to maxLevel. */
+export type StigmaDef = {
+  id: string
+  name: string
+  blurb: string
+  kind: SkillDef['kind']
+  power: number
+  cooldown: number
+  maxLevel: number
+}
+
 export type ChoiceOption = {
   id: string
   label: string
@@ -90,7 +101,7 @@ export type ConstellationDef = {
   blurb: string
   likes: Partial<Record<Tag, number>>
   lines: { like: string[]; dislike: string[]; sponsor: string[]; contract: string[]; death: string[] }
-  contract: { demandTag: Tag; giftSkillId: string; coinsPerScenario: number }
+  contract: { demandTag: Tag; stigmaId: string; coinsPerScenario: number }
 }
 
 export type SurvivorTemplate = {
@@ -139,4 +150,5 @@ export type Content = {
   survivorTemplates: SurvivorTemplate[]
   subScenarios: SubScenarioDef[]
   attributes: AttributeDef[]
+  stigmas: StigmaDef[]
 }

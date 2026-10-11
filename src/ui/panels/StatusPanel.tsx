@@ -66,6 +66,12 @@ export function StatusPanel({ state, now }: { state: GameState; now: number }) {
             </li>
           ))}
         </ul>
+        {p.stigma && (
+          <p className="small stigma-line">
+            Stigma: <strong>{content.stigmas.find((x) => x.id === p.stigma!.stigmaId)?.name}</strong> Lv{p.stigma.level}
+            {p.stigma.sealed ? ' · sealed' : ''} · sponsor «{content.constellations.find((c) => c.id === p.stigma!.constellationId)?.title}»
+          </p>
+        )}
         <p className="coins">◈ {p.coins} coins</p>
         {p.skills.length > 0 && (
           <p className="small muted">

@@ -1,7 +1,8 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { loadGame } from '../../save/save'
-import { inFight, makeSurvivor, playingState, weakEnemy, withCoins, withItem, withSkill } from '../../test/fixtures'
+import { inFight, makeSurvivor, playingState, weakEnemy, withCoins, withItem, withSkill, withStigma } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
+import { content } from '../../data'
 
 test('run button shows the run chance', () => {
   renderWithGame(inFight(playingState(), weakEnemy()));
@@ -61,4 +62,12 @@ test('after the first clear the ranking shows, the dead struck through and you h
   expect(within(board).getByText('Kofi').closest('s')).not.toBeNull();
   expect(within(board).getByText(/ari/i).closest('tr')).toHaveClass('you');
   expect(screen.getByRole('button', { name: /^ranking$/i })).toBeInTheDocument();
+});
+test('the stigma has its own button, disabled and marked when sealed', () => {
+  const c = content.constellations[0];
+  const stigma = content.stigmas.find(x => x.id === c.contract.stigmaId)!;
+  renderWithGame(inFight(withStigma(playingState(), c.id, { sealed: true }), weakEnemy()));
+  const button = screen.getByRole('button', { name: new RegExp(`stigma: ${stigma.name}`, 'i') });
+  expect(button).toBeDisabled();
+  expect(button).toHaveTextContent(/sealed/i);
 });

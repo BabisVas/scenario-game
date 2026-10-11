@@ -14,7 +14,7 @@ export const constellations: ConstellationDef[] = [
       contract: ['Burn for me and I will never let you go dark.', 'Swear to stand your ground, and I will stand behind you.'],
       death: ['Even the brightest wick runs out.', 'I will remember the light. Not the end.', 'You never once ran. Good.'],
     },
-    contract: { demandTag: 'bravery', giftSkillId: 'heavy-blow', coinsPerScenario: 40 },
+    contract: { demandTag: 'bravery', stigmaId: 'unquenched-flame', coinsPerScenario: 40 },
   },
   {
     id: 'smile-behind-the-velvet-knife',
@@ -28,6 +28,6 @@ export const constellations: ConstellationDef[] = [
       contract: ['Let us make an arrangement, you and I.', 'Be clever for me, and I will make you rich.'],
       death: ['Pity. You were almost fun.', 'Outplayed, at last.', 'I will find another clever one. I always do.'],
     },
-    contract: { demandTag: 'cunning', giftSkillId: 'vanishing-step', coinsPerScenario: 40 },
+    contract: { demandTag: 'cunning', stigmaId: 'velvet-exit', coinsPerScenario: 40 },
   },
 ]

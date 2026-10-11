@@ -930,3 +930,7 @@ h3 {
   color: var(--star);
   box-shadow: 0 0 10px rgba(246, 189, 96, 0.35);
 }
+
+.stigma-line {
+  color: var(--star);
+}

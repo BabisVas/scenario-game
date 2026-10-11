@@ -11,7 +11,8 @@ export function ChoiceModal({ state, act }: { state: GameState; act: (a: PlayerA
   if (pending.source === 'contract') {
     const def = content.constellations.find((c) => c.id === pending.constellationId)
     if (!def) return null
-    const gift = content.skills.find((k) => k.id === def.contract.giftSkillId)
+    const stigma = content.stigmas.find((x) => x.id === def.contract.stigmaId)
+    const current = state.player.stigma ? content.constellations.find((c) => c.id === state.player.stigma!.constellationId) : undefined
     return (
       <div className="overlay">
         <section className="panel modal star" role="dialog" aria-modal="true" aria-labelledby="contract-title">
@@ -24,10 +25,17 @@ export function ChoiceModal({ state, act }: { state: GameState; act: (a: PlayerA
               <li>
                 Demand: show <strong>{def.contract.demandTag}</strong> in every scenario.
               </li>
-              <li>Gift: the skill {gift?.name ?? def.contract.giftSkillId}.</li>
+              <li>
+                Stigma: <strong>{stigma?.name ?? def.contract.stigmaId}</strong>. {stigma?.blurb}
+              </li>
               <li>Pay: {def.contract.coinsPerScenario} coins for each scenario where you keep your word.</li>
-              <li>Break it, and it will remember.</li>
+              <li>Break it, and the stigma is sealed until you keep your word again.</li>
             </ul>
+            {current && current.id !== def.id && (
+              <p className="small why">
+                Accepting ends your contract with «{current.title}». It takes its stigma back, and it will not forget.
+              </p>
+            )}
           </div>
           <footer>
             <button className="btn" onClick={() => act({ kind: 'contract', accept: false })}>

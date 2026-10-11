@@ -5,7 +5,7 @@ import { newGame } from '../engine/newGame'
 import { content } from '../data'
 import type { AttributeDef, AttributeEffect, Content, ScenarioDef } from '../data/schema'
 import type { Rng } from '../engine/rng'
-import type { Combatant, ConstellationState, GameState, Survivor, Tag } from '../engine/types'
+import type { Combatant, ConstellationState, GameState, StigmaState, Survivor, Tag } from '../engine/types'
 
 /** Content with no attributes, so states built from it have none: tests of other rules stay deterministic. */
 export const plainContent: Content = { ...content, attributes: [] }
@@ -220,6 +220,16 @@ export function withInterest(s: GameState, id: string, interest: number): GameSt
 export function withContract(s: GameState, id: string, over: Partial<ConstellationState> = {}): GameState {
   const prev = s.constellations[id] ?? { interest: 0, contract: 'none', demandMetThisScenario: false }
   return { ...s, constellations: { ...s.constellations, [id]: { ...prev, contract: 'active', ...over } } }
+}
+
+/** The player is sponsored by this constellation and holds its stigma. */
+export function withStigma(s: GameState, constellationId: string, over: Partial<StigmaState> = {}): GameState {
+  const def = fixtureContent.constellations.find((c) => c.id === constellationId)!
+  const withContractState = withContract(s, constellationId)
+  return {
+    ...withContractState,
+    player: { ...withContractState.player, stigma: { stigmaId: def.contract.stigmaId, constellationId, level: 1, uses: 0, sealed: false, ...over } },
+  }
 }
 
 /** Content whose constellations are exactly the given ids, each cloned from the first shipped one. */

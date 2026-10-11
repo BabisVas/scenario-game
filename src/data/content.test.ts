@@ -35,7 +35,7 @@ test.each([
   ['a starting item', (c: typeof content) => ({ ...c, backgrounds: [{ ...c.backgrounds[0], startingItemId: 'ghost-item' }] })],
   ['an enemy drop', (c: typeof content) => ({ ...c, enemies: [{ ...c.enemies[0], drops: [{ itemId: 'ghost-item', chance: 1 }] }, ...c.enemies.slice(1)] })],
   ['a reward skill', (c: typeof content) => ({ ...c, scenarios: [{ ...c.scenarios[0], rewards: { coins: 1, skillId: 'ghost-item' } }] })],
-  ['a contract gift', (c: typeof content) => ({ ...c, constellations: [{ ...c.constellations[0], contract: { ...c.constellations[0].contract, giftSkillId: 'ghost-item' } }] })],
+  ['a contract stigma', (c: typeof content) => ({ ...c, constellations: [{ ...c.constellations[0], contract: { ...c.constellations[0].contract, stigmaId: 'ghost-item' } }] })],
   ['a reach zone', (c: typeof content) => ({ ...c, scenarios: [{ ...c.scenarios[0], goal: { kind: 'reach', zoneId: 'ghost-item' } } as ScenarioDef] })],
   ['a choice fight', (c: typeof content) => ({ ...c, scenarios: [{ ...c.scenarios[0], goal: { kind: 'choice', prompt: 'p', fallbackOptionId: 'a', options: [{ id: 'a', label: 'A', tags: [], outcome: { fight: 'ghost-item' } }] } } as ScenarioDef] })],
 ])('a dangling reference in %s is reported', (_, make) => {

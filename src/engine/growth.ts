@@ -1,5 +1,6 @@
 // Getting stronger: coins buy stats, and skills level up with use.
 
+import type { Content } from '../data/schema'
 import type { GameState, StatKey, Step } from './types'
 
 const STAT_LABEL: Record<StatKey, string> = {
@@ -45,5 +46,19 @@ export function recordSkillUse(state: GameState, skillId: string): Step {
   return {
     state: { ...state, player: { ...state.player, skills } },
     events: levelUp ? [{ kind: 'system', text: `Skill level up! ${titleCase(skillId)} is now level ${updated.level}.` }] : [],
+  }
+}
+
+/** Stigmas level up like skills, but stop at their maxLevel. */
+export function recordStigmaUse(state: GameState, content: Content): Step {
+  const held = state.player.stigma
+  const def = held ? content.stigmas.find((x) => x.id === held.stigmaId) : undefined
+  if (!held || !def) return { state, events: [] }
+  const uses = held.uses + 1
+  const levelUp = held.level < def.maxLevel && uses >= 5 * held.level
+  const stigma = levelUp ? { ...held, level: held.level + 1, uses: 0 } : { ...held, uses }
+  return {
+    state: { ...state, player: { ...state.player, stigma } },
+    events: levelUp ? [{ kind: 'system', text: `Stigma level up! ${def.name} is now level ${stigma.level}.` }] : [],
   }
 }

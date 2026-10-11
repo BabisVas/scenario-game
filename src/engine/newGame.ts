@@ -57,6 +57,7 @@ export function newGame(
       points: 0,
       kills: 0,
       attributeId,
+      stigma: null,
     },
     energy: ENERGY_MAX,
     energyUpdatedAt: input.now,

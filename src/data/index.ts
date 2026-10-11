@@ -6,6 +6,7 @@ import { items } from './items'
 import type { Content } from './schema'
 import { scenarios } from './scenarios'
 import { skills } from './skills'
+import { stigmas } from './stigmas'
 import { subScenarios } from './subScenarios'
 import { survivorTemplates } from './survivorTemplates'
 import { zones } from './zones'
@@ -21,4 +22,5 @@ export const content: Content = {
   survivorTemplates,
   subScenarios,
   attributes,
+  stigmas,
 }

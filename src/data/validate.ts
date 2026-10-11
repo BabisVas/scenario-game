@@ -69,6 +69,7 @@ export function validateContent(c: Content): string[] {
     constellations: c.constellations,
     subScenarios: c.subScenarios,
     attributes: c.attributes,
+    stigmas: c.stigmas,
   }
   for (const [name, list] of Object.entries(collections)) {
     const seen = new Set<string>()
@@ -101,7 +102,8 @@ export function validateContent(c: Content): string[] {
     for (const e of z.enemyIds) ref('enemy', e, enemyIds, `zone ${z.id}`)
   }
   for (const e of c.enemies) for (const d of e.drops) ref('item', d.itemId, itemIds, `enemy ${e.id} drop`)
-  for (const k of c.constellations) ref('skill', k.contract.giftSkillId, skillIds, `constellation ${k.id} contract`)
+  const stigmaIds = ids(c.stigmas)
+  for (const k of c.constellations) ref('stigma', k.contract.stigmaId, stigmaIds, `constellation ${k.id} contract`)
 
   c.scenarios.forEach((s, i) => {
     const where = `scenario ${s.id}`

@@ -1,4 +1,4 @@
-import { playerRunChance } from '../../engine/combat'
+import { playerRunChance, STIGMA_COOLDOWN_PREFIX } from '../../engine/combat'
 import { maxHp } from '../../engine/newGame'
 import type { GameState } from '../../engine/types'
 import { Meter } from '../panels/StatusPanel'
@@ -13,6 +13,9 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
   const p = state.player
   const enemy = fight.enemy
   const chance = Math.round(playerRunChance(state, enemy, content) * 100)
+  const stigma = p.stigma
+  const stigmaDef = stigma ? content.stigmas.find((x) => x.id === stigma.stigmaId) : undefined
+  const stigmaCooldown = stigma ? (fight.cooldowns[STIGMA_COOLDOWN_PREFIX + stigma.stigmaId] ?? 0) : 0
   const consumables = p.inventory
     .map((stack) => ({ stack, def: content.items.find((i) => i.id === stack.itemId) }))
     .filter((x) => x.def?.kind === 'consumable')
@@ -63,6 +66,12 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
                 </button>
               )
             })}
+            {stigma && (
+              <button className="btn star" disabled={stigma.sealed || stigmaCooldown > 0} onClick={() => turn({ kind: 'stigma' })}>
+                {`Stigma: ${stigmaDef?.name ?? stigma.stigmaId}`}
+                <span className="cost">{stigma.sealed ? 'sealed' : stigmaCooldown > 0 ? `ready in ${stigmaCooldown}` : `Lv${stigma.level}`}</span>
+              </button>
+            )}
             {consumables.map(({ stack, def }) => (
               <button key={stack.itemId} className="btn" onClick={() => turn({ kind: 'item', itemId: stack.itemId })}>
                 {def!.name} ×{stack.qty}

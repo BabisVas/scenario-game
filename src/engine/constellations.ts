@@ -76,40 +76,50 @@ export function resolveContract(state: GameState, accept: boolean, content: Cont
     s = { ...s, constellations: { ...s.constellations, [def.id]: { ...cur, contract: 'declined', interest: clamp(cur.interest - 10) } } }
     return { state: s, events: [say(def, 'shrugs', 'Your loss.')] }
   }
+
+  // One sponsor at a time: a new contract ends any other, and takes its stigma back.
+  const events: GameEvent[] = []
+  for (const old of content.constellations) {
+    const o = stateOf(s, old.id)
+    if (old.id === def.id || o.contract !== 'active') continue
+    s = { ...s, constellations: { ...s.constellations, [old.id]: { ...o, contract: 'ended', demandMetThisScenario: false, interest: clamp(o.interest - 30) } } }
+    events.push(say(old, 'takes back its stigma', old.lines.dislike[0]))
+  }
+
   s = { ...s, constellations: { ...s.constellations, [def.id]: { ...cur, contract: 'active', demandMetThisScenario: false } } }
-  const gift = def.contract.giftSkillId
-  if (!s.player.skills.some((k) => k.skillId === gift)) {
-    s = { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId: gift, level: 1, uses: 0 }] } }
-  }
-  const skillName = content.skills.find((k) => k.id === gift)?.name ?? gift
-  return {
-    state: s,
-    events: [
-      say(def, 'seals the contract', `Show me ${def.contract.demandTag} every scenario. Take ${skillName}.`),
-      { kind: 'system', text: `Contract signed. New skill: ${skillName}.` },
-    ],
-  }
+  const stigma = content.stigmas.find((x) => x.id === def.contract.stigmaId)
+  s = { ...s, player: { ...s.player, stigma: { stigmaId: def.contract.stigmaId, constellationId: def.id, level: 1, uses: 0, sealed: false } } }
+  const name = stigma?.name ?? def.contract.stigmaId
+  events.push(
+    say(def, 'seals the contract', `Show me ${def.contract.demandTag} every scenario. Take ${name}.`),
+    { kind: 'system', text: `Contract signed. Stigma granted: ${name}.` },
+  )
+  return { state: s, events }
 }
 
+/**
+ * At each cleared scenario the sponsor judges the demand: kept, it pays and
+ * lifts any seal; broken, it seals the stigma until a kept-demand clear.
+ */
 export function onScenarioCleared(state: GameState, content: Content): Step {
   let s = state
   const events: GameEvent[] = []
   for (const def of content.constellations) {
     const cur = stateOf(s, def.id)
     if (cur.contract !== 'active') continue
+    const stigma = s.player.stigma?.constellationId === def.id ? s.player.stigma : null
     if (cur.demandMetThisScenario) {
       s = { ...s, player: { ...s.player, coins: s.player.coins + def.contract.coinsPerScenario } }
       s = { ...s, constellations: { ...s.constellations, [def.id]: { ...cur, demandMetThisScenario: false } } }
       events.push(say(def, `pays ${def.contract.coinsPerScenario} coins as promised`, rng0(def.lines.sponsor)))
-    } else {
-      s = {
-        ...s,
-        constellations: {
-          ...s.constellations,
-          [def.id]: { ...cur, contract: 'broken', demandMetThisScenario: false, interest: clamp(cur.interest - 30) },
-        },
+      if (stigma?.sealed) {
+        s = { ...s, player: { ...s.player, stigma: { ...stigma, sealed: false } } }
+        events.push({ kind: 'system', text: 'The seal on your stigma breaks. It answers you again.' })
       }
-      events.push(say(def, 'tears up your contract', rng0(def.lines.dislike)))
+    } else {
+      s = { ...s, constellations: { ...s.constellations, [def.id]: { ...cur, demandMetThisScenario: false, interest: clamp(cur.interest - 10) } } }
+      events.push(say(def, 'seals your stigma', rng0(def.lines.dislike)))
+      if (stigma && !stigma.sealed) s = { ...s, player: { ...s.player, stigma: { ...stigma, sealed: true } } }
     }
   }
   return { state: s, events }

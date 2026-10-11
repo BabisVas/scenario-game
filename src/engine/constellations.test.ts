@@ -5,7 +5,7 @@ import { createRng } from './rng'
 import type { GameState } from './types'
 import { content } from '../data'
 import {
-  baseState, braveryLover, contentWith, inFight, weakEnemy, withContract, withInterest,
+  baseState, braveryLover, contentWith, inFight, weakEnemy, withContract, withInterest, withStigma,
 } from '../test/fixtures'
 
 const interest = (s: GameState, id: string) => s.constellations[id].interest;
@@ -21,10 +21,11 @@ test('reaching 60 interest offers a contract once', () => {
   const again = reactTo({ ...r, pendingChoice: null }, ['bravery'], createRng(1), content).state;
   expect(again.pendingChoice).toBeNull();
 });
-test('an unmet demand breaks the contract at scenario clear', () => {
-  const s = withContract(baseState(), braveryLover(content), { demandMetThisScenario: false });
-  const r = onScenarioCleared(s, content).state.constellations[braveryLover(content)];
-  expect(r.contract).toBe('broken');
+test('an unmet demand seals the stigma at scenario clear; the contract holds', () => {
+  const s = withStigma(baseState(), braveryLover(content));
+  const r = onScenarioCleared(s, content).state;
+  expect(r.constellations[braveryLover(content)].contract).toBe('active');
+  expect(r.player.stigma!.sealed).toBe(true);
 });
 test('death reactions come only from interested constellations, max 3', () => {
   const s = withInterest(withInterest(baseState(), 'a', 50), 'b', 5);
@@ -76,12 +77,13 @@ test('constellation lines name the constellation by its title', () => {
   }
   expect(seen).toBeGreaterThan(0);
 });
-test('accepting a contract activates it and grants the gift skill', () => {
+test('accepting a contract activates it and lends its stigma', () => {
   const id = braveryLover(content);
   const s = { ...withContract(baseState(), id, { contract: 'offered' }), pendingChoice: { source: 'contract' as const, constellationId: id } };
   const r = resolveContract(s, true, content).state;
   expect(r.constellations[id].contract).toBe('active');
-  expect(r.player.skills.map(k => k.skillId)).toContain(content.constellations.find(c => c.id === id)!.contract.giftSkillId);
+  expect(r.player.stigma).toMatchObject({ stigmaId: content.constellations.find(c => c.id === id)!.contract.stigmaId, constellationId: id, level: 1, sealed: false });
+  expect(r.player.skills).toEqual(s.player.skills);
   expect(r.pendingChoice).toBeNull();
 });
 test('declining a contract costs 10 interest', () => {

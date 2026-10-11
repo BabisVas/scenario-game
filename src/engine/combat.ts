@@ -1,8 +1,8 @@
 // Turn-based fights. Each round: the player acts, then the enemy acts by its behavior.
 
-import type { Content } from '../data/schema'
+import type { Content, SkillDef } from '../data/schema'
 import { attributeRunBonus, damageMultiplier, withCoinBonus, withHealingBonus } from './attributes'
-import { recordSkillUse } from './growth'
+import { recordSkillUse, recordStigmaUse } from './growth'
 import { addItem, removeItem, useConsumable } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
@@ -11,11 +11,19 @@ import { killPlayer } from './death'
 import { afterScenarioFight, checkScenarioClock, recordProgress, spendHours } from './scenario'
 import type { Combatant, FightState, GameEvent, GameState, Step } from './types'
 
-export type FightAction = { kind: 'attack' } | { kind: 'skill'; skillId: string } | { kind: 'item'; itemId: string } | { kind: 'run' }
+export type FightAction =
+  | { kind: 'attack' }
+  | { kind: 'skill'; skillId: string }
+  | { kind: 'stigma' }
+  | { kind: 'item'; itemId: string }
+  | { kind: 'run' }
 export type FightResult = 'ongoing' | 'won' | 'lost' | 'fled'
 export type FightStep = Step & { result: FightResult }
 
 const GUARD_EVERY = 3
+/** Stigmas are lent by constellations: stronger than a skill of the same power. */
+const STIGMA_POWER = 1.5
+export const STIGMA_COOLDOWN_PREFIX = 'stigma:'
 
 export function runChance(playerAgility: number, enemyAgility: number): number {
   return Math.min(0.9, Math.max(0.1, 0.4 + 0.05 * (playerAgility - enemyAgility)))
@@ -102,7 +110,6 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
   const guarding = enemy.behavior === 'defensive' && fight.round % GUARD_EVERY === 0
   let usedSkill: { id: string; cooldown: number } | null = null
   let braced = 0
-  let runBonus = 0
 
   const hitEnemy = (bonusPower: number, verb: string) => {
     let { damage, crit } = rollDamage(playerCombatant(s, content), enemy, rng, bonusPower)
@@ -112,6 +119,20 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
     enemy = { ...enemy, hp: enemy.hp - damage }
     const extra = crit ? ' Critical!' : guarding ? ' It guards.' : ''
     events.push({ kind: 'fight', text: `You ${verb} ${enemy.name} for ${damage}.${extra}` })
+  }
+
+  /** A skill or stigma taking effect. Escapes are resolved by the caller as a run. */
+  const applyAbility = (kind: SkillDef['kind'], power: number, name: string, cooldownKey: string, cooldown: number) => {
+    usedSkill = { id: cooldownKey, cooldown }
+    if (kind === 'attack') hitEnemy(Math.round(power), `use ${name} on`)
+    else if (kind === 'heal') {
+      const hp = Math.min(maxHp(s.player.stats), s.player.hp + withHealingBonus(s, content, Math.round(power)))
+      events.push({ kind: 'fight', text: `${name}. +${hp - s.player.hp} HP.` })
+      s = { ...s, player: { ...s.player, hp } }
+    } else if (kind === 'buff') {
+      braced = Math.round(power)
+      events.push({ kind: 'fight', text: `${name}. You brace for the next blow.` })
+    }
   }
 
   switch (action.kind) {
@@ -124,24 +145,28 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
       if (!owned || !def) return notNow(state, 'You do not know that skill.')
       if ((fight.cooldowns[def.id] ?? 0) > 0) return notNow(state, `${def.name} is not ready yet.`)
       const power = def.power * (1 + 0.25 * (owned.level - 1))
-      usedSkill = { id: def.id, cooldown: def.cooldown }
-      if (def.kind === 'attack') hitEnemy(Math.round(power), `use ${def.name} on`)
-      else if (def.kind === 'heal') {
-        const hp = Math.min(maxHp(s.player.stats), s.player.hp + withHealingBonus(s, content, Math.round(power)))
-        events.push({ kind: 'fight', text: `${def.name}. +${hp - s.player.hp} HP.` })
-        s = { ...s, player: { ...s.player, hp } }
-      } else if (def.kind === 'buff') {
-        braced = Math.round(power)
-        events.push({ kind: 'fight', text: `${def.name}. You brace for the next blow.` })
-      } else {
-        runBonus = power
-      }
+      applyAbility(def.kind, power, def.name, def.id, def.cooldown)
       const used = recordSkillUse(s, def.id)
       s = used.state
       events.push(...used.events)
-      if (def.kind !== 'escape') break
       // An escape skill is a run with better odds.
-      return runAway(s, enemy, fight, rng, content, events, runBonus, usedSkill)
+      if (def.kind === 'escape') return runAway(s, enemy, fight, rng, content, events, power, usedSkill)
+      break
+    }
+    case 'stigma': {
+      const held = s.player.stigma
+      const def = held ? content.stigmas.find((x) => x.id === held.stigmaId) : undefined
+      if (!held || !def) return notNow(state, 'No constellation has lent you a stigma.')
+      if (held.sealed) return notNow(state, `${def.name} is sealed. Keep your sponsor's demand to break the seal.`)
+      const key = STIGMA_COOLDOWN_PREFIX + def.id
+      if ((fight.cooldowns[key] ?? 0) > 0) return notNow(state, `${def.name} is not ready yet.`)
+      const power = def.power * STIGMA_POWER * (1 + 0.35 * (held.level - 1))
+      applyAbility(def.kind, power, def.name, key, def.cooldown)
+      const used = recordStigmaUse(s, content)
+      s = used.state
+      events.push(...used.events)
+      if (def.kind === 'escape') return runAway(s, enemy, fight, rng, content, events, power, usedSkill)
+      break
     }
     case 'item': {
       const def = content.items.find((i) => i.id === action.itemId)

@@ -7,6 +7,9 @@ export type StatKey = 'strength' | 'agility' | 'endurance' | 'spirit'
 export type ItemStack = { itemId: string; qty: number }
 export type SkillState = { skillId: string; level: number; uses: number }
 
+/** The stigma lent by the player's one sponsor. Sealed after a broken demand. */
+export type StigmaState = { stigmaId: string; constellationId: string; level: number; uses: number; sealed: boolean }
+
 export type Player = {
   name: string
   backgroundId: string
@@ -19,6 +22,7 @@ export type Player = {
   points: number
   kills: number
   attributeId: string | null
+  stigma: StigmaState | null
 }
 
 export type Phase =
@@ -62,7 +66,8 @@ export type ZoneState = { sealed: boolean; dangerBonus: number }
 export type ConstellationState = {
   /** -100..100 */
   interest: number
-  contract: 'none' | 'offered' | 'active' | 'declined' | 'broken'
+  /** 'ended': replaced by another sponsor's contract. */
+  contract: 'none' | 'offered' | 'active' | 'declined' | 'ended'
   demandMetThisScenario: boolean
 }
 export type PendingChoice = { source: 'scenario'; scenarioId: string } | { source: 'contract'; constellationId: string }
