@@ -1,12 +1,13 @@
 import { doAction } from './actions'
-import { checkScenarioClock, recordProgress, resolveChoice, spendHours } from './scenario'
+import { checkScenarioClock, recordProgress, resolveChoice, spendHours, startScenario } from './scenario'
+import { appendEvents } from './log'
 import { worldTick } from './survivors'
 import { checkHiddenTriggers } from './hidden'
 import { createRng } from './rng'
 import type { GameState } from './types'
 import {
   baseState, choiceDef, clearHiddenDefs, fixtureContent as content, hiddenDef, inRest, inScenario, makeSurvivor,
-  surviveDef, withItem,
+  killDef, surviveDef, withItem,
 } from '../test/fixtures'
 
 beforeEach(() => clearHiddenDefs());
@@ -121,4 +122,45 @@ test('rumors come about one tick in ten', () => {
   const n = Array.from({ length: 2000 }, (_, i) => worldTick(baseState(), createRng(i), content).events.some(e => e.text.includes('RUMOR-LOST'))).filter(Boolean).length;
   expect(n / 2000).toBeGreaterThan(0.07);
   expect(n / 2000).toBeLessThan(0.13);
+});
+
+describe('rumors arrive before a hidden scenario window closes', () => {
+  const rumorIn = (events: { text: string }[], text: string) => events.some(e => e.text.includes(text));
+
+  test('a "be there during scenario N" rumor is posted when the scenario before N starts', () => {
+    const before = surviveDef({ hours: 40 }); // number 901
+    hiddenDef('stage-door', { kind: 'zone-during-scenario', zoneId: 'glass-towers', scenarioNumber: 902 }, { rumor: 'RUMOR-STAGE' });
+    killDef({ hours: 10, count: 3 }); // number 902 exists
+    expect(rumorIn(startScenario(baseState(), before, createRng(1), content).events, 'RUMOR-STAGE')).toBe(true);
+    expect(rumorIn(startScenario(baseState(), content.scenarios[0], createRng(1), content).events, 'RUMOR-STAGE')).toBe(false);
+  });
+  test('a "choose this option" rumor is posted when the scenario before the choice starts', () => {
+    const choice = choiceDef(); // number 905
+    hiddenDef('toll-paid', { kind: 'choose-option', scenarioId: choice.id, optionId: 'walk-away' }, { rumor: 'RUMOR-TOLL' });
+    const before = content.scenarios.filter(d => d.number < choice.number).sort((a, b) => b.number - a.number)[0];
+    expect(rumorIn(startScenario(baseState(), before, createRng(1), content).events, 'RUMOR-TOLL')).toBe(true);
+  });
+  test('a window in the very first scenario gets its rumor as that scenario starts', () => {
+    hiddenDef('first-morning', { kind: 'zone-during-scenario', zoneId: 'old-market', scenarioNumber: 1 }, { rumor: 'RUMOR-FIRST' });
+    expect(rumorIn(startScenario(baseState(), content.scenarios[0], createRng(1), content).events, 'RUMOR-FIRST')).toBe(true);
+  });
+  test('no window rumor for a hidden scenario already found', () => {
+    const before = surviveDef({ hours: 40 });
+    hiddenDef('stage-door', { kind: 'zone-during-scenario', zoneId: 'glass-towers', scenarioNumber: 902 }, { rumor: 'RUMOR-STAGE' });
+    killDef({ hours: 10, count: 3 });
+    const found = { ...baseState(), foundHiddenIds: ['stage-door'] };
+    expect(rumorIn(startScenario(found, before, createRng(1), content).events, 'RUMOR-STAGE')).toBe(false);
+  });
+  test('a careful player playing straight through sees the rumor in the log before the window', () => {
+    hiddenDef('stage-door', { kind: 'zone-during-scenario', zoneId: 'glass-towers', scenarioNumber: 902 }, { rumor: 'RUMOR-STAGE' });
+    surviveDef({ hours: 40 });
+    killDef({ hours: 10, count: 3 });
+    // Clear scenario 901 and rest until 902 begins, with no real time passing at all.
+    let s = inRest(baseState(), 0, 'fx-survive');
+    const step = checkScenarioClock(s, createRng(1), content);
+    s = appendEvents(step.state, step.events);
+    const sawRumor = s.log.some(e => e.text.includes('RUMOR-STAGE'));
+    expect(s.phase).toMatchObject({ kind: 'scenario', scenarioId: 'fx-survive' });
+    expect(sawRumor).toBe(true);
+  });
 });

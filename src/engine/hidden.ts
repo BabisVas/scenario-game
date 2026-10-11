@@ -119,3 +119,33 @@ export function hiddenRumor(state: GameState, rng: Rng, content: Content): GameE
   const who = living.length > 0 ? rng.pick(living).name : 'Someone'
   return [{ kind: 'survivor', text: `${who} whispers a rumor: "${def.rumor}"` }]
 }
+
+/** The main scenario number whose time a hidden scenario's trigger is tied to, if any. */
+function windowNumber(def: HiddenScenarioDef, content: Content): number | null {
+  const t = def.trigger
+  if (t.kind === 'zone-during-scenario') return t.scenarioNumber
+  if (t.kind === 'choose-option') return content.scenarios.find((d) => d.id === t.scenarioId)?.number ?? null
+  return null
+}
+
+/**
+ * Rumors that must not be left to chance: when a scenario starts, survivors talk
+ * about every undiscovered hidden scenario whose window is the next scenario
+ * (or this one, when there is no scenario before it). A careful player always
+ * hears about a window before it closes.
+ */
+export function windowRumors(state: GameState, started: { number: number }, content: Content): GameEvent[] {
+  const numbers = content.scenarios.map((d) => d.number)
+  const living = state.survivors.filter((v) => v.alive)
+  const who = (living.find((v) => v.met) ?? living[0])?.name ?? 'Someone'
+  return content.hiddenScenarios
+    .filter((d) => !state.foundHiddenIds.includes(d.id) && state.hiddenScenario?.defId !== d.id)
+    .filter((d) => {
+      const n = windowNumber(d, content)
+      if (n === null) return false
+      const earlier = numbers.filter((x) => x < n)
+      const opener = earlier.length > 0 ? Math.max(...earlier) : n
+      return opener === started.number
+    })
+    .map((d) => ({ kind: 'survivor' as const, text: `${who} whispers a rumor: "${d.rumor}"` }))
+}

@@ -9,7 +9,7 @@ import { startFight } from './combat'
 import { REST_PERIOD_HOURS } from './config'
 import { onScenarioCleared, withReactions } from './constellations'
 import { killPlayer } from './death'
-import { checkHiddenTriggers, judgeHidden } from './hidden'
+import { checkHiddenTriggers, judgeHidden, windowRumors } from './hidden'
 import { addItem } from './inventory'
 import type { Rng } from './rng'
 import { resolveScenarioForSurvivors } from './survivors'
@@ -101,6 +101,7 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
     const who = state.survivors.find((v) => v.id === protectedSurvivorId)!
     events.push({ kind: 'system', text: `Keep ${who.name} alive until the clock runs out.` })
   }
+  events.push(...windowRumors(s, def, content))
   return { state: s, events }
 }
 
