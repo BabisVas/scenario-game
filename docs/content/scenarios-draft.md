@@ -4,24 +4,31 @@ Draft for Task 15. Nothing here is in the game yet: the data files get written o
 
 Placeholders `«CITY»`, `«SYSTEM»` and `«ANNOUNCER»` stay as they are until you pick names.
 
-**Updated 2026-10-11** with the three new systems: [16 attributes](#attributes-16), [8 stigmas](#stigmas-8-one-per-constellation) and [6 hidden scenarios](#hidden-scenarios-6). Constellation contracts now lend a stigma instead of a skill. Scenario 4 and 8 options now have ids, because hidden scenarios can trigger on them.
+**Updated again 2026-10-11** with your four answers (Final Wave, protect ambushes, tag triggers, scenario groups). All four are now built and tested. See [what changed](#what-changed-in-this-round).
 
-## How waiting is never safe (read first)
+**Earlier on 2026-10-11:** added the three new systems: [16 attributes](#attributes-16), [8 stigmas](#stigmas-8-one-per-constellation) and [6 hidden scenarios](#hidden-scenarios-6). Constellation contracts now lend a stigma instead of a skill. Scenario 4 and 8 options now have ids, because hidden scenarios can trigger on them.
 
-You asked that no survive scenario can be passed safely by waiting. Two layers do that:
+## What changed in this round
 
-1. **Ambushes (already built).** In a survive scenario every action, resting included, has an ambush chance of 10% + 5% × the zone's danger. Each survive scenario below also raises danger somewhere, so the zones you can rest in get worse as the story goes on.
-2. **The Final Wave (proposed, needs your yes).** When a survive scenario's clock hits zero, one last enemy always comes for you. You have to beat it, or run from it, to clear the scenario. With this rule, the chance of passing a survive scenario without a fight is exactly 0%. It is a small engine change (about 20 lines plus tests), which is why I am asking rather than doing it.
+- **The Final Wave is in.** When a survive scenario's clock hits zero, one last enemy always comes. You must beat it to clear the scenario, and there is no running from it.
+- **Protect scenarios have ambushes too**, at the same 10% + 5% × danger per action.
+- **The quiet constellations have triggers** ([listed below](#what-each-tag-comes-from)). Shop buying is not one of them.
+- **"Only some can survive" uses the group present.** When such a scenario starts, it gathers 4–6 living survivors where you stand, people you know first. You pick who is spared, and the rest of that group dies. Nobody outside the group is touched.
+- **New:** you can now **rob**, **overcharge** or **give** to survivors you know, because greed and loyalty needed those actions.
+- **New:** the game tracks **where you stand**: the zone of your last action. The group and the Final Wave both use it.
 
-Chance of passing by only resting, with ambushes alone and no Final Wave:
+## How waiting is never safe
 
-| Scenario | Hours | Rests needed | Best rest zone ambush chance | Chance of zero fights |
-| --- | --- | --- | --- | --- |
-| 1. First Light | 24 | 6 | 20% | 26% |
-| 5. Lights Out | 30 | 8 | 25% | 10% |
-| 10. Curtain Call | 36 | 9 | 25% | 7.5% |
+1. **Ambushes.** In survive and protect scenarios, every action, resting included, has an ambush chance of 10% + 5% × the zone's danger. Each survive scenario below also raises danger somewhere.
+2. **The Final Wave.** When a survive scenario's clock hits zero, one last enemy comes, and you have to beat it. If the scenario does not name one, it is the toughest enemy where you stand, one danger level stronger than usual.
 
-With the Final Wave, every row is 0%.
+Passing a survive scenario without a fight is therefore impossible. Even if you rest the whole time and no ambush comes, the Final Wave still does.
+
+| Scenario | Hours | Chance of no ambush while only resting | Final Wave |
+| --- | --- | --- | --- |
+| 1. First Light | 24 | 26% | the toughest enemy where you stand |
+| 5. Lights Out | 30 | 10% | **Bell Gargoyle**: "something in the dark has been ringing all night" |
+| 10. Curtain Call | 36 | 7.5% | **The Understudy**, the announcer's stand-in |
 
 ---
 
@@ -35,6 +42,7 @@ Difficulty rises through danger bumps, stronger enemies and a survivor death rat
 
 - **Goal:** survive. **Hours:** 24.
 - **Twist:** Nobody knows the rules yet. Even the Old Market, the calmest corner of the city, gets one danger level worse while everyone is still guessing.
+- **Final Wave:** the toughest enemy where you stand. This is your first boss, so rest up first.
 - **Zone changes:** Old Market danger +1.
 - **Rewards:** 50 coins, 2 Bandages.
 - **Survivor death rate:** 0.15.
@@ -79,6 +87,7 @@ Difficulty rises through danger bumps, stronger enemies and a survivor death rat
 
 - **Goal:** survive. **Hours:** 30.
 - **Twist:** The dark makes every resting place one level more dangerous: Riverside Park, University Hill and the Glass Towers. Waiting it out is the worst plan in the city.
+- **Final Wave:** Bell Gargoyle.
 - **Zone changes:** danger +1 for Riverside Park, University Hill and Glass Towers.
 - **Rewards:** 130 coins, Riot Vest.
 - **Survivor death rate:** 0.25.
@@ -88,7 +97,7 @@ Difficulty rises through danger bumps, stronger enemies and a survivor death rat
 > Someone in this city saw something they should not have. «SYSTEM» has decided they should live anyway, purely to annoy everyone else. Keep them alive for a day. The Old Market reopens, because we are generous.
 
 - **Goal:** protect a survivor you have met (or anyone, if you have met no one). **Hours:** 24.
-- **Twist:** Your ward cannot be killed by the world, only by you. The city knows who they are, and the people around them are on edge.
+- **Twist:** Your ward cannot be killed by the world, only by you. The city knows who they are, and the people around them are on edge. Ambushes apply here too, so resting is not safe.
 - **Zone changes:** open Old Market.
 - **Rewards:** 150 coins, skill *Iron Skin*.
 - **Survivor death rate:** 0.27.
@@ -105,13 +114,15 @@ Difficulty rises through danger bumps, stronger enemies and a survivor death rat
 
 ### 8. Lifeboat — *choice: only some of a group survive*
 
-> The river is rising. By dawn the harbor will be underwater. There is one boat. It holds you and two others. How exciting! Who do you love most? Take your time. Actually, do not take your time.
+> The river is rising. By dawn the harbor will be underwater. There is one boat, and the system has kindly gathered a few of you around it. It holds you and two others. How exciting! Who do you like most? Take your time. Actually, do not take your time.
 
 - **Goal:** choice. **Hours:** 10.
 - **Prompt:** *The boat holds you and two. Choose who comes with you.*
 - **Options:**
-  - **Choose who boards** (`choose-boarders`). You tick up to 2 survivors you have met. Everyone else you know dies in the flood. If you know fewer than 2, all of them board and the system fills the rest by who likes you most. Tags: loyalty, cunning.
-  - **Give up your seat and swim** (`swim`, fallback). A fight against a Salt Eel in the flood. Nobody you know dies because of you. Tags: bravery, mercy.
+  - **The group:** when the scenario starts, it gathers 4–6 living survivors where you stand, people you know first. If the zone is nearly empty, others are drawn in. You see them all by name.
+  - **Choose who boards** (`choose-boarders`). You tick up to 2 of the group. The rest of the group drowns. Nobody else in the city is affected. Tags: loyalty, cunning.
+  - **Load the reward crates instead** (`load-the-crates`). Nobody from the group boards; the seats go to the system's reward crates. +150 coins. The whole group drowns. Tags: greed, cruelty. This is the "keep a reward someone else needed" choice.
+  - **Give up your seat and swim** (`swim`, fallback). A fight against a Salt Eel in the flood. You must win to pass. The group is not culled. Tags: bravery, mercy.
 - **Twist:** The harbor goes under, and the tunnels flood.
 - **Zone changes:** seal Harbor Cranes; Subway Tunnels danger +2.
 - **Rewards:** 200 coins.
@@ -132,7 +143,8 @@ Difficulty rises through danger bumps, stronger enemies and a survivor death rat
 > Ladies, gentlemen and survivors: the finale. «ANNOUNCER» is coming down to the stage in person. Every corner of «CITY» will be at its most dangerous. Survive thirty-six hours, and you will have earned an encore.
 
 - **Goal:** survive. **Hours:** 36.
-- **Twist:** The whole city gets one danger level worse. If the Final Wave is approved, the last enemy is *The Understudy*, the announcer's own stand-in, waiting for its big break.
+- **Twist:** The whole city gets one danger level worse.
+- **Final Wave:** *The Understudy*, the announcer's own stand-in, waiting for its big break.
 - **Zone changes:** danger +1 in every zone.
 - **Rewards:** 400 coins, the *Encore Ticket* (rare).
 - **Survivor death rate:** 0.35.
@@ -164,6 +176,21 @@ Each one likes a different tag most, so how you play decides who watches. Every 
 6. **The Saint of Open Doors.** *"Run, little one. Running is a kind of living."* / *"Heroes are just corpses with good press."*
 7. **The Ledger With Golden Teeth.** *"Every coin remembers who earned it."* / *"You gave it away? For free?"*
 8. **The Dog That Waits at the Gate.** *"You came back for them. Good."* / *"They trusted you. I will remember."*
+
+### What each tag comes from
+
+| Tag | Comes from |
+| --- | --- |
+| bravery | winning any fight |
+| cowardice | running from a fight |
+| cruelty | attacking a survivor, robbing one, choices like *Push someone into the river* |
+| mercy | giving a survivor an item, choices like *Pay the toll* |
+| **greed** | **robbing** a survivor (take an item without paying) or **overcharging** one (sell at full price instead of half); choices where you keep a reward someone else needed, like *Load the reward crates* |
+| **style** | winning a fight **without taking any damage**, or **finishing it with a critical hit** |
+| **loyalty** | **keeping your sponsor's demand** at a scenario clear, or **giving to a survivor who likes you** (attitude 30+) |
+| **cunning** | **discovering a hidden scenario**, or **finishing a fight with a skill, stigma or item** |
+
+Robbing and overcharging make the survivor remember you badly (−40 and −15 attitude). Giving makes them like you more (+15).
 
 ---
 
@@ -276,17 +303,16 @@ Hidden scenarios 4 and 5 can only be found during one scenario each, and 6 only 
 
 ---
 
+## Decided this round
+
+1. Final Wave: yes, and it must be beaten (no running). Built.
+2. Protect scenarios have ambushes. Built.
+3. Quiet constellations: your trigger list. Built (see [What each tag comes from](#what-each-tag-comes-from)).
+4. "Only some can survive": the group present in the scenario (4–6 where you stand, met first), you pick who is spared, the rest of the group dies. Built. The choice screen now says "Everyone else in this group dies."
+
 ## Questions for you
 
-1. **Final Wave:** add it, so that waiting out a survive scenario is never safe (0% instead of 7–26%)? I recommend yes.
-2. **Protect scenarios** (scenario 6) currently have no ambushes, so you can rest through them. Should ambushes apply to protect scenarios too? I recommend yes. It is a one-line change to the same rule.
-3. **Tags for quieter constellations.** Today only fights (bravery, cowardice), attacking survivors (cruelty) and scenario choices produce tags. That means the Ledger (greed), the Peacock (style), the Dog (loyalty) and the Velvet Knife (cunning) rarely react. Proposed:
-   - buying from the shop → greed
-   - a critical hit that wins a fight → style
-   - trading with a survivor → cunning
-   - helping or trading with someone you have met 3+ times → loyalty
-
-   Add these?
-4. **Lifeboat (scenario 8)** uses your literal rule: everyone you know who does not board dies. If you have met 10 people, that is 8 deaths. Is that the drama you want, or should the flood take only a few of them?
-5. **Hidden scenarios found by one choice or during one scenario** (4, 5 and 6) can be missed for good. Keep them that rare, or give each a second trigger?
-6. **A stigma levels to 5 and stops.** Should a maxed stigma do anything more later (for example, "evolve"), or is level 5 the end for v1?
+1. **Lifeboat's greed option.** I added *Load the reward crates instead*: the whole group drowns for +150 coins. It is the clearest "keep a reward someone else needed" choice, but it is the darkest line in the game. Keep it, soften it (for example, only one person drowns), or cut it?
+2. **Hidden scenarios found by one choice or during one scenario** (4, 5 and 6) can be missed for good. Keep them that rare, or give each a second trigger?
+3. **A stigma levels to 5 and stops.** Should a maxed stigma do anything more later (for example, "evolve"), or is level 5 the end for v1?
+4. **Robbing has no direct risk** beyond the survivor's attitude (−40, so they may attack you the next time you meet). Is that enough, or should a robbery sometimes fail and start a fight on the spot?
