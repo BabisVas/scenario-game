@@ -129,6 +129,14 @@ The MMO feel comes from simulated survivors: the city is full of them, and they 
 - They remember how the player treated them, and that changes how they act toward the player later.
 - There is no ranking board on day one. The system opens it after the first scenario, ranking survivors by what they achieved in scenarios so far. From then on, as their numbers fall, the board tells the story of the city.
 
+## Attributes, stigmas and hidden scenarios
+
+**Attributes:** on the first morning the system gives every person one attribute (a title for who they are, with a passive effect). Not chosen; background makes some likelier. Rarity common/rare/legendary ~70/25/5. Tags make matching constellations notice you sooner. Survivors have them too, shown once met. ~16 in v1; evolution later.
+
+**Stigmas:** a special skill a constellation lends its sponsored survivor, replacing the contract's plain skill gift. Stronger than skills, own fight button, levels with use. One sponsor at a time; a new contract ends the old one (stigma taken back, sponsor turns colder). A broken demand seals the stigma until the next scenario is cleared with the demand kept. One stigma per constellation.
+
+**Hidden scenarios:** found by unusual conditions, never listed before found, hinted only by survivor rumors. Run alongside the main scenario with their own hours, bigger rewards, all constellations take notice. Failing costs rewards, not life. Once per game each. ~6 in v1.
+
 ## Death
 
 There is one life per game. Losing a fight or failing a main scenario kills the character, and the save is gone for good.
@@ -172,3 +180,6 @@ The game is a React project built and maintained in Claude Code, with the game's
 | Look | Dark system-window panels, no art, phone-friendly | Claude |
 | Hosting | GitHub Pages; saves per browser | Claude |
 | Names, balance, scenario drafts | Placeholders and tuning values; scenarios reviewed by Babis | Builder |
+| Attributes | One per person, rolled on the first morning, rarity ~70/25/5, background-weighted, ~16 in v1 | Babis |
+| Stigmas | Constellation-lent special skill replaces the contract gift; one sponsor at a time; broken demand seals it | Babis |
+| Hidden scenarios | Found by unusual conditions, hinted only by rumors, once per game, failing costs rewards not life, ~6 in v1 | Babis |
