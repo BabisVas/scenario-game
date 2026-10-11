@@ -164,3 +164,33 @@ describe('rumors arrive before a hidden scenario window closes', () => {
     expect(sawRumor).toBe(true);
   });
 });
+
+describe('a hidden scenario outlives its main scenario', () => {
+  function foundByTheChoice(goal: Parameters<typeof hiddenDef>[2] = {}) {
+    const def = choiceDef();
+    hiddenDef('after-hours', { kind: 'choose-option', scenarioId: def.id, optionId: 'walk-away' }, { hours: 12, ...goal });
+    return resolveChoice(inScenario(baseState(), def), 'walk-away', null, createRng(1), content).state;
+  }
+  test('the choice that finds it ends the main scenario, and the hidden one keeps running into the rest period', () => {
+    const s = foundByTheChoice();
+    expect(s.phase.kind).toBe('rest');
+    expect(s.hiddenScenario).toMatchObject({ defId: 'after-hours', hoursLeft: 12 });
+    const later = checkScenarioClock(spendHours(s, 5), createRng(1), content).state;
+    expect(later.phase.kind).toBe('rest');
+    expect(later.hiddenScenario).toMatchObject({ defId: 'after-hours', hoursLeft: 7 });
+  });
+  test('it can be won during the rest period', () => {
+    const s = foundByTheChoice({ goal: { kind: 'kill', count: 1 } });
+    const coins = s.player.coins;
+    const r = checkScenarioClock(recordProgress(spendHours(s, 3), 'kill', { enemyTags: ['beast'] }, content), createRng(1), content).state;
+    expect(r.hiddenScenario).toBeNull();
+    expect(r.player.coins).toBe(coins + 100);
+  });
+  test('it can run out during the rest period, harmlessly', () => {
+    const s = foundByTheChoice({ goal: { kind: 'kill', count: 9 } });
+    const r = checkScenarioClock(spendHours(s, 12), createRng(1), content).state;
+    expect(r.hiddenScenario).toBeNull();
+    expect(r.phase.kind).toBe('rest');
+    expect(r.player.hp).toBe(s.player.hp);
+  });
+});
