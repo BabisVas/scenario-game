@@ -6,7 +6,7 @@ import { createRng } from './rng'
 import { generateSurvivors } from './survivors'
 import { content } from '../data'
 import {
-  attributeDef, baseState, fixtureContent, inFight, onlyAttribute, seqRng, unarmed, weakEnemy, withAttribute,
+  at, attributeDef, baseState, fixtureContent, inFight, onlyAttribute, seqRng, unarmed, weakEnemy, withAttribute,
 } from '../test/fixtures'
 
 const start = (backgroundId = 'courier', seed = 1, c = content) => newGame({ name: 'Ari', backgroundId, seed, now: 0 }, c);
@@ -65,8 +65,8 @@ describe('passive effects', () => {
   test('coin bonus raises coins found', () => {
     // subway tunnels: danger 3 pays 9..24; roll 0 gives 9; 0.99s skip the item and the ambush
     const rolls = () => seqRng(0.0, 0.99, 0.99, 0.99);
-    expect(doAction(baseState(), 'subway-tunnels', 'scavenge', rolls(), fixtureContent).state.player.coins).toBe(9);
-    const rich = withAttribute(baseState(), { kind: 'coins', percent: 50 });
+    expect(doAction(at(baseState(), 'subway-tunnels'), 'subway-tunnels', 'scavenge', rolls(), fixtureContent).state.player.coins).toBe(9);
+    const rich = withAttribute(at(baseState(), 'subway-tunnels'), { kind: 'coins', percent: 50 });
     expect(doAction(rich, 'subway-tunnels', 'scavenge', rolls(), fixtureContent).state.player.coins).toBe(13);
   });
   test('run bonus improves the odds of getting away', () => {

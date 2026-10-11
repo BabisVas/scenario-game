@@ -86,7 +86,8 @@ test('a hostile survivor may attack on sight', () => {
 test('talking in a zone meets someone there', () => {
   const s = baseStateWithSurvivors();
   const zone = s.survivors[0].zoneId;
-  const r = doAction(s, zone === 'subway-tunnels' ? 'old-market' : zone, 'talk', createRng(1), content);
+  const where = zone === 'subway-tunnels' ? 'old-market' : zone;
+  const r = doAction({ ...s, zoneId: where }, where, 'talk', createRng(1), content);
   expect(r.state.survivors.some(v => v.met) || r.events.some(e => /nobody/i.test(e.text))).toBe(true);
 });
 test('friends sell cheaper; buying spends coins and makes them remember the trade', () => {

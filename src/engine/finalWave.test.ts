@@ -40,10 +40,6 @@ test('the Final Wave is the toughest enemy where the player stands, unless the s
   expect(checkScenarioClock(s, createRng(1), content).state.fight!.enemyId).toBe('iron-boar');
   content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = named;
 });
-test('the player stands where they last acted', () => {
-  expect(baseState().zoneId).toBe('old-market');
-  expect(doAction(baseState(), 'riverside-park', 'rest', seqRng(0.99), content).state.zoneId).toBe('riverside-park');
-});
 test('protect scenarios have ambushes too', () => {
   const s = { ...inScenario(baseState(), protectDef({ hours: 20 })), survivors: [makeSurvivor('s-0')] };
   expect(doAction(s, 'old-market', 'rest', seqRng(0.0, 0.0, 0.5), content).state.fight).not.toBeNull();

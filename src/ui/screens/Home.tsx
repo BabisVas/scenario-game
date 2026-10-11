@@ -62,6 +62,7 @@ export function Home({ game, state }: { game: Game; state: GameState }) {
         <div className="col col-world">
           <MapPanel
             state={state}
+            act={game.act}
             selected={zoneId}
             onSelect={(id) => {
               setZoneId(id)

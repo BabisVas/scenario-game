@@ -2,7 +2,7 @@ import { ambushChance, canAct, combatantFromEnemy, doAction } from './actions'
 import type { GameState } from './types'
 import { createRng } from './rng'
 import { content } from '../data'
-import { baseState, fixtureContent, inFight, inRest, inScenario, killDef, sealZone, seqRng, weakEnemy, withCoins } from '../test/fixtures'
+import { at, baseState, fixtureContent, inFight, inRest, inScenario, killDef, sealZone, seqRng, weakEnemy, withCoins } from '../test/fixtures'
 
 test('scavenge spends 10 energy and 2 hours', () => {
   const s = baseState();
@@ -39,7 +39,7 @@ test('a refused action changes nothing', () => {
 });
 test('scavenging pays danger×3 to danger×8 coins', () => {
   for (let seed = 0; seed < 50; seed++) {
-    const r = doAction(withCoins(baseState(), 0), 'subway-tunnels', 'scavenge', createRng(seed), content).state;
+    const r = doAction(at(withCoins(baseState(), 0), 'subway-tunnels'), 'subway-tunnels', 'scavenge', createRng(seed), content).state;
     expect(r.player.coins).toBeGreaterThanOrEqual(9);
     expect(r.player.coins).toBeLessThanOrEqual(24);
   }

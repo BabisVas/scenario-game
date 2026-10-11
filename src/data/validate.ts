@@ -120,7 +120,21 @@ export function validateContent(c: Content): string[] {
   for (const b of c.backgrounds) ref('item', b.startingItemId, itemIds, `background ${b.id}`)
   for (const z of c.zones) {
     if (z.actions.length === 0) problems.push(`zone ${z.id}: has no actions`)
+    for (const n of z.connections) {
+      if (n === z.id) problems.push(`zone ${z.id}: connects to itself`)
+      else if (!zoneIds.has(n)) problems.push(`zone ${z.id}: unknown connection "${n}"`)
+      else if (!c.zones.find((o) => o.id === n)!.connections.includes(z.id)) problems.push(`zone ${z.id}: connection to ${n} is one-way; connections must go both ways`)
+    }
     for (const e of z.enemyIds) ref('enemy', e, enemyIds, `zone ${z.id}`)
+  }
+  if (c.zones.length > 0) {
+    const reached = new Set([c.zones[0].id])
+    const queue = [c.zones[0].id]
+    while (queue.length > 0) {
+      const here = c.zones.find((z) => z.id === queue.shift())
+      for (const n of here?.connections ?? []) if (zoneIds.has(n) && !reached.has(n)) { reached.add(n); queue.push(n) }
+    }
+    for (const z of c.zones) if (!reached.has(z.id)) problems.push(`zone ${z.id}: cannot be reached from ${c.zones[0].id}`)
   }
   for (const e of c.enemies) for (const d of e.drops) ref('item', d.itemId, itemIds, `enemy ${e.id} drop`)
   const stigmaIds = ids(c.stigmas)

@@ -306,3 +306,8 @@ export function hiddenDef(id: string, trigger: HiddenScenarioDef['trigger'], ove
 export function clearHiddenDefs(): void {
   fixtureContent.hiddenScenarios.length = 0
 }
+
+/** Places the player in a zone (as if they had travelled there). */
+export function at(s: GameState, zoneId: string): GameState {
+  return { ...s, zoneId }
+}

@@ -22,6 +22,7 @@ const WHY: Record<Exclude<CanAct, { ok: true }>['reason'], string> = {
   energy: 'Not enough energy',
   sealed: 'Zone sealed',
   'not-here': 'Not here',
+  away: 'You are not here',
   busy: 'Busy',
   dead: 'Dead',
 }

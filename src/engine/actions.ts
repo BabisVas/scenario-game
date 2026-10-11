@@ -23,7 +23,7 @@ export const ACTION_COST: Record<ActionId, { energy: number; hours: number }> = 
   hunt: { energy: 15, hours: 1 },
 }
 
-export type CanAct = { ok: true } | { ok: false; reason: 'energy' | 'sealed' | 'not-here' | 'busy' | 'dead' }
+export type CanAct = { ok: true } | { ok: false; reason: 'energy' | 'sealed' | 'not-here' | 'away' | 'busy' | 'dead' }
 
 const STATS: StatKey[] = ['strength', 'agility', 'endurance', 'spirit']
 
@@ -41,8 +41,62 @@ export function canAct(state: GameState, zoneId: string, action: ActionId, conte
   const zone = content.zones.find((z) => z.id === zoneId)
   if (!zone || !zone.actions.includes(action)) return { ok: false, reason: 'not-here' }
   if (zoneState(state, zone).sealed) return { ok: false, reason: 'sealed' }
+  if (state.zoneId !== zone.id) return { ok: false, reason: 'away' }
   if (state.energy < ACTION_COST[action].energy) return { ok: false, reason: 'energy' }
   return { ok: true }
+}
+
+export const TRAVEL_COST = { energy: 5, hours: 1 }
+
+export type CanTravel =
+  | { ok: true }
+  | { ok: false; reason: 'dead' | 'busy' | 'here' | 'unknown' | 'not-adjacent' | 'sealed' | 'energy' }
+
+export function canTravel(state: GameState, toZoneId: string, content: Content): CanTravel {
+  if (state.phase.kind === 'dead') return { ok: false, reason: 'dead' }
+  if (state.fight || state.pendingChoice) return { ok: false, reason: 'busy' }
+  if (toZoneId === state.zoneId) return { ok: false, reason: 'here' }
+  const to = content.zones.find((z) => z.id === toZoneId)
+  const from = content.zones.find((z) => z.id === state.zoneId)
+  if (!to) return { ok: false, reason: 'unknown' }
+  if (!from?.connections.includes(to.id)) return { ok: false, reason: 'not-adjacent' }
+  if (zoneState(state, to).sealed) return { ok: false, reason: 'sealed' }
+  if (state.energy < TRAVEL_COST.energy) return { ok: false, reason: 'energy' }
+  return { ok: true }
+}
+
+const TRAVEL_REFUSAL: Record<Exclude<CanTravel, { ok: true }>['reason'], string> = {
+  dead: 'You are dead.',
+  busy: 'Finish what you are doing first.',
+  here: 'You are already here.',
+  unknown: 'There is no such place.',
+  'not-adjacent': 'You cannot get there from here in one move.',
+  sealed: 'That zone is sealed.',
+  energy: 'Not enough energy.',
+}
+
+/** One move to an adjacent zone. Reach goals are met on arrival; the road can be dangerous. */
+export function travel(state: GameState, toZoneId: string, rng: Rng, content: Content): Step {
+  const check = canTravel(state, toZoneId, content)
+  if (!check.ok) return { state, events: [{ kind: 'system', text: TRAVEL_REFUSAL[check.reason] }] }
+  const from = content.zones.find((z) => z.id === state.zoneId)!
+  const to = content.zones.find((z) => z.id === toZoneId)!
+
+  let s = spendHours({ ...state, energy: state.energy - TRAVEL_COST.energy, zoneId: to.id }, TRAVEL_COST.hours)
+  const events: GameEvent[] = [{ kind: 'player', text: `You leave the ${from.name} for the ${to.name}.` }]
+  const run = (step: Step) => {
+    s = step.state
+    events.push(...step.events)
+  }
+  s = recordProgress(s, 'reach', { zoneId: to.id }, content)
+  if (inScenarioOf(s, content, ['survive', 'protect', 'reach']) && to.enemyIds.length > 0 && rng.chance(ambushChance(zoneDanger(s, to)))) {
+    events.push({ kind: 'fight', text: `Ambush on the way into the ${to.name}!` })
+    run(randomFight(s, to, rng, content, 'hunt'))
+  }
+  const carried = state.player.inventory.map((i) => i.itemId)
+  run(checkHiddenTriggers(s, { zoneId: to.id, carried }, content))
+  const clock = checkScenarioClock(s, rng, content)
+  return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
 
 /** Survive scenarios are never safe: any action in one can be ambushed. */
@@ -50,12 +104,16 @@ export function ambushChance(danger: number): number {
   return 0.1 + 0.05 * danger
 }
 
-/** Survive and protect scenarios are never safe: any action in them can be ambushed. */
-function inAmbushScenario(state: GameState, content: Content): boolean {
+function inScenarioOf(state: GameState, content: Content, kinds: string[]): boolean {
   if (state.phase.kind !== 'scenario') return false
   const id = state.phase.scenarioId
   const kind = content.scenarios.find((d) => d.id === id)?.goal.kind
-  return kind === 'survive' || kind === 'protect'
+  return !!kind && kinds.includes(kind)
+}
+
+/** Survive and protect scenarios are never safe: any action in them can be ambushed. */
+function inAmbushScenario(state: GameState, content: Content): boolean {
+  return inScenarioOf(state, content, ['survive', 'protect'])
 }
 
 /** An enemy as a fighter, tougher the more dangerous the zone. */
@@ -83,6 +141,7 @@ const REFUSAL: Record<Exclude<CanAct, { ok: true }>['reason'], string> = {
   'not-here': 'You cannot do that here.',
   busy: 'Finish what you are doing first.',
   dead: 'You are dead.',
+  away: 'You are not there.',
 }
 
 export function doAction(state: GameState, zoneId: string, action: ActionId, rng: Rng, content: Content): Step {
@@ -94,7 +153,6 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
   let s: GameState = { ...state, energy: state.energy - cost.energy, zoneId }
   // A hunt's hour is the hour its fight takes.
   if (action !== 'hunt') s = spendHours(s, cost.hours)
-  s = recordProgress(s, 'reach', { zoneId }, content)
   const events: GameEvent[] = []
   const run = (step: Step) => {
     s = step.state

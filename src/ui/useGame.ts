@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { content as shippedContent } from '../data'
 import type { ActionId, Content } from '../data/schema'
-import { doAction } from '../engine/actions'
+import { doAction, travel } from '../engine/actions'
 import { fightTurn, type FightAction } from '../engine/combat'
 import { WORLD_TICK_MS } from '../engine/config'
 import { resolveContract, withReactions } from '../engine/constellations'
@@ -21,6 +21,7 @@ import { createTabGuard } from '../save/tabGuard'
 
 export type PlayerAction =
   | { kind: 'zone'; zoneId: string; action: ActionId }
+  | { kind: 'travel'; zoneId: string }
   | { kind: 'fight'; turn: FightAction }
   | { kind: 'choice'; optionId: string; targetSurvivorId: string | null; spareIds?: string[] }
   | { kind: 'contract'; accept: boolean }
@@ -61,6 +62,8 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
       return doAction(state, a.zoneId, a.action, rng, c)
     case 'meet':
       return doAction(state, a.zoneId, 'talk', rng, c)
+    case 'travel':
+      return travel(state, a.zoneId, rng, c)
   }
   if (state.fight) return refuse(state, 'Not in the middle of a fight!')
   switch (a.kind) {

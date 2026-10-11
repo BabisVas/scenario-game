@@ -20,6 +20,8 @@ export type ZoneDef = {
   danger: 1 | 2 | 3 | 4 | 5
   actions: ActionId[]
   enemyIds: string[]
+  /** Zones one move away. Connections always go both ways. */
+  connections: string[]
   startsSealed?: boolean
 }
 

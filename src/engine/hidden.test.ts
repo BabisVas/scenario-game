@@ -6,7 +6,7 @@ import { checkHiddenTriggers } from './hidden'
 import { createRng } from './rng'
 import type { GameState } from './types'
 import {
-  baseState, choiceDef, clearHiddenDefs, fixtureContent as content, hiddenDef, inRest, inScenario, makeSurvivor,
+  at, baseState, choiceDef, clearHiddenDefs, fixtureContent as content, hiddenDef, inRest, inScenario, makeSurvivor,
   killDef, surviveDef, withItem,
 } from '../test/fixtures'
 
@@ -14,7 +14,7 @@ beforeEach(() => clearHiddenDefs());
 
 /** A calm state: a long rest period, so no ambushes and no scenario clock pressure. */
 const calm = (): GameState => inRest(baseState(), 500);
-const act = (s: GameState, zoneId: string, action: Parameters<typeof doAction>[2], seed = 1) => doAction(s, zoneId, action, createRng(seed), content);
+const act = (s: GameState, zoneId: string, action: Parameters<typeof doAction>[2], seed = 1) => doAction(at(s, zoneId), zoneId, action, createRng(seed), content);
 const discovered = (r: { events: { text: string }[] }) => r.events.some(e => /hidden scenario discovered/i.test(e.text));
 
 test('a trigger fires once and only once', () => {

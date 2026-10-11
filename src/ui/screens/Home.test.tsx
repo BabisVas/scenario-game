@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { SAVE_KEY } from '../../engine/config'
 import { loadGame } from '../../save/save'
-import { choiceDef, clearHiddenDefs, hiddenDef, inScenario, makeSurvivor, memoryStorage, playingState, sealZone, spareDef } from '../../test/fixtures'
+import { choiceDef, clearHiddenDefs, hiddenDef, inRest, inScenario, makeSurvivor, memoryStorage, playingState, sealZone, spareDef } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
 import { content } from '../../data'
 
@@ -137,4 +137,21 @@ test('a "nobody is spared" option is a plain button with a warning, not a picker
   expect(within(dialog).getByText(/nobody in this group is spared/i)).toBeInTheDocument();
   expect(within(dialog).getByRole('button', { name: /send the crates across instead/i })).toBeEnabled();
   expect(within(dialog).queryByText(/spare up to 0/i)).toBeNull();
+});
+test('the map shows where you are, where each zone leads, and lets you travel next door', () => {
+  const { storage } = renderWithGame(inRest(playingState(), 50));
+  const map = screen.getByRole('region', { name: /map/i });
+  expect(within(map).getByText(/you are here/i)).toBeInTheDocument();
+  const go = within(map).getByRole('button', { name: /travel to riverside park/i });
+  fireEvent.click(go);
+  const saved = loadGame(storage);
+  expect(saved.ok && saved.state.zoneId).toBe('riverside-park');
+});
+test('a zone you are not in shows its actions as out of reach', () => {
+  renderWithGame(playingState());
+  const map = screen.getByRole('region', { name: /map/i });
+  fireEvent.click(within(map).getByRole('button', { name: /^glass towers/i }));
+  const zone = screen.getByRole('region', { name: /zone/i });
+  expect(within(zone).getByRole('button', { name: /scavenge/i })).toBeDisabled();
+  expect(within(zone).getAllByText(/you are not here/i).length).toBeGreaterThan(0);
 });

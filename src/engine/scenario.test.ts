@@ -1,11 +1,11 @@
 import { checkScenarioClock, clearScenario, recordProgress, resolveChoice, spendHours, startScenario } from './scenario'
-import { doAction } from './actions'
+import { travel } from './actions'
 import { fightTurn } from './combat'
 import { createRng } from './rng'
 import type { GameState } from './types'
 import {
   baseState, choiceDef, clearedAll, fixtureContent as content, inFight, inRest, inScenario, killDef, makeSurvivor,
-  protectDef, reachDef, surviveDef, weakEnemy, withNoMetSurvivors, brutalEnemy,
+  protectDef, reachDef, seqRng, surviveDef, weakEnemy, withNoMetSurvivors, brutalEnemy,
 } from '../test/fixtures'
 
 test('surviving the clock and its Final Wave clears a survive scenario and opens the ranking', () => {
@@ -65,9 +65,9 @@ test('kills only count toward a tagged kill goal when the tag matches', () => {
   const s = recordProgress(inScenario(baseState(), tagged), 'kill', { enemyTags: ['beast'] }, content);
   expect(s.phase).toMatchObject({ progress: 0 });
 });
-test('acting in the target zone clears a reach scenario', () => {
+test('arriving in the target zone clears a reach scenario', () => {
   const s = inScenario(baseState(), reachDef({ hours: 10, zoneId: 'riverside-park' }));
-  expect(doAction(s, 'riverside-park', 'rest', createRng(1), content).state.phase.kind).toBe('rest');
+  expect(travel(s, 'riverside-park', seqRng(0.99), content).state.phase.kind).toBe('rest');
 });
 test('a protect scenario fails when the protected survivor is dead', () => {
   const s = { ...inScenario(baseState(), protectDef({ hours: 10 })), survivors: [makeSurvivor('s-0', { alive: false })] };
@@ -87,7 +87,7 @@ test('starting a protect scenario picks a met living survivor to protect', () =>
 test('starting a scenario announces it, applies zone changes and opens a choice', () => {
   const def = { ...choiceDef(), zoneChanges: { seal: ['old-market'], danger: { 'glass-towers': 2 } } };
   const r = startScenario(baseState(), def, createRng(1), content);
-  expect(r.events[0].text).toContain(def.announcement);
+  expect(r.events.some(e => e.text.includes(def.announcement))).toBe(true);
   expect(r.state.zones['old-market'].sealed).toBe(true);
   expect(r.state.zones['glass-towers'].dangerBonus).toBe(2);
   expect(r.state.pendingChoice).toEqual({ source: 'scenario', scenarioId: def.id });

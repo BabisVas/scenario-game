@@ -939,3 +939,26 @@ h3 {
   border-color: var(--star);
   color: var(--star);
 }
+
+/* --- Travel ------------------------------------------------------------------ */
+
+.zone-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 2px 0;
+  font-size: 0.75rem;
+}
+
+.here-tag {
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--ok);
+  text-transform: uppercase;
+}
+
+.zone-here > .zone-btn {
+  border-color: color-mix(in srgb, var(--ok) 60%, transparent);
+}

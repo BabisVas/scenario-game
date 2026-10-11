@@ -72,6 +72,19 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
     protectedSurvivorId = pool.length > 0 ? rng.pick(pool).id : undefined
   }
 
+  // Standing in a zone as it seals: you are pushed out to the nearest open zone.
+  let zoneId = state.zoneId
+  const sealedEvents: GameEvent[] = []
+  if (zones[zoneId]?.sealed) {
+    const open = nearestOpenZone(zoneId, zones, content)
+    if (open) {
+      const fromName = content.zones.find((z) => z.id === zoneId)?.name ?? zoneId
+      sealedEvents.push({ kind: 'system', text: `The ${fromName} seals. You are pushed out into the ${open.name}.` })
+      zoneId = open.id
+    }
+  }
+  state = { ...state, zoneId }
+
   const needsGroup = def.goal.kind === 'choice' && def.goal.options.some((o) => o.outcome.spareCount !== undefined)
   const gathered = needsGroup ? gatherGroup(state, rng) : null
   const s: GameState = {
@@ -90,6 +103,7 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
   }
 
   const events: GameEvent[] = [
+    ...sealedEvents,
     { kind: 'system', text: def.announcement },
     { kind: 'system', text: `Main Scenario ${def.number}: ${def.title}. ${def.hours} hours. ${def.rules.join(' ')}`.trim() },
   ]
@@ -389,4 +403,21 @@ function startFinalWave(state: GameState, def: ScenarioDef, content: Content): S
     state: fight.state,
     events: [{ kind: 'system', text: `The clock hits zero. The Final Wave arrives: ${enemy.name}! Beat it to clear "${def.title}".` }, ...fight.events],
   }
+}
+
+/** Breadth-first: the closest zone (by moves) that is not sealed. */
+function nearestOpenZone(fromId: string, zones: GameState['zones'], content: Content) {
+  const isOpen = (id: string) => !(zones[id]?.sealed ?? content.zones.find((z) => z.id === id)?.startsSealed)
+  const seen = new Set([fromId])
+  const queue = [fromId]
+  while (queue.length > 0) {
+    const here = content.zones.find((z) => z.id === queue.shift())
+    for (const n of here?.connections ?? []) {
+      if (seen.has(n)) continue
+      seen.add(n)
+      if (isOpen(n)) return content.zones.find((z) => z.id === n)
+      queue.push(n)
+    }
+  }
+  return content.zones.find((z) => isOpen(z.id))
 }

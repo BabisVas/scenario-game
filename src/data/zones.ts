@@ -8,6 +8,7 @@ export const zones: ZoneDef[] = [
     danger: 1,
     actions: ['scavenge', 'explore', 'rest', 'talk', 'trade', 'hunt'],
     enemyIds: ['rat-swarm', 'feral-hound'],
+    connections: ['riverside-park', 'glass-towers', 'subway-tunnels'],
   },
   {
     id: 'riverside-park',
@@ -16,6 +17,7 @@ export const zones: ZoneDef[] = [
     danger: 2,
     actions: ['train', 'rest', 'explore', 'hunt', 'talk'],
     enemyIds: ['feral-hound', 'iron-boar'],
+    connections: ['old-market', 'subway-tunnels'],
   },
   {
     id: 'glass-towers',
@@ -24,6 +26,7 @@ export const zones: ZoneDef[] = [
     danger: 2,
     actions: ['scavenge', 'explore', 'hunt', 'talk', 'trade'],
     enemyIds: ['glass-wraith', 'rooftop-harpy'],
+    connections: ['old-market', 'subway-tunnels'],
   },
   {
     id: 'subway-tunnels',
@@ -32,5 +35,6 @@ export const zones: ZoneDef[] = [
     danger: 3,
     actions: ['scavenge', 'explore', 'hunt'],
     enemyIds: ['tunnel-crawler', 'rat-swarm'],
+    connections: ['old-market', 'riverside-park', 'glass-towers'],
   },
 ]
