@@ -8,7 +8,7 @@ import { maxHp } from './newGame'
 import type { Rng } from './rng'
 import { withReactions } from './constellations'
 import { killPlayer } from './death'
-import { afterScenarioFight, checkScenarioClock, recordProgress, spendHours } from './scenario'
+import { afterFinalWave, afterScenarioFight, checkScenarioClock, recordProgress, spendHours } from './scenario'
 import type { Combatant, FightState, GameEvent, GameState, Step } from './types'
 
 export type FightAction =
@@ -73,6 +73,14 @@ export function startFight(
   }
 }
 
+/** Running, or any skill or stigma that is an escape. */
+function isEscape(action: FightAction, s: GameState, content: Content): boolean {
+  if (action.kind === 'run') return true
+  if (action.kind === 'skill') return content.skills.find((k) => k.id === action.skillId)?.kind === 'escape'
+  if (action.kind === 'stigma') return content.stigmas.find((x) => x.id === s.player.stigma?.stigmaId)?.kind === 'escape'
+  return false
+}
+
 const notNow = (state: GameState, text: string): FightStep => ({ state, events: [{ kind: 'system', text }], result: 'ongoing' })
 
 export function fightTurn(state: GameState, action: FightAction, rng: Rng, content: Content): FightStep {
@@ -95,6 +103,7 @@ export function fightTurn(state: GameState, action: FightAction, rng: Rng, conte
     }
   }
   if (fight.origin === 'scenario') s = afterScenarioFight(s, step.result)
+  if (fight.origin === 'final-wave' && step.result === 'won') s = afterFinalWave(s)
   const clock = checkScenarioClock(s, rng, content)
   const reacted = withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
   return { ...reacted, result: step.result }
@@ -108,6 +117,7 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
   let enemy = { ...fight.enemy }
   const events: GameEvent[] = []
   const guarding = enemy.behavior === 'defensive' && fight.round % GUARD_EVERY === 0
+  if (fight.origin === 'final-wave' && isEscape(action, s, content)) return notNow(state, 'There is nowhere left to run. Beat it.')
   let usedSkill: { id: string; cooldown: number } | null = null
   let braced = 0
 

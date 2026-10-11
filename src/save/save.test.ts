@@ -39,3 +39,7 @@ test('a save from before attributes (schema 1) is treated as unreadable', () => 
   const st = memoryStorage(); st.setItem(SAVE_KEY, JSON.stringify({ ...baseState(), schemaVersion: 1 }));
   expect(loadGame(st)).toEqual({ ok: false, reason: 'version' });
 });
+test('a save from before the Final Wave (schema 2) is treated as unreadable', () => {
+  const st = memoryStorage(); st.setItem(SAVE_KEY, JSON.stringify({ ...baseState(), schemaVersion: 2 }));
+  expect(loadGame(st)).toEqual({ ok: false, reason: 'version' });
+});

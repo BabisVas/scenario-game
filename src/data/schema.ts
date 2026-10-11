@@ -93,6 +93,8 @@ export type ScenarioDef = {
   rewards: { coins: number; itemIds?: string[]; skillId?: string }
   zoneChanges?: { seal?: string[]; open?: string[]; danger?: Record<string, number> }
   survivorDeathRate: number
+  /** Survive scenarios: the enemy of the Final Wave. Default: the toughest enemy where the player stands. */
+  finalWave?: string
 }
 
 export type ConstellationDef = {

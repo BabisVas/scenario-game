@@ -71,3 +71,8 @@ test('the stigma has its own button, disabled and marked when sealed', () => {
   expect(button).toBeDisabled();
   expect(button).toHaveTextContent(/sealed/i);
 });
+test('the Final Wave disables Run', () => {
+  const s = inFight(playingState(), weakEnemy());
+  renderWithGame({ ...s, fight: { ...s.fight!, origin: 'final-wave' } });
+  expect(screen.getByRole('button', { name: /run/i })).toBeDisabled();
+});

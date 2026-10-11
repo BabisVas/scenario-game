@@ -13,6 +13,7 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
   const p = state.player
   const enemy = fight.enemy
   const chance = Math.round(playerRunChance(state, enemy, content) * 100)
+  const finalWave = fight.origin === 'final-wave'
   const stigma = p.stigma
   const stigmaDef = stigma ? content.stigmas.find((x) => x.id === stigma.stigmaId) : undefined
   const stigmaCooldown = stigma ? (fight.cooldowns[STIGMA_COOLDOWN_PREFIX + stigma.stigmaId] ?? 0) : 0
@@ -77,8 +78,8 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
                 {def!.name} ×{stack.qty}
               </button>
             ))}
-            <button className="btn danger" onClick={() => turn({ kind: 'run' })}>
-              {`Run (${chance}%)`}
+            <button className="btn danger" disabled={finalWave} onClick={() => turn({ kind: 'run' })}>
+              {finalWave ? 'Run (nowhere to run)' : `Run (${chance}%)`}
             </button>
           </div>
         </div>

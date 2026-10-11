@@ -50,10 +50,12 @@ export function ambushChance(danger: number): number {
   return 0.1 + 0.05 * danger
 }
 
-function inSurviveScenario(state: GameState, content: Content): boolean {
+/** Survive and protect scenarios are never safe: any action in them can be ambushed. */
+function inAmbushScenario(state: GameState, content: Content): boolean {
   if (state.phase.kind !== 'scenario') return false
   const id = state.phase.scenarioId
-  return content.scenarios.find((d) => d.id === id)?.goal.kind === 'survive'
+  const kind = content.scenarios.find((d) => d.id === id)?.goal.kind
+  return kind === 'survive' || kind === 'protect'
 }
 
 /** An enemy as a fighter, tougher the more dangerous the zone. */
@@ -89,7 +91,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
   const zone = content.zones.find((z) => z.id === zoneId)!
   const cost = ACTION_COST[action]
 
-  let s: GameState = { ...state, energy: state.energy - cost.energy }
+  let s: GameState = { ...state, energy: state.energy - cost.energy, zoneId }
   // A hunt's hour is the hour its fight takes.
   if (action !== 'hunt') s = spendHours(s, cost.hours)
   s = recordProgress(s, 'reach', { zoneId }, content)
@@ -127,7 +129,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       break
   }
 
-  if (!s.fight && inSurviveScenario(s, content) && zone.enemyIds.length > 0 && rng.chance(ambushChance(zoneDanger(s, zone)))) {
+  if (!s.fight && inAmbushScenario(s, content) && zone.enemyIds.length > 0 && rng.chance(ambushChance(zoneDanger(s, zone)))) {
     events.push({ kind: 'fight', text: 'Ambush! Something was waiting for you.' })
     run(randomFight(s, zone, rng, content, 'hunt'))
   }

@@ -3,7 +3,7 @@
 
 import type { Content, ScenarioDef } from '../data/schema'
 import { SYSTEM } from '../data/names'
-import { combatantFromEnemy } from './actions'
+import { combatantFromEnemy, zoneDanger } from './actions'
 import { withCoinBonus } from './attributes'
 import { startFight } from './combat'
 import { REST_PERIOD_HOURS } from './config'
@@ -153,7 +153,7 @@ function goalMet(state: GameState, def: ScenarioDef): boolean {
   const { progress, hoursLeft, protectedSurvivorId } = state.phase
   switch (def.goal.kind) {
     case 'survive':
-      return hoursLeft <= 0
+      return hoursLeft <= 0 && !!state.phase.finalWaveBeaten
     case 'kill':
       return progress >= def.goal.count
     case 'reach':
@@ -198,6 +198,7 @@ export function checkScenarioClock(state: GameState, rng: Rng, content: Content)
       s.survivors.find((v) => v.id === phase.protectedSurvivorId)?.alive === false
     let step: Step | null = null
     if (protectedDead) step = killPlayer(s, `The one you were sworn to protect died, and the scenario took you with them.`, content, rng)
+    else if (def.goal.kind === 'survive' && phase.hoursLeft <= 0 && !phase.finalWaveBeaten) step = startFinalWave(s, def, content)
     else if (goalMet(s, def)) step = clearScenario(s, rng, content)
     else if (phase.hoursLeft <= 0) step = killPlayer(s, `Failed main scenario ${def.number}, "${def.title}". The clock ran out.`, content, rng)
     if (step) {
@@ -330,4 +331,26 @@ export function afterScenarioFight(state: GameState, result: 'won' | 'fled'): Ga
   if (state.phase.kind !== 'scenario') return state
   if (result === 'won') return { ...state, phase: { ...state.phase, progress: 1 } }
   return { ...state, pendingChoice: { source: 'scenario', scenarioId: state.phase.scenarioId } }
+}
+
+/** Marks the Final Wave beaten, so the next clock check clears the survive scenario. */
+export function afterFinalWave(state: GameState): GameState {
+  if (state.phase.kind !== 'scenario') return state
+  return { ...state, phase: { ...state.phase, finalWaveBeaten: true } }
+}
+
+/**
+ * When a survive scenario's clock hits zero, one last enemy always comes: the
+ * scenario's named Final Wave, or the toughest enemy where the player stands.
+ */
+function startFinalWave(state: GameState, def: ScenarioDef, content: Content): Step {
+  const zone = content.zones.find((z) => z.id === state.zoneId) ?? content.zones[0]
+  const local = content.enemies.filter((e) => zone.enemyIds.includes(e.id))
+  const pool = local.length > 0 ? local : content.enemies
+  const enemy = (def.finalWave && content.enemies.find((e) => e.id === def.finalWave)) || [...pool].sort((a, b) => b.hp - a.hp)[0]
+  const fight = startFight(state, combatantFromEnemy(enemy, zoneDanger(state, zone) + 1), 'final-wave', { enemyId: enemy.id })
+  return {
+    state: fight.state,
+    events: [{ kind: 'system', text: `The clock hits zero. The Final Wave arrives: ${enemy.name}! Beat it to clear "${def.title}".` }, ...fight.events],
+  }
 }

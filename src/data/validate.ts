@@ -111,6 +111,7 @@ export function validateContent(c: Content): string[] {
     if (s.number !== i + 1) problems.push(`${where}: number ${s.number} should be ${i + 1} (numbers run 1..n in order, no gaps)`)
     for (const it of s.rewards.itemIds ?? []) ref('item', it, itemIds, `${where} reward`)
     if (s.rewards.skillId) ref('skill', s.rewards.skillId, skillIds, `${where} reward`)
+    if (s.finalWave) ref('enemy', s.finalWave, enemyIds, `${where} final wave`)
     const changed = [
       ...(s.zoneChanges?.seal ?? []),
       ...(s.zoneChanges?.open ?? []),

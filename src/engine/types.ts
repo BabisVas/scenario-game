@@ -34,6 +34,8 @@ export type Phase =
       protectedSurvivorId?: string
       /** player.kills when the scenario began, for 'kills this scenario'. */
       killsAtStart?: number
+      /** Survive scenarios only: the last enemy that comes when the clock hits zero has been beaten. */
+      finalWaveBeaten?: boolean
     }
   | { kind: 'rest'; nextScenarioId: string | null; hoursLeft: number }
   | { kind: 'dead'; cause: string }
@@ -92,11 +94,11 @@ export type FightState = {
   survivorId?: string
   round: number
   cooldowns: Record<string, number>
-  origin: 'hunt' | 'scenario' | 'survivor' | 'sub'
+  origin: 'hunt' | 'scenario' | 'survivor' | 'sub' | 'final-wave'
 }
 
 export type GameState = {
-  schemaVersion: 2
+  schemaVersion: 3
   rngState: number
   createdAt: number
   lastSeenAt: number
@@ -105,6 +107,8 @@ export type GameState = {
   energyUpdatedAt: number
   worldTickAt: number
   inGameHour: number
+  /** The zone of the player's last action: where they stand. */
+  zoneId: string
   phase: Phase
   clearedScenarioIds: string[]
   subScenario: ActiveSubScenario | null

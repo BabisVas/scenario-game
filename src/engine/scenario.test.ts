@@ -8,10 +8,11 @@ import {
   protectDef, reachDef, spareDef, surviveDef, weakEnemy, withNoMetSurvivors, brutalEnemy,
 } from '../test/fixtures'
 
-test('surviving the clock clears a survive scenario and opens the ranking', () => {
+test('surviving the clock and its Final Wave clears a survive scenario and opens the ranking', () => {
   let s = inScenario(baseState(), surviveDef({ hours: 2 }));
-  s = spendHours(s, 2);
-  const r = checkScenarioClock(s, createRng(1), content).state;
+  s = checkScenarioClock(spendHours(s, 2), createRng(1), content).state;
+  s = { ...s, fight: { ...s.fight!, enemy: { ...s.fight!.enemy, hp: 1 } } };
+  const r = fightTurn(s, { kind: 'attack' }, createRng(1), content).state;
   expect(r.phase.kind).toBe('rest');
   expect(r.rankingOpen).toBe(true);
 });

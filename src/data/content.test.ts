@@ -63,3 +63,7 @@ test.each([
   const def = { id: 'hidden-x', title: 'X', announcement: 'x', trigger, goal: { kind: 'survive' }, hours: 4, rewards: { coins: 1 }, rumor: 'r' } as HiddenScenarioDef;
   expect(validateContent({ ...content, hiddenScenarios: [def] })).toContainEqual(expect.stringContaining(needle));
 });
+test('a Final Wave naming an unknown enemy is reported', () => {
+  const bad = { ...content, scenarios: [{ ...content.scenarios[0], finalWave: 'ghost-enemy' }] };
+  expect(validateContent(bad)).toContainEqual(expect.stringContaining('ghost-enemy'));
+});

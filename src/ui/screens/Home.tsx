@@ -30,7 +30,8 @@ export function Home({ game, state }: { game: Game; state: GameState }) {
   const content = useContent()
   const [tab, setTab] = useState<Tab>('scenario')
   const firstOpen = content.zones.find((z) => !(state.zones[z.id]?.sealed ?? z.startsSealed)) ?? content.zones[0]
-  const [zoneId, setZoneId] = useState(firstOpen.id)
+  const here = content.zones.find((z) => z.id === state.zoneId && !(state.zones[z.id]?.sealed ?? z.startsSealed))
+  const [zoneId, setZoneId] = useState((here ?? firstOpen).id)
   const digest = state.digest ? <DigestModal entries={state.digest} onContinue={game.dismissDigest} /> : null
 
   if (state.fight) {

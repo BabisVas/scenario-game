@@ -63,6 +63,7 @@ export function newGame(
     energyUpdatedAt: input.now,
     worldTickAt: input.now,
     inGameHour: 0,
+    zoneId: (content.zones.find((z) => !z.startsSealed) ?? content.zones[0]).id,
     phase: { kind: 'rest', nextScenarioId: first.id, hoursLeft: 0 },
     clearedScenarioIds: [],
     subScenario: null,

@@ -16,4 +16,4 @@ export const BACKGROUND_STAT_BONUS = 2
 export const CONTRACT_INTEREST = 60
 export const HOSTILE_INTEREST = -40
 export const SAVE_KEY = 'scenario-game/save/v1'
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
