@@ -18,6 +18,7 @@ export type Player = {
   skills: SkillState[]
   points: number
   kills: number
+  attributeId: string | null
 }
 
 export type Phase =
@@ -55,6 +56,7 @@ export type Survivor = {
   memories: string[]
   points: number
   deathNote?: string
+  attributeId: string | null
 }
 export type ZoneState = { sealed: boolean; dangerBonus: number }
 export type ConstellationState = {
@@ -86,7 +88,7 @@ export type FightState = {
 }
 
 export type GameState = {
-  schemaVersion: 1
+  schemaVersion: 2
   rngState: number
   createdAt: number
   lastSeenAt: number

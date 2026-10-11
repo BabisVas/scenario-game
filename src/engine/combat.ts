@@ -1,6 +1,7 @@
 // Turn-based fights. Each round: the player acts, then the enemy acts by its behavior.
 
 import type { Content } from '../data/schema'
+import { attributeRunBonus, damageMultiplier, withCoinBonus, withHealingBonus } from './attributes'
 import { recordSkillUse } from './growth'
 import { addItem, removeItem, useConsumable } from './inventory'
 import { maxHp } from './newGame'
@@ -19,6 +20,14 @@ const GUARD_EVERY = 3
 export function runChance(playerAgility: number, enemyAgility: number): number {
   return Math.min(0.9, Math.max(0.1, 0.4 + 0.05 * (playerAgility - enemyAgility)))
 }
+
+/** The player's real chance to get away, attribute included (before any escape skill). */
+export function playerRunChance(state: GameState, enemy: Combatant, content: Content): number {
+  return Math.min(0.95, runChance(state.player.stats.agility, enemy.stats.agility) + attributeRunBonus(state, content))
+}
+
+const enemyTags = (fight: FightState, content: Content): string[] =>
+  fight.survivorId ? ['survivor'] : (content.enemies.find((e) => e.id === fight.enemyId)?.tags ?? [])
 
 /** Damage from one hit. Rolls variance, then crit. */
 export function rollDamage(atk: Combatant, def: Combatant, rng: Rng, bonusPower = 0, bonusArmor = 0): { damage: number; crit: boolean } {
@@ -97,6 +106,8 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
 
   const hitEnemy = (bonusPower: number, verb: string) => {
     let { damage, crit } = rollDamage(playerCombatant(s, content), enemy, rng, bonusPower)
+    const mult = damageMultiplier(s, content, enemyTags(fight, content))
+    if (mult !== 1) damage = Math.max(1, Math.round(damage * mult))
     if (guarding) damage = Math.max(1, Math.round(damage / 2))
     enemy = { ...enemy, hp: enemy.hp - damage }
     const extra = crit ? ' Critical!' : guarding ? ' It guards.' : ''
@@ -116,7 +127,7 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
       usedSkill = { id: def.id, cooldown: def.cooldown }
       if (def.kind === 'attack') hitEnemy(Math.round(power), `use ${def.name} on`)
       else if (def.kind === 'heal') {
-        const hp = Math.min(maxHp(s.player.stats), s.player.hp + Math.round(power))
+        const hp = Math.min(maxHp(s.player.stats), s.player.hp + withHealingBonus(s, content, Math.round(power)))
         events.push({ kind: 'fight', text: `${def.name}. +${hp - s.player.hp} HP.` })
         s = { ...s, player: { ...s.player, hp } }
       } else if (def.kind === 'buff') {
@@ -167,7 +178,7 @@ function runAway(
   bonus: number,
   usedSkill: { id: string; cooldown: number } | null,
 ): FightStep {
-  if (rng.chance(Math.min(0.95, runChance(s.player.stats.agility, enemy.stats.agility) + bonus))) {
+  if (rng.chance(Math.min(0.95, playerRunChance(s, enemy, content) + bonus))) {
     events.push({ kind: 'fight', text: `You break away from ${enemy.name} and run.`, tags: ['cowardice'] })
     return { state: spendHours({ ...s, fight: null }, 1), events, result: 'fled' }
   }
@@ -221,7 +232,7 @@ function win(s: GameState, enemy: Combatant, fight: FightState, rng: Rng, conten
   let next: GameState = { ...s, fight: null, player: { ...s.player, kills: s.player.kills + 1 } }
   events.push({ kind: 'fight', text: `${enemy.name} goes down.`, tags: ['bravery'] })
   if (def) {
-    const coins = rng.int(def.coins[0], def.coins[1])
+    const coins = withCoinBonus(s, content, rng.int(def.coins[0], def.coins[1]))
     const drops = def.drops.filter((d) => rng.chance(d.chance)).map((d) => d.itemId)
     next = { ...next, player: { ...next.player, coins: next.player.coins + coins } }
     for (const itemId of drops) next = addItem(next, itemId)

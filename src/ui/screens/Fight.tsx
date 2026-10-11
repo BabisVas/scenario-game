@@ -1,4 +1,4 @@
-import { runChance } from '../../engine/combat'
+import { playerRunChance } from '../../engine/combat'
 import { maxHp } from '../../engine/newGame'
 import type { GameState } from '../../engine/types'
 import { Meter } from '../panels/StatusPanel'
@@ -12,7 +12,7 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
   if (!fight) return null
   const p = state.player
   const enemy = fight.enemy
-  const chance = Math.round(runChance(p.stats.agility, enemy.stats.agility) * 100)
+  const chance = Math.round(playerRunChance(state, enemy, content) * 100)
   const consumables = p.inventory
     .map((stack) => ({ stack, def: content.items.find((i) => i.id === stack.itemId) }))
     .filter((x) => x.def?.kind === 'consumable')

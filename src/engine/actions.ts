@@ -1,6 +1,7 @@
 // Zone actions: everything the player does on the map costs energy and in-game hours.
 
 import type { ActionId, Content, EnemyDef, ZoneDef } from '../data/schema'
+import { withCoinBonus, withHealingBonus } from './attributes'
 import { startFight } from './combat'
 import { withReactions } from './constellations'
 import { recordSkillUse } from './growth'
@@ -109,7 +110,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       break
     case 'rest': {
       const cap = maxHp(s.player.stats)
-      const hp = Math.min(cap, s.player.hp + Math.round(cap * 0.3))
+      const hp = Math.min(cap, s.player.hp + withHealingBonus(s, content, Math.round(cap * 0.3)))
       events.push({ kind: 'player', text: `You rest in the ${zone.name}. +${hp - s.player.hp} HP.` })
       s = { ...s, player: { ...s.player, hp } }
       break
@@ -136,7 +137,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
 
 function scavenge(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step {
   const danger = zoneDanger(s, zone)
-  const coins = rng.int(danger * 3, danger * 8)
+  const coins = withCoinBonus(s, content, rng.int(danger * 3, danger * 8))
   let next: GameState = { ...s, player: { ...s.player, coins: s.player.coins + coins } }
   let found = ''
   if (rng.chance(0.2)) {

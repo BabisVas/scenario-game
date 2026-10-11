@@ -3,12 +3,15 @@
 import { appendEvents } from '../engine/log'
 import { newGame } from '../engine/newGame'
 import { content } from '../data'
-import type { Content, ScenarioDef } from '../data/schema'
+import type { AttributeDef, AttributeEffect, Content, ScenarioDef } from '../data/schema'
 import type { Rng } from '../engine/rng'
-import type { Combatant, ConstellationState, GameState, Survivor } from '../engine/types'
+import type { Combatant, ConstellationState, GameState, Survivor, Tag } from '../engine/types'
+
+/** Content with no attributes, so states built from it have none: tests of other rules stay deterministic. */
+export const plainContent: Content = { ...content, attributes: [] }
 
 export function baseState(): GameState {
-  return newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, content)
+  return newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, plainContent)
 }
 
 /** An in-memory Storage, so tests never touch the real localStorage. */
@@ -101,7 +104,7 @@ export function sealZone(s: GameState, zoneId: string): GameState {
 // scenario defs below, registered when a builder is called, so the engine can
 // look a def up by the phase's scenarioId like it does in the real game.
 
-export const fixtureContent: Content = { ...content, scenarios: [...content.scenarios] }
+export const fixtureContent: Content = { ...content, scenarios: [...content.scenarios], attributes: [...content.attributes] }
 
 function register(def: ScenarioDef): ScenarioDef {
   const i = fixtureContent.scenarios.findIndex((d) => d.id === def.id)
@@ -163,7 +166,7 @@ export function clearedAll(s: GameState, c: Content): GameState {
 export function makeSurvivor(id: string, over: Partial<Survivor> = {}): Survivor {
   return {
     id, name: `Survivor ${id}`, personality: 'kind', stats: { strength: 5, agility: 5, endurance: 5, spirit: 5 },
-    hp: 100, alive: true, zoneId: 'old-market', partyId: null, met: false, attitude: 0, memories: [], points: 0, ...over,
+    hp: 100, alive: true, zoneId: 'old-market', partyId: null, met: false, attitude: 0, memories: [], points: 0, attributeId: null, ...over,
   }
 }
 
@@ -247,4 +250,24 @@ export function deadState(cause: string): GameState {
 export function playingState(): GameState {
   const now = Date.now()
   return { ...baseState(), createdAt: now, lastSeenAt: now, energyUpdatedAt: now, worldTickAt: now }
+}
+
+// --- Attribute fixtures --------------------------------------------------------
+
+export function attributeDef(effect: AttributeEffect, over: Partial<AttributeDef> = {}): AttributeDef {
+  return { id: 'fx-attr-' + effect.kind, name: 'Fixture ' + effect.kind, blurb: 'A fixture.', rarity: 'common', effect, tags: [], backgroundWeights: {}, ...over }
+}
+
+/** Gives the player a fixture attribute, registered in fixtureContent. */
+export function withAttribute(s: GameState, effect: AttributeEffect, tags: Tag[] = []): GameState {
+  const def = attributeDef(effect, { tags })
+  const i = fixtureContent.attributes.findIndex((a) => a.id === def.id)
+  if (i >= 0) fixtureContent.attributes[i] = def
+  else fixtureContent.attributes.push(def)
+  return { ...s, player: { ...s.player, attributeId: def.id } }
+}
+
+/** Shipped content whose only attribute is the given one, so every roll lands on it. */
+export function onlyAttribute(def: AttributeDef): Content {
+  return { ...content, attributes: [def] }
 }

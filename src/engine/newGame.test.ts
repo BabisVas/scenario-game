@@ -1,8 +1,9 @@
 import { newGame, maxHp } from './newGame'
 import { content } from '../data'
+import { plainContent } from '../test/fixtures'
 
 test('new game applies background bonus and starts scenario 1', () => {
-  const s = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 1000 }, content);
+  const s = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 1000 }, plainContent);
   expect(s.player.stats.agility).toBe(7);
   expect(s.player.stats.strength).toBe(5);
   expect(s.energy).toBe(100);
@@ -15,9 +16,11 @@ test('new game gives the background starting item and sets the scenario hours', 
   expect(s.player.inventory).toEqual([{ itemId: 'bike-chain', qty: 1 }]);
   expect(s.phase).toMatchObject({ hoursLeft: 12 });
 });
-test('the first log line is the first scenario announcement', () => {
+test('the scenario announcement follows the attribute line', () => {
   const s = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 1000 }, content);
-  expect(s.log[0]).toMatchObject({ kind: 'system', text: content.scenarios[0].announcement });
+  expect(s.log[1]).toMatchObject({ kind: 'system', text: content.scenarios[0].announcement });
+  const plain = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 1000 }, plainContent);
+  expect(plain.log[0]).toMatchObject({ kind: 'system', text: content.scenarios[0].announcement });
 });
 test('timestamps start at now', () => {
   const s = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 1000 }, content);

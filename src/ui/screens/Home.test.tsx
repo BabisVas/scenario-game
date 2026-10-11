@@ -3,6 +3,7 @@ import { SAVE_KEY } from '../../engine/config'
 import { loadGame } from '../../save/save'
 import { choiceDef, inScenario, makeSurvivor, memoryStorage, playingState, sealZone, spareDef } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
+import { content } from '../../data'
 
 test('home shows scenario hours and disables an action without energy', () => {
   renderWithGame({ ...playingState(), energy: 0 });
@@ -91,4 +92,22 @@ test('knowing fewer people than the limit spares them all', () => {
   const dialog = screen.getByRole('dialog', { name: /choice/i });
   expect(within(dialog).queryByRole('checkbox')).toBeNull();
   expect(within(dialog).getByText(/all of them will be spared/i)).toBeInTheDocument();
+});
+test('the status window shows your attribute and its rarity', () => {
+  const def = content.attributes[0];
+  const s = { ...playingState(), player: { ...playingState().player, attributeId: def.id } };
+  renderWithGame(s);
+  const status = screen.getByRole('region', { name: /status/i });
+  expect(within(status).getByText(def.name)).toBeInTheDocument();
+  expect(within(status).getByText(new RegExp(def.rarity, 'i'))).toBeInTheDocument();
+});
+test("a survivor's attribute shows only once you have met them", () => {
+  const [a, b] = content.attributes;
+  renderWithGame({ ...playingState(), survivors: [
+    makeSurvivor('s-0', { met: true, name: 'Mara', attributeId: a.id }),
+    makeSurvivor('s-1', { attributeId: b.id }),
+  ] });
+  const zone = screen.getByRole('region', { name: /zone/i });
+  expect(within(zone).getByText(new RegExp(a.name))).toBeInTheDocument();
+  expect(within(zone).queryByText(new RegExp(b.name))).toBeNull();
 });

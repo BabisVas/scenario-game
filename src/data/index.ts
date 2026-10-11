@@ -1,3 +1,4 @@
+import { attributes } from './attributes'
 import { backgrounds } from './backgrounds'
 import { constellations } from './constellations'
 import { enemies } from './enemies'
@@ -19,4 +20,5 @@ export const content: Content = {
   constellations,
   survivorTemplates,
   subScenarios,
+  attributes,
 }

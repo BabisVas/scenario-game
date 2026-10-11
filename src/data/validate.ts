@@ -68,6 +68,7 @@ export function validateContent(c: Content): string[] {
     scenarios: c.scenarios,
     constellations: c.constellations,
     subScenarios: c.subScenarios,
+    attributes: c.attributes,
   }
   for (const [name, list] of Object.entries(collections)) {
     const seen = new Set<string>()
@@ -92,6 +93,8 @@ export function validateContent(c: Content): string[] {
     if (!known.has(id)) problems.push(`${where}: unknown ${kind} "${id}"`)
   }
 
+  const backgroundIds = ids(c.backgrounds)
+  for (const a of c.attributes) for (const b of Object.keys(a.backgroundWeights)) ref('background', b, backgroundIds, 'attribute ' + a.id)
   for (const b of c.backgrounds) ref('item', b.startingItemId, itemIds, `background ${b.id}`)
   for (const z of c.zones) {
     if (z.actions.length === 0) problems.push(`zone ${z.id}: has no actions`)

@@ -4,6 +4,7 @@
 import type { Content, ScenarioDef } from '../data/schema'
 import { SYSTEM } from '../data/names'
 import { combatantFromEnemy } from './actions'
+import { withCoinBonus } from './attributes'
 import { startFight } from './combat'
 import { REST_PERIOD_HOURS } from './config'
 import { onScenarioCleared, withReactions } from './constellations'
@@ -100,12 +101,12 @@ export function clearScenario(state: GameState, rng: Rng, content: Content): Ste
     ...state,
     player: {
       ...state.player,
-      coins: state.player.coins + def.rewards.coins,
+      coins: state.player.coins + withCoinBonus(state, content, def.rewards.coins),
       points: state.player.points + 10 + killsThisScenario,
     },
     clearedScenarioIds: [...state.clearedScenarioIds, def.id],
   }
-  const loot: string[] = [`${def.rewards.coins} coins`]
+  const loot: string[] = [`${withCoinBonus(state, content, def.rewards.coins)} coins`]
   for (const itemId of def.rewards.itemIds ?? []) {
     s = addItem(s, itemId)
     loot.push(content.items.find((i) => i.id === itemId)?.name ?? itemId)
@@ -165,9 +166,10 @@ export function checkScenarioClock(state: GameState, rng: Rng, content: Content)
     const def = content.subScenarios.find((d) => d.id === sub.defId)
     const met = !!def && (def.goal.kind === 'kill' ? sub.progress >= def.goal.count : sub.progress >= 1)
     if (def && met) {
-      s = { ...s, subScenario: null, player: { ...s.player, coins: s.player.coins + def.rewards.coins } }
+      const coins = withCoinBonus(s, content, def.rewards.coins)
+      s = { ...s, subScenario: null, player: { ...s.player, coins: s.player.coins + coins } }
       for (const itemId of def.rewards.itemIds ?? []) s = addItem(s, itemId)
-      events.push({ kind: 'system', text: `Sub-scenario complete: ${def.title}. +${def.rewards.coins} coins.` })
+      events.push({ kind: 'system', text: `Sub-scenario complete: ${def.title}. +${coins} coins.` })
     } else if (!def || sub.hoursLeft <= 0) {
       s = { ...s, subScenario: null }
       events.push({ kind: 'system', text: `Sub-scenario over: ${def?.title ?? 'unknown'}. Time ran out. No reward, no harm done.` })

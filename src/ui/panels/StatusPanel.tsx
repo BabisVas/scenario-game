@@ -1,3 +1,4 @@
+import { attributeDef } from '../../engine/attributes'
 import { ENERGY_MAX } from '../../engine/config'
 import { maxHp } from '../../engine/newGame'
 import { msUntilNextEnergy } from '../../engine/time'
@@ -34,6 +35,7 @@ export function StatusPanel({ state, now }: { state: GameState; now: number }) {
   const content = useContent()
   const p = state.player
   const background = content.backgrounds.find((b) => b.id === p.backgroundId)
+  const attribute = attributeDef(content, p.attributeId)
   const wait = msUntilNextEnergy(state, now)
   return (
     <section className="panel" data-tab-panel="status" aria-labelledby="status-title">
@@ -43,6 +45,11 @@ export function StatusPanel({ state, now }: { state: GameState; now: number }) {
           <h3>{p.name}</h3>
           <span className="muted small">{background?.name}</span>
         </div>
+        {attribute && (
+          <p className="attribute" title={attribute.blurb}>
+            <span>{attribute.name}</span> <span className={'rarity rarity-' + attribute.rarity}>{attribute.rarity}</span>
+          </p>
+        )}
         <Meter label="HP" value={p.hp} max={maxHp(p.stats)} kind="hp" />
         <Meter
           label="Energy"

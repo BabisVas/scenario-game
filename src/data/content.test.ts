@@ -49,3 +49,7 @@ test('ids must be kebab-case', () => {
   const bad = { ...content, skills: [...content.skills, { ...content.skills[0], id: 'Bad_Id' }] };
   expect(validateContent(bad)).toContainEqual(expect.stringContaining('Bad_Id'));
 });
+test('an attribute weighted for an unknown background is reported', () => {
+  const bad = { ...content, attributes: [{ ...content.attributes[0], backgroundWeights: { 'ghost-job': 2 } }] };
+  expect(validateContent(bad)).toContainEqual(expect.stringContaining('ghost-job'));
+});

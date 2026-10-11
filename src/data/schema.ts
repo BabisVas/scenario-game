@@ -107,6 +107,26 @@ export type SubScenarioDef = {
   rewards: { coins: number; itemIds?: string[] }
 }
 
+/** What an attribute does, always on. */
+export type AttributeEffect =
+  | { kind: 'stat'; stat: StatKey; amount: number }
+  | { kind: 'coins'; percent: number }
+  | { kind: 'run'; bonus: number }
+  | { kind: 'damage-vs'; enemyTag: string; percent: number }
+  | { kind: 'healing'; percent: number }
+
+export type AttributeDef = {
+  id: string
+  name: string
+  blurb: string
+  rarity: 'common' | 'rare' | 'legendary'
+  effect: AttributeEffect
+  /** Constellations that like any of these notice the holder sooner. */
+  tags: Tag[]
+  /** Likelihood multiplier per background id; missing means 1. */
+  backgroundWeights: Record<string, number>
+}
+
 export type Content = {
   backgrounds: Background[]
   zones: ZoneDef[]
@@ -118,4 +138,5 @@ export type Content = {
   constellations: ConstellationDef[]
   survivorTemplates: SurvivorTemplate[]
   subScenarios: SubScenarioDef[]
+  attributes: AttributeDef[]
 }

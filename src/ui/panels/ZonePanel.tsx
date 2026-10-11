@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ActionId } from '../../data/schema'
 import { ACTION_COST, canAct, type CanAct } from '../../engine/actions'
+import { attributeDef } from '../../engine/attributes'
 import { sellPrice } from '../../engine/inventory'
 import { survivorsInZone, tradePrice } from '../../engine/survivors'
 import type { GameState, Survivor } from '../../engine/types'
@@ -77,6 +78,7 @@ export function ZonePanel({ state, zoneId, act }: { state: GameState; zoneId: st
 function Person({ survivor: v, state, busy, act }: { survivor: Survivor; state: GameState; busy: boolean; act: (a: PlayerAction) => void }) {
   const content = useContent()
   const [trading, setTrading] = useState(false)
+  const attribute = attributeDef(content, v.attributeId)
   const canTrade = v.attitude > -50
   const wares = content.items.filter((i) => i.kind !== 'rare')
 
@@ -85,6 +87,7 @@ function Person({ survivor: v, state, busy, act }: { survivor: Survivor; state: 
       <div className="person-row">
         <span>
           {v.name} <span className="attitude">{attitudeWord(v.attitude)}</span>
+          {attribute && <span className={'rarity rarity-' + attribute.rarity} title={attribute.blurb}>{attribute.name}</span>}
         </span>
         <span className="buttons">
           {canTrade && (

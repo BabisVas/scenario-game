@@ -2,6 +2,7 @@
 
 import type { Content, ScenarioDef, SurvivorTemplate } from '../data/schema'
 import { zoneDanger } from './actions'
+import { rollAttribute } from './attributes'
 import { startFight } from './combat'
 import { SURVIVOR_COUNT } from './config'
 import { addItem, removeItem, sellPrice } from './inventory'
@@ -50,6 +51,7 @@ export function generateSurvivors(content: Content, rng: Rng): Survivor[] {
       attitude: 0,
       memories: [],
       points: 0,
+      attributeId: rollAttribute(content, rng),
     }
   })
 }

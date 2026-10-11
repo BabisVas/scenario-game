@@ -1,6 +1,7 @@
 // Items: carrying, equipping, the system shop and consumables.
 
 import type { Content, ItemDef } from '../data/schema'
+import { withHealingBonus } from './attributes'
 import { maxHp } from './newGame'
 import type { GameState, Step } from './types'
 
@@ -73,7 +74,7 @@ export function useConsumable(state: GameState, itemId: string, content: Content
   if (!def || def.kind !== 'consumable' || !def.effect?.heal) return refuse(state, 'That cannot be used here.')
   const removed = removeItem(state, itemId)
   if (!removed) return refuse(state, `You have no ${def.name} left.`)
-  const hp = Math.min(maxHp(removed.player.stats), removed.player.hp + def.effect.heal)
+  const hp = Math.min(maxHp(removed.player.stats), removed.player.hp + withHealingBonus(removed, content, def.effect.heal))
   const healed = hp - removed.player.hp
   return {
     state: { ...removed, player: { ...removed.player, hp } },
