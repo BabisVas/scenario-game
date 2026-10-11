@@ -122,3 +122,13 @@ test('undiscovered hidden scenarios appear nowhere; a discovered one shows in th
   const panel = screen.getByRole('region', { name: /scenario/i });
   expect(within(panel).getByText(/the secret stage/i)).toBeInTheDocument();
 });
+test('trading with someone you know offers buy, rob, sell, overcharge and give', () => {
+  const s = { ...playingState(), survivors: [makeSurvivor('s-0', { met: true, name: 'Mara' })] };
+  const { storage } = renderWithGame(s);
+  fireEvent.click(screen.getByRole('button', { name: /trade with mara/i }));
+  expect(screen.getByRole('button', { name: /overcharge mara for bike chain/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /give bike chain to mara/i })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /rob mara of crowbar/i }));
+  const saved = loadGame(storage);
+  expect(saved.ok && saved.state.player.inventory.some(i => i.itemId === 'crowbar')).toBe(true);
+});

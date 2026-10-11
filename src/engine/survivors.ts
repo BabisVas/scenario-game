@@ -9,9 +9,13 @@ import { hiddenRumor } from './hidden'
 import { addItem, removeItem, sellPrice } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
-import type { Combatant, GameEvent, GameState, StatKey, Step, Survivor } from './types'
+import type { Combatant, GameEvent, GameState, StatKey, Step, Survivor, Tag } from './types'
 
 export type Memory = 'helped' | 'robbed' | 'spared' | 'attacked' | 'betrayed' | 'traded'
+export type TradeMode = 'buy' | 'sell' | 'overcharge' | 'rob'
+
+/** Helping someone whose attitude is at least this counts as loyalty. */
+const LOYAL_ATTITUDE = 30
 
 const FAVORED: Record<SurvivorTemplate['personality'], StatKey[]> = {
   brave: ['strength', 'endurance'],
@@ -228,7 +232,7 @@ export function tradeWithSurvivor(
   state: GameState,
   survivorId: string,
   itemId: string,
-  mode: 'buy' | 'sell',
+  mode: TradeMode,
   content: Content,
 ): Step {
   const v = state.survivors.find((x) => x.id === survivorId)
@@ -238,6 +242,13 @@ export function tradeWithSurvivor(
   if (v.attitude <= -50) return refuse(`${v.name} will not trade with you.`)
   if (!def) return refuse('Nobody has heard of that.')
 
+  if (mode === 'rob') {
+    if (def.kind === 'rare') return refuse(`${v.name} does not have that.`)
+    return {
+      state: remember(addItem(state, itemId), v.id, 'robbed', -40),
+      events: [{ kind: 'player', text: `You take the ${def.name} from ${v.name} and do not pay.`, tags: ['greed', 'cruelty'] }],
+    }
+  }
   if (mode === 'buy') {
     if (def.kind === 'rare') return refuse(`${v.name} is not selling that.`)
     const price = tradePrice(def.price, v.attitude)
@@ -250,11 +261,31 @@ export function tradeWithSurvivor(
   }
   const removed = removeItem(state, itemId)
   if (!removed) return refuse('You have nothing like that to sell.')
+  if (mode === 'overcharge') {
+    const sold = { ...removed, player: { ...removed.player, coins: removed.player.coins + def.price } }
+    return {
+      state: remember(sold, v.id, 'robbed', -15),
+      events: [{ kind: 'player', text: `You talk ${v.name} into paying ${def.price} coins for a ${def.name}. They will figure it out later.`, tags: ['greed'] }],
+    }
+  }
   const price = sellPrice(def)
   const sold = { ...removed, player: { ...removed.player, coins: removed.player.coins + price } }
   return {
     state: remember(sold, v.id, 'traded', 3),
     events: [{ kind: 'survivor', text: `You sell a ${def.name} to ${v.name} for ${price} coins.` }],
+  }
+}
+
+/** Helping someone: a gift. Always merciful; loyal when they already like you (30+). */
+export function giveToSurvivor(state: GameState, survivorId: string, itemId: string, content: Content): Step {
+  const v = state.survivors.find((x) => x.id === survivorId)
+  const def = content.items.find((i) => i.id === itemId)
+  const removed = removeItem(state, itemId)
+  if (!v || !v.alive || !v.met || !def || !removed) return { state, events: [{ kind: 'system', text: 'You cannot give that.' }] }
+  const tags: Tag[] = v.attitude >= LOYAL_ATTITUDE ? ['mercy', 'loyalty'] : ['mercy']
+  return {
+    state: remember(removed, v.id, 'helped', 15),
+    events: [{ kind: 'player', text: `You give ${v.name} your ${def.name}.`, tags }],
   }
 }
 

@@ -9,7 +9,7 @@ import type { Rng } from './rng'
 import { withReactions } from './constellations'
 import { killPlayer } from './death'
 import { afterFinalWave, afterScenarioFight, checkScenarioClock, recordProgress, spendHours } from './scenario'
-import type { Combatant, FightState, GameEvent, GameState, Step } from './types'
+import type { Combatant, FightState, GameEvent, GameState, Step, Tag } from './types'
 
 export type FightAction =
   | { kind: 'attack' }
@@ -120,6 +120,7 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
   if (fight.origin === 'final-wave' && isEscape(action, s, content)) return notNow(state, 'There is nowhere left to run. Beat it.')
   let usedSkill: { id: string; cooldown: number } | null = null
   let braced = 0
+  let finishedWithCrit = false
 
   const hitEnemy = (bonusPower: number, verb: string) => {
     let { damage, crit } = rollDamage(playerCombatant(s, content), enemy, rng, bonusPower)
@@ -127,6 +128,7 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
     if (mult !== 1) damage = Math.max(1, Math.round(damage * mult))
     if (guarding) damage = Math.max(1, Math.round(damage / 2))
     enemy = { ...enemy, hp: enemy.hp - damage }
+    finishedWithCrit = crit
     const extra = crit ? ' Critical!' : guarding ? ' It guards.' : ''
     events.push({ kind: 'fight', text: `You ${verb} ${enemy.name} for ${damage}.${extra}` })
   }
@@ -199,7 +201,12 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
       return runAway(s, enemy, fight, rng, content, events, 0, null)
   }
 
-  if (enemy.hp <= 0) return win(s, enemy, fight, rng, content, events)
+  if (enemy.hp <= 0) {
+    const flair: Tag[] = []
+    if ((fight.damageTaken ?? 0) === 0 || finishedWithCrit) flair.push('style')
+    if (action.kind !== 'attack') flair.push('cunning')
+    return win(s, enemy, fight, rng, content, events, flair)
+  }
   return enemyActs(s, enemy, fight, rng, content, events, braced, usedSkill)
 }
 
@@ -258,14 +265,14 @@ function enemyActs(
   const cooldowns: Record<string, number> = {}
   for (const [id, n] of Object.entries(fight.cooldowns)) if (n > 1) cooldowns[id] = n - 1
   if (usedSkill) cooldowns[usedSkill.id] = usedSkill.cooldown
-  const next: FightState = { ...fight, enemy, round: fight.round + 1, cooldowns }
+  const next: FightState = { ...fight, enemy, round: fight.round + 1, cooldowns, damageTaken: (fight.damageTaken ?? 0) + (s.player.hp - hp) }
   return { state: { ...s, fight: next, player: { ...s.player, hp } }, events, result: 'ongoing' }
 }
 
-function win(s: GameState, enemy: Combatant, fight: FightState, rng: Rng, content: Content, events: GameEvent[]): FightStep {
+function win(s: GameState, enemy: Combatant, fight: FightState, rng: Rng, content: Content, events: GameEvent[], flair: Tag[]): FightStep {
   const def = fight.enemyId ? content.enemies.find((e) => e.id === fight.enemyId) : undefined
   let next: GameState = { ...s, fight: null, player: { ...s.player, kills: s.player.kills + 1 } }
-  events.push({ kind: 'fight', text: `${enemy.name} goes down.`, tags: ['bravery'] })
+  events.push({ kind: 'fight', text: `${enemy.name} goes down.`, tags: ['bravery', ...flair] })
   if (def) {
     const coins = withCoinBonus(s, content, rng.int(def.coins[0], def.coins[1]))
     const drops = def.drops.filter((d) => rng.chance(d.chance)).map((d) => d.itemId)

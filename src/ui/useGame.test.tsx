@@ -5,7 +5,7 @@ import { createRng } from '../engine/rng'
 import type { GameState } from '../engine/types'
 import { loadGame, saveGame } from '../save/save'
 import { content } from '../data'
-import { baseState, brutalEnemy, inFight, memoryStorage, withCoins } from '../test/fixtures'
+import { baseState, brutalEnemy, inFight, makeSurvivor, memoryStorage, withCoins, withItem } from '../test/fixtures'
 import { withStorage } from '../test/render'
 
 function nearDeathInLosingFight(): GameState {
@@ -97,4 +97,10 @@ test('runAction routes a contract answer and an attack', () => {
   expect(r.state.fight).toMatchObject({ survivorId: 's-1' });
   const cruel = content.constellations.find(c => (c.likes.cruelty ?? 0) > 0)!.id;
   expect(r.state.constellations[cruel].interest).toBeGreaterThan(0);
+});
+test('runAction passes trade and gift tags on to the constellations', () => {
+  const lover = content.constellations.find(c => (c.likes.loyalty ?? 0) > 0)!;
+  const s = withItem({ ...baseState(), survivors: [makeSurvivor('s-1', { met: true, attitude: 40 })] }, 'bandage');
+  const r = runAction(s, { kind: 'give', survivorId: 's-1', itemId: 'bandage' }, createRng(1), content);
+  expect(r.state.constellations[lover.id].interest).toBeGreaterThan(s.constellations[lover.id].interest);
 });

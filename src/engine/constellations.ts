@@ -111,7 +111,7 @@ export function onScenarioCleared(state: GameState, content: Content): Step {
     if (cur.demandMetThisScenario) {
       s = { ...s, player: { ...s.player, coins: s.player.coins + def.contract.coinsPerScenario } }
       s = { ...s, constellations: { ...s.constellations, [def.id]: { ...cur, demandMetThisScenario: false } } }
-      events.push(say(def, `pays ${def.contract.coinsPerScenario} coins as promised`, rng0(def.lines.sponsor)))
+      events.push({ ...say(def, `pays ${def.contract.coinsPerScenario} coins as promised`, rng0(def.lines.sponsor)), tags: ['loyalty'] })
       if (stigma?.sealed) {
         s = { ...s, player: { ...s.player, stigma: { ...stigma, sealed: false } } }
         events.push({ kind: 'system', text: 'The seal on your stigma breaks. It answers you again.' })

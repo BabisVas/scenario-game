@@ -1,6 +1,7 @@
 import { doAction } from './actions'
 import { checkScenarioClock, recordProgress, resolveChoice, spendHours } from './scenario'
 import { worldTick } from './survivors'
+import { checkHiddenTriggers } from './hidden'
 import { createRng } from './rng'
 import type { GameState } from './types'
 import {
@@ -36,8 +37,8 @@ test('a trigger fires once and only once', () => {
 });
 test('discovery makes every constellation take notice (+15)', () => {
   hiddenDef('regular', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 });
-  const s = calm();
-  const r = act(s, 'old-market', 'rest').state;
+  const s = { ...calm(), actionCounts: { 'old-market/rest': 1 } };
+  const r = checkHiddenTriggers(s, { zoneId: 'old-market', action: 'rest' }, content).state;
   for (const c of content.constellations) expect(r.constellations[c.id].interest).toBe(s.constellations[c.id].interest + 15);
 });
 test('only one hidden scenario runs at a time', () => {

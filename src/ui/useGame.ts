@@ -13,7 +13,7 @@ import { appendEvents } from '../engine/log'
 import { newGame as createNewGame } from '../engine/newGame'
 import { createRng, type Rng } from '../engine/rng'
 import { resolveChoice } from '../engine/scenario'
-import { attackSurvivor, tradeWithSurvivor, worldTick } from '../engine/survivors'
+import { attackSurvivor, giveToSurvivor, tradeWithSurvivor, worldTick, type TradeMode } from '../engine/survivors'
 import { catchUp, refillEnergy } from '../engine/time'
 import type { GameState, StatKey, Step } from '../engine/types'
 import { deleteSave, loadGame, saveGame } from '../save/save'
@@ -29,7 +29,8 @@ export type PlayerAction =
   | { kind: 'equip'; itemId: string }
   | { kind: 'useItem'; itemId: string }
   | { kind: 'meet'; zoneId: string }
-  | { kind: 'trade'; survivorId: string; itemId: string; mode: 'buy' | 'sell' }
+  | { kind: 'trade'; survivorId: string; itemId: string; mode: TradeMode }
+  | { kind: 'give'; survivorId: string; itemId: string }
   | { kind: 'attack'; survivorId: string }
 
 export type GameStatus = 'loading' | 'no-save' | 'unreadable' | 'playing' | 'dead' | 'taken-over'
@@ -72,7 +73,9 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
     case 'useItem':
       return useConsumable(state, a.itemId, c)
     case 'trade':
-      return tradeWithSurvivor(state, a.survivorId, a.itemId, a.mode, c)
+      return withReactions(tradeWithSurvivor(state, a.survivorId, a.itemId, a.mode, c), rng, c)
+    case 'give':
+      return withReactions(giveToSurvivor(state, a.survivorId, a.itemId, c), rng, c)
     case 'attack':
       if (state.pendingChoice) return refuse(state, 'Finish what you are doing first.')
       return withReactions(attackSurvivor(state, a.survivorId), rng, c)

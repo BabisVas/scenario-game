@@ -115,6 +115,14 @@ function Person({ survivor: v, state, busy, act }: { survivor: Survivor; state: 
                 >
                   Buy {price}
                 </button>
+                <button
+                  className="btn small danger"
+                  aria-label={`Rob ${v.name} of ${i.name}`}
+                  disabled={busy}
+                  onClick={() => act({ kind: 'trade', survivorId: v.id, itemId: i.id, mode: 'rob' })}
+                >
+                  Rob
+                </button>
               </div>
             )
           })}
@@ -133,6 +141,22 @@ function Person({ survivor: v, state, busy, act }: { survivor: Survivor; state: 
                   onClick={() => act({ kind: 'trade', survivorId: v.id, itemId: def.id, mode: 'sell' })}
                 >
                   Sell {sellPrice(def)}
+                </button>
+                <button
+                  className="btn small danger"
+                  aria-label={`Overcharge ${v.name} for ${def.name} at ${def.price}`}
+                  disabled={busy}
+                  onClick={() => act({ kind: 'trade', survivorId: v.id, itemId: def.id, mode: 'overcharge' })}
+                >
+                  Overcharge {def.price}
+                </button>
+                <button
+                  className="btn small"
+                  aria-label={`Give ${def.name} to ${v.name}`}
+                  disabled={busy}
+                  onClick={() => act({ kind: 'give', survivorId: v.id, itemId: def.id })}
+                >
+                  Give
                 </button>
               </div>
             )

@@ -94,6 +94,8 @@ export type FightState = {
   survivorId?: string
   round: number
   cooldowns: Record<string, number>
+  /** Damage the player has taken in this fight. */
+  damageTaken?: number
   origin: 'hunt' | 'scenario' | 'survivor' | 'sub' | 'final-wave'
 }
 
