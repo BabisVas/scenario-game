@@ -42,10 +42,23 @@ function triggered(def: HiddenScenarioDef, state: GameState, ctx: HiddenContext,
   }
 }
 
-/** Checks every undiscovered hidden scenario's trigger. At most one runs at a time. */
+/** A goal that needs a zone that is sealed right now cannot be played: its trigger waits. */
+function goalZoneSealed(def: HiddenScenarioDef, state: GameState, content: Content): boolean {
+  const g = def.goal
+  const zoneId = g.kind === 'reach' || g.kind === 'survive' ? g.zoneId : undefined
+  if (!zoneId) return false
+  return state.zones[zoneId]?.sealed ?? !!content.zones.find((z) => z.id === zoneId)?.startsSealed
+}
+
+/**
+ * Checks every undiscovered hidden scenario's trigger. At most one runs at a
+ * time. One whose goal zone is sealed stays armed until the zone reopens.
+ */
 export function checkHiddenTriggers(state: GameState, ctx: HiddenContext, content: Content): Step {
   if (state.hiddenScenario || state.phase.kind === 'dead') return { state, events: [] }
-  const def = content.hiddenScenarios.find((d) => !state.foundHiddenIds.includes(d.id) && triggered(d, state, ctx, content))
+  const def = content.hiddenScenarios.find(
+    (d) => !state.foundHiddenIds.includes(d.id) && !goalZoneSealed(d, state, content) && triggered(d, state, ctx, content),
+  )
   if (!def) return { state, events: [] }
 
   const constellations = { ...state.constellations }

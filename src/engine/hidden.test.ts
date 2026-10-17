@@ -233,3 +233,23 @@ describe('a hidden survive goal can require a zone', () => {
     expect(r.events.some(e => /hidden scenario over/i.test(e.text))).toBe(true);
   });
 });
+
+describe('a hidden scenario whose target zone is sealed waits', () => {
+  const sealed = (s: GameState, zoneId: string, on = true): GameState => ({ ...s, zones: { ...s.zones, [zoneId]: { sealed: on, dangerBonus: 0 } } });
+  test('its trigger does not fire while the reach target is sealed', () => {
+    hiddenDef('reunion', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { goal: { kind: 'reach', zoneId: 'glass-towers' } });
+    const r = act(sealed(calm(), 'glass-towers'), 'old-market', 'rest');
+    expect(discovered(r)).toBe(false);
+    expect(r.state.foundHiddenIds).not.toContain('reunion');
+  });
+  test('the trigger stays armed and fires once the zone reopens', () => {
+    hiddenDef('reunion', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { goal: { kind: 'reach', zoneId: 'glass-towers' } });
+    const first = act(sealed(calm(), 'glass-towers'), 'old-market', 'rest').state;
+    const second = act(sealed(first, 'glass-towers', false), 'old-market', 'rest');
+    expect(discovered(second)).toBe(true);
+  });
+  test('a required survive zone that is sealed also holds the trigger back', () => {
+    hiddenDef('platform', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { goal: { kind: 'survive', zoneId: 'subway-tunnels' } });
+    expect(discovered(act(sealed(calm(), 'subway-tunnels'), 'old-market', 'rest'))).toBe(false);
+  });
+});
