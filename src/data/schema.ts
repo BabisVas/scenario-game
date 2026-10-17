@@ -45,6 +45,8 @@ export type ItemDef = {
   power: number
   price: number
   inShop: boolean
+  /** One or two lines of lore. */
+  blurb?: string
   /** What using it once does. */
   effect?: {
     heal?: number

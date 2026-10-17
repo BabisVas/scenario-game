@@ -748,6 +748,13 @@ h3 {
   flex-wrap: wrap;
 }
 
+.rows .lore {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
 .stat-pick {
   display: flex;
   flex-wrap: wrap;

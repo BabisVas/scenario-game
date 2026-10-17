@@ -125,3 +125,8 @@ test('the shop shows the sale price a carried coin charm really pays', () => {
   // Bandage sells for 5; with the charm, 6.
   expect(within(screen.getByRole('region', { name: /system shop/i })).getByRole('button', { name: /sell bandage for 6/i })).toBeInTheDocument();
 });
+test('an item shows its lore in the inventory', () => {
+  itemFixture({ id: 'fx-lore', name: 'Fixture Lore', kind: 'rare', power: 0, price: 1, inShop: false, blurb: 'FX-LORE hums one low note.' });
+  renderWithGame(withItem(playingState(), 'fx-lore'));
+  expect(screen.getByText(/FX-LORE hums one low note/)).toBeInTheDocument();
+});

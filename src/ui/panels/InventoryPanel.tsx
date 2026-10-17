@@ -38,6 +38,7 @@ export function InventoryPanel({ state, act }: { state: GameState; act: (a: Play
                       {def.power ? ` +${def.power}` : ''}
                       {itemEffectText(def)}
                     </span>
+                    {def.blurb && <span className="lore">{def.blurb}</span>}
                   </span>
                   {gear &&
                     (worn ? (
