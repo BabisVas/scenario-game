@@ -2,7 +2,7 @@
 
 > **Babis has asked not to read this file.** It is for his reviewer. Everything player-facing here is a surprise for him.
 
-Draft for Task 15. Nothing here is in the game yet: the data files are written only after this draft is approved.
+Draft for Task 15. **Everything here is now in the game** (round 6): the data files were written from this draft with the round-2 review fixes. This file stays the readable copy for review; the data files under `src/data/` are what the game runs.
 
 All player-facing text below follows the abyssal-epic-style skill in Browser Game mode:
 - adventure first, with Lovecraft and Poe as spice only;
@@ -16,45 +16,32 @@ Placeholders `«CITY»`, `«SYSTEM»` and `«ANNOUNCER»` stay until Babis picks
 
 ## Questions for the reviewer
 
-1. **Rare item purposes.** Every rare item now has a purpose. One is a trigger; the other five are one-use relics that heal or deal damage, the only effects the engine runs. Are these the right uses, or should some do something the engine does not yet support (energy, escape, a stat)? See [Items](#items-25).
-2. **The Last Train reward.** It was the Encore Ticket, which Curtain Call also gives. It is now the Salt Pearl. Keep?
-3. **Scenario 1's Final Wave** is now a fixed Feral Hound at normal strength. In the Old Market, after scenario 1's danger bump, that is a 35-HP hound that hits for about 7 to 9, depending on armor. Fair for a first boss?
-4. **Lifeboat swim.** You give up your seat, you pick 3 of the group to board, and the rest drown. If the group is 3 or smaller, nobody drowns on that path. Intended?
-5. **Death screen and "While you were away".** The proposed wording is in [Screens](#death-screen-and-while-you-were-away). Renaming the digest title from "While you were gone" to "While you were away" also means updating two UI tests at the data-file step. That is a wording change, not a rule change. OK?
-6. **Survivor greetings** are still built into the engine and are not in this draft. Should they move into data and be rewritten in this style too?
-7. **Clues.** The quiet hints to hidden scenarios are listed in [Where the clues are planted](#where-the-clues-are-planted). Too obvious, too faint, or about right?
+1. **The Regular is found by almost everyone.** Resting 5 times in the Old Market is cumulative, and the market is where everyone starts and rests through scenario 1 and its rest period. In every playtest it fired before scenario 2, usually during the rest period. Raise the count (8? 10?), make it consecutive rests, or keep it as the "welcome" hidden scenario?
+2. **Enemy stats.** The draft had none; they are now set (table under [Enemies](#enemies-15)). A seeded balance test checks five player stages against every zone. The Iron-Bristled Boar and the Paper Golem had to be softened: a fresh survivor could not beat them in danger-2 zones (3% and 0%). Do the stage targets look right to you?
+3. **Skill sources.** Eight of the twelve skills had no way to be earned (nothing taught skills except rewards). The system shop now teaches six of them for coins, and training can teach five (15% on a session that does not break through). Prices and which ones are in [Skills](#skills-12). OK?
+4. **Survivor greetings** are now in data and written in the style: five voices, four attitude bands, three or four lines each, never the same line twice in a row. See [Survivor greetings](#survivor-greetings). Any voice off?
+5. **The Harbor Cranes and the Bowl have no rest action.** A player who clears a scenario there must travel to wait out the rest period. Intended?
+6. **Lifeboat swim and fleeing the Salt Eel.** The boarders are chosen before the fight. If you flee the eel, the choice re-opens (the round-1 rule for fights in choices), with the drowned already gone. Fine, or should fleeing be refused in that fight?
 
 ---
 
-## What changed in this round (mechanics, for the reviewer)
+## What changed in this round (round 6, mechanics, for the reviewer)
 
-- **Travel.** Zones are connected (map below). You can only act where you stand.
-  - Moving to an adjacent zone costs 1 hour and 5 energy. In survive, protect and reach scenarios, arriving rolls the ambush chance of the zone you enter.
-  - Reach goals are met on arrival. Sealed zones cannot be entered.
-  - If the zone you stand in seals, you are pushed to the nearest open zone, with a log line.
-- **Protect.** The ward stays in one zone and can take 3 wounds.
-  - Each action or arrival away from the ward has a 20% chance the ward is attacked.
-  - At 0 wounds the ward dies and the scenario fails. In the ward's zone, ambushes hit you as normal.
-  - Real-time ticks never wound the ward.
-- **Bravery** now comes only from:
-  - beating an enemy at least as strong as you (health, body and gear);
-  - winning at 25% HP or less;
-  - choosing a fight option in a choice.
-- **Hidden scenarios** keep their own clock after the main scenario ends, into the rest period.
-- **Legendary attributes** have two effects each.
-- **Robbing:** a caught robbery fails. You get no item and the fight starts; win it and you take the item.
-- **Choice outcomes** can now spread news (every living survivor's attitude shifts) and make «ANNOUNCER» speak. A "nobody is spared" option is a plain button with a warning. The validator rejects outcomes the engine cannot run.
-- **Content support:**
-  - rare items with an effect can be used once;
-  - a Final Wave named by its scenario comes at normal strength (only the default is a step stronger).
-- **Content fixes:**
-  - Paying the toll is mercy only.
-  - Two sub-scenarios were renamed: *Stall Sweep* (was a scenario's name) and *Third Rail* (was a hidden scenario's name).
-  - Every rare item has a purpose, and the trigger item can be found.
-  - The duplicate rare reward is replaced.
-  - The Lifeboat swim option is rebuilt.
-  - Scenario 1's Final Wave is fixed and fair.
-  - The first-morning rumor no longer mentions events that have not happened yet.
+All of review round 2 is built, each engine change test-first in its own commit.
+
+- **Rare items** now do what nothing else does (table in [Rare](#rare-6-every-one-has-a-purpose)): a permanent stat point of your choice, a stun, a sure escape, a carried coin charm, a full heal; the Mirror Shard stays a trigger.
+- **Spirit** was not used for the player anywhere (only in survivors' own survival odds). It now adds 4% per point above 5 to skill and stigma damage and to all healing.
+- **The Mirror Shard** comes only from scavenging Riverside Park and the Subway Tunnels (8% each), never from an enemy. *Mirror, Mirror* fires on **arriving** in the Glass Towers while holding it, not on acting there.
+- **Hidden scenarios never bring a Final Wave.** Stated in the engine and tested.
+- **The Last Train** pays only if you are in the Subway Tunnels when its clock ends. Survive goals of hidden scenarios can name a required zone.
+- **A hidden scenario whose target zone is sealed** does not trigger; its trigger waits and fires on the next qualifying action after the zone reopens.
+- **Reach scenarios:** every action can be ambushed (not only arrivals). Scenarios 3 and 9 are 6 hours. A test checks that from every zone open at their start, the target is at least two hours inside the limit.
+- **The digest's opening line** says others were less fortunate only if a survivor actually died while you were away; otherwise a neutral line.
+- **Danger above 5:** ambushes cap at 50% (from danger 8); enemies keep scaling; the map shows five pips and "+N".
+- **Drops:** every enemy drop has an explicit chance (validated).
+- **Juno Castellane** is now **Saoirse Delacroix**.
+- **Also built:** the shop teaches skills and training can teach them (question 3); items show their lore in the inventory; scenario, hidden and sub-scenario notices, clears and failures, attributes and stigmas all use the bracketed system voice; explore flavor and world rumors moved into data and were restyled.
+- **Bugs found in play and fixed:** the zone panel did not follow you after travel; zone names read "the Riverside Park"; the map's breadth-first searches skipped zones (being pushed out of a sealing zone could put you two moves away); goal text read "Kill 5 beast enemies".
 
 ---
 
@@ -67,13 +54,13 @@ Each line is one move (1 hour, 5 energy). Connections go both ways. The Subway T
 | Zone | Danger | Rest? | Leads to |
 | --- | --- | --- | --- |
 | Old Market | 1 | yes | Riverside Park, Glass Towers, Subway Tunnels |
-| Riverside Park | 2 | yes | Old Market, University Hill, Harbor Cranes |
+| Riverside Park | 2 | yes | Old Market, University Hill, Harbor Cranes · scavenging can turn up the Humming Mirror Shard (8%) |
 | Glass Towers | 2 | no | Old Market, Clocktower Square, Subway Tunnels |
 | University Hill *(starts sealed)* | 2 | yes | Riverside Park, Clocktower Square |
 | Clocktower Square | 3 | yes | Glass Towers, University Hill, The Bowl |
 | Harbor Cranes | 3 | no | Riverside Park, Subway Tunnels |
 | The Bowl *(starts sealed)* | 4 | no | Clocktower Square, Subway Tunnels |
-| Subway Tunnels | 3 | no | Old Market, Glass Towers, Harbor Cranes, The Bowl |
+| Subway Tunnels | 3 | no | Old Market, Glass Towers, Harbor Cranes, The Bowl · scavenging can turn up the Humming Mirror Shard (8%) |
 
 **Moves to each reach target from every other zone**, with the tunnels allowed:
 
@@ -105,7 +92,7 @@ Most targets are 2–4 moves away. Every 1-move route to a target is either next
 
 ## How waiting is never safe
 
-1. **Ambushes.** In survive and protect scenarios, every action, resting included, has a 10% + 5% × danger chance of an ambush. Arriving in a zone rolls the same chance in survive, protect and reach scenarios.
+1. **Ambushes.** In survive, protect and reach scenarios, every action (resting included) and every arrival has a 10% + 5% × danger chance of an ambush, never more than 50%.
 2. **The Final Wave.** When a survive scenario's clock hits zero, one last enemy comes, and it must be beaten. There is no running. A named wave comes at normal strength. The default (the toughest enemy where you stand) is a step stronger.
 
 | Scenario | Hours | Chance of no ambush while only resting | Final Wave |
@@ -169,7 +156,7 @@ Somewhere a dog barks, then stops mid-bark, the way a radio stops when someone p
 ```
 [Main Scenario #3: The Long Walk]
 [Objective: Reach the Harbor Cranes.]
-[Time limit: 14 hours.]
+[Time limit: 6 hours.]
 [Reward: 90 coins. Skill: Second Wind.]
 [Failure: Death.]
 [Notice: The Old Market is closed. Anyone inside will be relocated. Gently, where possible.]
@@ -179,7 +166,7 @@ Somewhere a dog barks, then stops mid-bark, the way a radio stops when someone p
 
 The market's tarps snap shut like eyelids. The stalls stand empty, though one of them, you could swear, is still warm.
 
-- **Goal:** reach the Harbor Cranes. **Hours:** 14. **Zone changes:** seal Old Market; Subway Tunnels danger +1. **Rewards:** 90 coins, skill *Second Wind*. **Death rate:** 0.20.
+- **Goal:** reach the Harbor Cranes. **Hours:** 6. **Zone changes:** seal Old Market; Subway Tunnels danger +1. **Rewards:** 90 coins, skill *Second Wind*. **Death rate:** 0.20.
 
 ### 4. The Toll Bridge *(choice: kill someone to pass)*
 
@@ -294,7 +281,7 @@ The water is at your ankles and climbing. The boat sits low and patient. Behind 
 ```
 [Main Scenario #9: Clockwork]
 [Objective: Reach the Bowl.]
-[Time limit: 12 hours.]
+[Time limit: 6 hours.]
 [Reward: 230 coins. Skill: Vanishing Step.]
 [Failure: Death.]
 [Notice: Clocktower Square is sealed. Its residents have relocated to the Glass Towers.]
@@ -304,7 +291,7 @@ The water is at your ankles and climbing. The boat sits low and patient. Behind 
 
 You can still hear it from three streets away. The ticks are not evenly spaced anymore.
 
-- **Goal:** reach The Bowl. **Hours:** 12. **Zone changes:** seal Clocktower Square; Glass Towers danger +1. **Rewards:** 230 coins, skill *Vanishing Step*. **Death rate:** 0.33.
+- **Goal:** reach The Bowl. **Hours:** 6. **Zone changes:** seal Clocktower Square; Glass Towers danger +1. **Rewards:** 230 coins, skill *Vanishing Step*. **Death rate:** 0.33.
 
 ### 10. Curtain Call *(survive)*
 
@@ -597,18 +584,18 @@ Every item gets one line of exact mechanics, then one or two lines of lore. Rare
 
 | Item | Purpose | Price | Where from |
 | --- | --- | --- | --- |
-| Humming Mirror Shard | **trigger**: carry it into the Glass Towers | 120 | Glass Wraith drop (10%); scavenging in the Glass Towers |
-| Ink-Stained Crown | **one use:** heal 60 | 260 | hidden *Mirror, Mirror* |
-| Bell Fragment | **one use:** 50 damage | 240 | hidden *An Old Friend* |
-| Salt Pearl | **one use:** 45 damage | 280 | hidden *The Last Train* |
-| Golden Tooth | **one use:** heal 40 | 600 | hidden *The Honest Toll* |
+| Humming Mirror Shard | **trigger**: arrive in the Glass Towers carrying it | 120 | scavenging Riverside Park or the Subway Tunnels (8%) |
+| Ink-Stained Crown | **one use, outside fights:** +1 to a stat you choose, for good | 260 | hidden *Mirror, Mirror* |
+| Bell Fragment | **one use:** 40 damage, and the enemy loses its next turn | 240 | hidden *An Old Friend* |
+| Salt Pearl | **one use:** a sure escape from any fight except a Final Wave or a scenario's own fight | 280 | hidden *The Last Train* |
+| Golden Tooth | **carried, never used up:** +20% coins from every source | 600 | hidden *The Honest Toll* |
 | Encore Ticket | **one use:** heal to full | 400 | scenario 10 |
 
-- **Humming Mirror Shard.** A sliver of window that hums one low note, always the same. In the Glass Towers, the windows on every floor seem to hum back.
-- **Ink-Stained Crown.** Paper and wire, stained with ink that has never dried. Put it on for a breath and the wound remembers being skin.
-- **Bell Fragment.** A shard of bronze that still remembers its note. Strike it once and the air breaks along the line of the sound.
-- **Salt Pearl.** Found on the seat of a train that should not have been running. Crush it and the sea comes out, all at once, very angry.
-- **Golden Tooth.** The Ledger's, supposedly. Bite down and feel better. The bill comes later.
+- **Humming Mirror Shard.** A sliver of window that hums one low note, always the same. Somewhere, a lot of glass is humming back.
+- **Ink-Stained Crown.** Paper and wire, stained with ink that has never dried. Wear it once and a line of you is rewritten, for good.
+- **Bell Fragment.** A shard of bronze that still remembers its note. Strike it once and the air breaks along the line of the sound. Whatever hears it forgets, for a moment, what it was doing.
+- **Salt Pearl.** Found on the seat of a train that should not have been running. Crush it and the tide comes in between you and whatever was chasing you. It will not come for a fight the system arranged.
+- **Golden Tooth.** The Ledger's, supposedly. Keep it in your pocket and coins start finding their way to you. The bill comes later.
 - **Encore Ticket.** *Admit one. Again.* The stub has your name on it, in handwriting you almost recognize.
 
 ---
@@ -626,9 +613,9 @@ They are never listed until found, hinted only by rumors. Mechanics:
 | # | Title | Trigger | Goal | Hours | Rewards |
 | --- | --- | --- | --- | --- | --- |
 | 1 | The Regular | Rest in the Old Market 5 times | Kill 3 | 10 | 150 coins, Riot Vest |
-| 2 | Mirror, Mirror | Carry the Humming Mirror Shard into the Glass Towers | Kill 2 spirits | 8 | 220 coins, Ink-Stained Crown |
-| 3 | An Old Friend | Talk to the same survivor 4 times | Reach Clocktower Square | 8 | 200 coins, Bell Fragment |
-| 4 | The Last Train | Be in the Subway Tunnels during scenario 5 | Survive | 10 | 300 coins, **Salt Pearl** |
+| 2 | Mirror, Mirror | Arrive in the Glass Towers carrying the Humming Mirror Shard | Kill 2 spirits | 8 | 220 coins, Ink-Stained Crown |
+| 3 | An Old Friend | Talk to the same survivor 4 times | Reach Clocktower Square (its trigger waits while the square is sealed) | 8 | 200 coins, Bell Fragment |
+| 4 | The Last Train | Be in the Subway Tunnels during scenario 5 | Be in the Subway Tunnels when its clock ends | 10 | 300 coins, **Salt Pearl** |
 | 5 | Overdue | Be on University Hill during scenario 2 | Kill 3 spirits | 10 | 180 coins, skill Steady Breath |
 | 6 | The Honest Toll | Choose *Pay the fare* (`pay-toll`) in scenario 4 | Reach the Harbor Cranes | 12 | 250 coins, Harbor Hook, Golden Tooth |
 
@@ -667,7 +654,7 @@ They are never listed until found, hinted only by rumors. Mechanics:
 **4. The Last Train**
 ```
 [Hidden scenario discovered: The Last Train.]
-[Objective: Stay alive until the train arrives.]
+[Objective: Be in the Subway Tunnels when the train arrives.]
 [Time limit: 10 hours.]
 [Reward: 300 coins. Salt Pearl.]
 [Failure: The reward is withdrawn.]
@@ -721,7 +708,7 @@ Ordinary flavor text that a careful player can read as a hint:
 | Hidden scenario | Clues |
 | --- | --- |
 | The Regular | Old Market description (the warm blanket nobody owns); scenario 3 narration (a stall is still warm) |
-| Mirror, Mirror | Glass Towers description (one pane missing on every floor); Humming Mirror Shard lore (the windows hum back) |
+| Mirror, Mirror | Glass Towers description (one pane missing on every floor); Humming Mirror Shard lore (a lot of glass is humming back) |
 | An Old Friend | Clocktower Square description (four chalk marks by the door); the Dog's third contract line ("the fourth time you come back") |
 | The Last Train | Subway Tunnels description (the board shows one train); scenario 5 «ANNOUNCER» line ("We missed one. It is underground") |
 | Overdue | University Hill description (*Returns accepted at all hours*); scenario 2 «ANNOUNCER» line ("The library has not. Please do not knock.") |
@@ -777,7 +764,7 @@ You died.
 Causes:
 - Killed in a fight: `[Cause: <enemy>, round <n>.]`
 - Failed scenario: `[Cause: Main Scenario #<n>, "<title>". The time limit expired.]`
-- Lost ward: `[Cause: The witness did not survive. Neither did you.]`
+- Lost ward: `[Cause: <ward's name> did not survive. Neither did you.]`
 
 Then come the facts (scenarios cleared, days survived, kills, coins), then the constellations' last words. Then:
 
@@ -785,41 +772,75 @@ Then come the facts (scenarios cleared, days survived, kills, coins), then the c
 
 Single button: **Start a new life**
 
+### Other notices
+
+```
+[Attribute assigned: <name> (<rarity>).]
+[Main Scenario #<n> cleared: <title>.] [Rewards: <coins> coins. <items>.]
+[Hidden scenario cleared: <title>.] [Rewards: …]
+[Hidden scenario failed: <title>. The reward is withdrawn.]
+[Sub-scenario cleared: <title>.] [Rewards: …]
+[Sub-scenario failed: <title>. The reward is withdrawn.]
+[Skill level up: <name>, level <n>.]
+[Skill learned: <name>.] Something in the drill finally clicks.
+```
+
 ### While you were away (digest)
 
 Title: **While you were away**
+
+If a survivor died while you were away:
 ```
 [Elapsed time logged. You were not harmed. Others were less fortunate.]
+```
+If nobody died:
+```
+[Elapsed time logged. You were not harmed. Nobody died while you were away.]
 ```
 Then the world's news, then the **Continue** button.
 
 ---
 
-## Enemies (15, for goal checking)
+## Enemies (15)
 
-| Enemy | Tags | Lives in | Notes |
-| --- | --- | --- | --- |
-| Rat Swarm | beast | Old Market, Subway Tunnels | |
-| Feral Hound | beast | Old Market, Riverside Park | scenario 1 Final Wave |
-| Iron-Bristled Boar | beast | Riverside Park | drops Riot Vest |
-| Crane Crab | beast | Harbor Cranes | |
-| Salt Eel | beast | Harbor Cranes | Lifeboat *swim* fight |
-| Glass Wraith | spirit, monster | Glass Towers | drops Humming Mirror Shard (10%) |
-| Ink Wisp | spirit | University Hill | |
-| Rooftop Harpy | monster | Glass Towers | |
-| Tunnel Crawler | monster | Subway Tunnels | drops Crowbar |
-| Paper Golem | monster | University Hill | |
-| Bell Gargoyle | monster | Clocktower Square | scenario 5 Final Wave |
-| Clockwork Hound | monster | Clocktower Square | |
-| Arena Gladiator | monster | The Bowl | drops Stage Armor (10%) |
-| Toll-Keeper | monster | (scenario 4 only) | |
-| The Understudy | monster | (scenario 10 only) | scenario 10 Final Wave |
+Stats at danger 1; each danger level above 1 adds 15% to hp, strength and endurance.
+
+| Enemy | Tags | Lives in | Str/Agi/End | HP | Behavior | Coins | Drops |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Rat Swarm | beast | Old Market, Subway Tunnels | 4/6/2 | 22 | erratic | 2–6 | Bandage 15% |
+| Feral Hound | beast | Old Market, Riverside Park | 6/7/3 | 30 | aggressive | 4–9 | Bandage 20% |
+| Iron-Bristled Boar | beast | Riverside Park | 7/3/4 | 46 | defensive | 8–15 | Riot Vest 8%, Painkillers 15% |
+| Crane Crab | beast | Harbor Cranes | 8/3/8 | 46 | defensive | 9–16 | Painkillers 20%, Welding Apron 5% |
+| Salt Eel | beast | Harbor Cranes | 9/8/4 | 42 | aggressive | 10–18 | Energy Drink 15% |
+| Glass Wraith | spirit, monster | Glass Towers | 6/6/4 | 36 | erratic | 8–14 | Pepper Spray 15% |
+| Ink Wisp | spirit | University Hill | 5/8/2 | 26 | erratic | 6–12 | Painkillers 20% |
+| Rooftop Harpy | monster | Glass Towers | 7/8/3 | 34 | aggressive | 7–13 | Road Flare 20% |
+| Tunnel Crawler | monster | Subway Tunnels | 9/5/6 | 55 | defensive | 12–22 | Crowbar 15%, Energy Drink 10% |
+| Paper Golem | monster | University Hill | 7/2/4 | 44 | defensive | 10–16 | Bandage 20%, Rebar Spear 5% |
+| Bell Gargoyle | monster | Clocktower Square | 9/4/7 | 58 | defensive | 14–24 | Firecracker String 15% |
+| Clockwork Hound | monster | Clocktower Square | 9/8/5 | 44 | aggressive | 12–20 | Road Flare 20%, Fire Axe 5% |
+| Arena Gladiator | monster | The Bowl | 10/6/7 | 64 | defensive | 20–35 | Stage Armor 10%, Med Kit 15% |
+| Toll-Keeper | monster | (scenario 4 only) | 8/5/6 | 52 | defensive | 30–40 | none |
+| The Understudy | monster | (scenario 10 Final Wave) | 11/8/8 | 95 | aggressive | 80–120 | none |
 
 ## Skills (12)
 
-These come from scenario rewards, the shop and training. Constellations lend stigmas, not skills.
+| Skill | Kind | Power | Cooldown | Where from |
+| --- | --- | --- | --- | --- |
+| Quick Strike | attack | 6 | 2 | shop 40; training |
+| Heavy Blow | attack | 12 | 3 | shop 120 |
+| Shoulder Check | attack | 8 | 2 | shop 60; training |
+| Second Wind | heal | 25 | 4 | scenario 3 |
+| Steady Breath | heal | 12 | 2 | hidden *Overdue* |
+| Field Dressing | heal | 18 | 3 | shop 70 |
+| Iron Skin | buff | 4 | 4 | scenario 6 |
+| Brace | buff | 8 | 4 | shop 80 |
+| Battle Cry | buff | 5 | 3 | training |
+| Feint | buff | 6 | 3 | training |
+| Vanishing Step | escape | +30% | 5 | scenario 9 |
+| Sprint | escape | +20% | 3 | shop 50; training |
 
-Quick Strike (attack 6, cd 2) · Heavy Blow (attack 12, cd 3) · Shoulder Check (attack 8, cd 2) · Second Wind (heal 25, cd 4) · Steady Breath (heal 12, cd 2) · Field Dressing (heal 18, cd 3) · Iron Skin (buff 4, cd 4) · Brace (buff 8, cd 4) · Battle Cry (buff 5, cd 3) · Feint (buff 6, cd 3) · Vanishing Step (escape +30%, cd 5) · Sprint (escape +20%, cd 3)
+Lore for the new ones: **Shoulder Check.** Lead with the bone. Doors taught you this. · **Field Dressing.** Tear, wrap, knot, breathe. Your hands know it better than you do. · **Brace.** Feet wide, chin down. Let the city break on you. · **Battle Cry.** Loud enough, and for one moment even the monsters believe you. · **Feint.** Look left. Be right. Something always falls for it. · **Sprint.** Your lungs will forgive you. Eventually.
 
 ## Survivors (40, eight per personality)
 
@@ -827,7 +848,49 @@ Quick Strike (attack 6, cd 2) · Heavy Blow (attack 12, cd 3) · Shoulder Check 
 - *Cautious:* Teodor Vasquez, Yuki Moreau, Eitan Albrecht, Noor Haddad, Wim Oosterhout, Lucía Ferraro, Anselm Iwu, Meiling Sørensen
 - *Kind:* Ines Halloran, Dario Nakashima, Amara Lindgren, Tobiah Mensah, Sunniva Okafor, Ilse Marangoni, Jomo Varga, Rosalind Adebayo
 - *Ruthless:* Ruslan Achterberg, Selin Abernathy, Viggo Strand, Kasia Wróbel, Dmitri Halvorsen, Marisol Dunne, Okan Barlas, Greta Valtonen
-- *Schemer:* Pia Lindqvist, Ottilie Ferreira, Lazlo Mbatha, Corentin Aubry, Zainab Kessler, Fenna Pruitt, Ravi Okoye, Juno Castellane
+- *Schemer:* Pia Lindqvist, Ottilie Ferreira, Lazlo Mbatha, Corentin Aubry, Zainab Kessler, Fenna Pruitt, Ravi Okoye, Saoirse Delacroix
+
+---
+
+## Survivor greetings
+
+What a survivor says when you talk to them. Bands: hostile (−50 or worse; they may attack), wary (below 0), neutral, friendly (50 or better). Lines take turns, so the same person never greets you the same way twice in a row.
+
+**Brave**
+- *hostile:* <name> squares up before you are close. "Walk away. That is the only warning you get." · <name> cracks their knuckles, one by one. "I have been hoping you would come back." · <name> plants their feet in your path. "You and me. Right here. I have the time."
+- *wary:* <name> does not smile. "I remember what you did. Keep your hands where I can see them." · <name> looks you over like a door that might be rigged. "Talk fast." · <name> folds their arms. "I fought beside worse than you. Not by choice."
+- *neutral:* <name> nods. "Stick close if things get loud. They always get loud." · <name> is wrapping tape round their knuckles. "You fighting today, or just looking?" · <name> points down the street with a pipe. "Something big went that way. I am going after it." · <name> grins at the sky's new words. "Say what you like. It is never boring now."
+- *friendly:* <name> claps your shoulder hard enough to hurt. "Still alive! Good. I was not done with you." · <name> tosses you half a chocolate bar. "Eat. We have monsters to embarrass." · <name> grins. "Anyone gives you trouble, you send them to me. I mean it."
+
+**Cautious**
+- *hostile:* <name> backs away, eyes on your hands. "No closer. I have done the math on you." · <name> is already halfway to the exit. "You are the reason I check corners twice." · <name> keeps a table between you. "I know three ways out of here. You know none of them."
+- *wary:* <name> watches you for a long moment before speaking. "Why are you here?" · <name> answers a question you did not ask. "No. I have not seen anything. Nobody has." · <name> glances at the exits, then at you, then at the exits. "Make it quick."
+- *neutral:* <name> speaks without looking up from a hand-drawn map. "The ambushes come at the corners. Mostly." · <name> studies you. "You walk loud. Things here listen for that." · <name> counts something on their fingers and stops when you arrive. "Nothing. Just counting." · <name> keeps their voice low. "The board changes when nobody is reading it. Have you noticed?"
+- *friendly:* <name> lowers the knife they were holding behind their back. "Oh. It is you. Good." · <name> slips you a folded note: three safe streets, one underlined. "Do not ask how I know." · <name> almost smiles. "I saved you a spot by the wall. Best view of the doors."
+
+**Ruthless**
+- *hostile:* <name> sees you and their hand goes to their weapon. "Saves me looking for you." · <name> smiles with none of their face. "Funny. I was just thinking about you." · <name> rolls their shoulders. "No crowd. No witnesses. Lucky me."
+- *wary:* <name> sizes you up like a price tag, and does not like the number. · <name> keeps eating. "You owe me. I have not decided what yet." · <name> does not get up. "You are still breathing. That is your problem, not mine."
+- *neutral:* <name> sizes you up like a price tag. · <name> flips a coin and catches it without looking. "Everything here costs something. Remember that." · <name> wipes a blade clean on their sleeve. "Business or pleasure?" · <name> glances at your pockets before your face. "What are you carrying?"
+- *friendly:* <name> nods, which from <name> is a speech. "You are useful. Stay that way." · <name> slides a stolen bandage across the table. "Do not thank me. Thank the idiot I took it from." · <name> almost laughs. "You and I would do well, if the city lets us. It will not."
+
+**Kind**
+- *hostile:* <name> flinches at the sight of you. "Please go. I helped you once." · <name> stands in front of someone smaller. "Not them. Not today. Not you." · <name> will not look at you. "I keep a list of people I would not feed. You are on it."
+- *wary:* <name> keeps their distance. "I remember you. I want to think better of you. Help me." · <name> hesitates, then holds out a water bottle anyway. "Do not make me sorry." · <name> speaks gently, which is worse. "Whatever you did, I hope it was worth it."
+- *neutral:* <name> offers you half a sandwich. "You look like you need it." · <name> is stitching someone's coat with fishing line. "Sit. You are bleeding a little." · <name> hums while they sort bandages into piles. "Small ones for small hurts. We are low on small hurts." · <name> looks up from a sleeping stranger. "They have not woken since the sirens. I talk to them anyway."
+- *friendly:* <name> hugs you before you can stop them. "You came back! I kept your blanket dry." · <name> presses a warm tin into your hands. "Soup. Do not ask from what. It is good." · <name> laughs, tired and real. "Every time you walk in, I count one more. Keep making me count."
+
+**Schemer**
+- *hostile:* <name> smiles too wide. "Oh, it is you. I have told everyone such stories about you." · <name> raises both hands, palms open, eyes on your back. "No hard feelings. Mine are all soft." · <name> whistles once. Somewhere behind you, someone answers.
+- *wary:* <name> smiles a little too quickly. "Friends, yes? Of course yes." · <name> sighs theatrically. "You hurt my feelings. I charge interest on those." · <name> pretends to be busy with something that is not there. "I am not here. You did not see me."
+- *neutral:* <name> smiles a little too quickly. "Friends, yes?" · <name> leans in close. "I know a secret about this zone. Not for free. Nothing is." · <name> offers you a coin trick, and keeps the coin. "Lesson one." · <name> drops their voice. "Everyone is lying to you. Except me. Mostly."
+- *friendly:* <name> links an arm through yours. "My favorite investment! You are paying off beautifully." · <name> winks. "Someone is selling your name to a constellation. I bought it back. You owe me." · <name> tucks a rumor into your pocket like a coin. "That one is free. The next one is not."
+
+## Explore flavor and world rumors
+
+When exploring finds nothing else: A wall is covered in handwritten warnings. Someone has crossed out half of them and written LIES across the rest. · A radio in a parked car still plays music. Nobody comes to turn it off. You leave it on. · Footprints in the dust lead somewhere you decide not to follow. Not yet. · Someone has chalked a map on the pavement. Half of it is wrong. The wrong half is very detailed. · A vending machine hums in the dark, fully stocked, every price set to zero. Nobody has touched it. You do not either. · A dog sits on a doorstep, waiting. It watches you pass, decides you are not who it is waiting for, and goes back to waiting.
+
+World rumors (`{zone}` is the zone): Rumor: something in {zone} has started singing at night. · Rumor: a cache of supplies is buried somewhere in {zone}. · Rumor: {zone} is safer than it looks. Nobody believes it. · Rumor: someone saw the announcer's shadow over {zone}.
 
 ---
 
@@ -841,3 +904,4 @@ Quick Strike (attack 6, cd 2) · Heavy Blow (attack 12, cd 3) · Shoulder Check 
 - **Stigmas** cap at level 5 for v1.
 - **Robbing:** 30% caught (50% if brave or ruthless). A caught robbery fails and starts a fight; win it to take the item. Everyone else in the zone loses 10 attitude.
 - **Travel, the ward's 3 wounds, two-effect legendaries,** and hidden scenarios outliving their main scenario are all built.
+- **Round 6:** rare relic powers, spirit, the shard's sources and arrival trigger, no Final Wave in hidden scenarios, a required zone for The Last Train, sealed targets wait, reach-scenario ambushes and 6-hour limits, a true digest line, danger past 5, explicit drop chances, the rename, greetings in data, the digest title.
