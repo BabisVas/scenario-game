@@ -97,7 +97,7 @@ export function travel(state: GameState, toZoneId: string, rng: Rng, content: Co
   return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
 
-/** Survive scenarios are never safe: any action in one can be ambushed. */
+/** Survive, protect and reach scenarios are never safe: any action or arrival in one can be ambushed. */
 export function ambushChance(danger: number): number {
   return 0.1 + 0.05 * danger
 }
@@ -213,7 +213,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       break
   }
 
-  if (!s.fight) run(dangerAfter(s, zone, rng, content, ['survive', 'protect'], 'Ambush! Something was waiting for you.'))
+  if (!s.fight) run(dangerAfter(s, zone, rng, content, ['survive', 'protect', 'reach'], 'Ambush! Something was waiting for you.'))
 
   s = countAction(s, zoneId, action)
   const carried = state.player.inventory.map((i) => i.itemId)

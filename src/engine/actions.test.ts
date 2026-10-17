@@ -2,7 +2,7 @@ import { ambushChance, canAct, combatantFromEnemy, doAction } from './actions'
 import type { GameState } from './types'
 import { createRng } from './rng'
 import { content } from '../data'
-import { at, baseState, fixtureContent, inFight, inRest, inScenario, killDef, sealZone, seqRng, weakEnemy, withCoins } from '../test/fixtures'
+import { at, baseState, fixtureContent, inFight, inRest, inScenario, killDef, reachDef, sealZone, seqRng, weakEnemy, withCoins } from '../test/fixtures'
 
 test('scavenge spends 10 energy and 2 hours', () => {
   const s = baseState();
@@ -112,5 +112,14 @@ describe('ambushes in survive scenarios', () => {
       if (s.fight) ambushed++;
     }
     expect(ambushed).toBeGreaterThan(40);
+  });
+});
+
+describe('reach scenarios are never safe either', () => {
+  test('any action in a reach scenario can be ambushed', () => {
+    const s = inScenario(baseState(), reachDef({ hours: 20, zoneId: 'subway-tunnels' }));
+    const r = doAction(s, 'old-market', 'rest', seqRng(0.0, 0.0, 0.5), fixtureContent);
+    expect(r.state.fight).not.toBeNull();
+    expect(r.events.some(e => /ambush/i.test(e.text))).toBe(true);
   });
 });
