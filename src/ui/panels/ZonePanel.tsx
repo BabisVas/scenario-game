@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { ActionId } from '../../data/schema'
 import { ACTION_COST, canAct, type CanAct } from '../../engine/actions'
-import { attributeDef } from '../../engine/attributes'
+import { attributeDef, withCarriedBonus } from '../../engine/attributes'
 import { sellPrice } from '../../engine/inventory'
-import { survivorsInZone, tradePrice } from '../../engine/survivors'
+import { overchargePrice, survivorsInZone, tradePrice } from '../../engine/survivors'
 import type { GameState, Survivor } from '../../engine/types'
 import { attitudeWord } from '../format'
 import { useContent, type PlayerAction } from '../useGame'
@@ -103,6 +103,7 @@ function Person({ survivor: v, state, busy, act }: { survivor: Survivor; state: 
       </div>
       {trading && canTrade && (
         <div className="trade-list">
+          <p className="mono small muted">{`Each deal: ${ACTION_COST.trade.energy} energy · ${ACTION_COST.trade.hours}h`}</p>
           {wares.map((i) => {
             const price = tradePrice(i.price, v.attitude)
             return (
@@ -130,6 +131,8 @@ function Person({ survivor: v, state, busy, act }: { survivor: Survivor; state: 
           {state.player.inventory.map((stack) => {
             const def = content.items.find((i) => i.id === stack.itemId)
             if (!def) return null
+            const sale = withCarriedBonus(state, content, sellPrice(def))
+            const overcharge = withCarriedBonus(state, content, overchargePrice(def.price))
             return (
               <div className="row" key={`sell-${def.id}`}>
                 <span>
@@ -137,19 +140,19 @@ function Person({ survivor: v, state, busy, act }: { survivor: Survivor; state: 
                 </span>
                 <button
                   className="btn small"
-                  aria-label={`Sell ${def.name} to ${v.name} for ${sellPrice(def)}`}
+                  aria-label={`Sell ${def.name} to ${v.name} for ${sale}`}
                   disabled={busy}
                   onClick={() => act({ kind: 'trade', survivorId: v.id, itemId: def.id, mode: 'sell' })}
                 >
-                  Sell {sellPrice(def)}
+                  Sell {sale}
                 </button>
                 <button
                   className="btn small danger"
-                  aria-label={`Overcharge ${v.name} for ${def.name} at ${def.price}`}
+                  aria-label={`Overcharge ${v.name} for ${def.name} at ${overcharge}`}
                   disabled={busy}
                   onClick={() => act({ kind: 'trade', survivorId: v.id, itemId: def.id, mode: 'overcharge' })}
                 >
-                  Overcharge {def.price}
+                  Overcharge {overcharge}
                 </button>
                 <button
                   className="btn small"

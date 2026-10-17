@@ -224,6 +224,11 @@ export function meetSurvivor(state: GameState, zoneId: string, rng: Rng, content
   return { state: s, events }
 }
 
+/** What talking someone into overpaying gets you: more than a fair sale, less than the item is worth. */
+export function overchargePrice(price: number): number {
+  return Math.round(price * 0.75)
+}
+
 /** The price a survivor asks for an item: friends sell cheaper, enemies dearer. */
 export function tradePrice(price: number, attitude: number): number {
   return Math.round(price * (1 - attitude / 200))
@@ -261,7 +266,7 @@ export function tradeWithSurvivor(
   const removed = removeItem(state, itemId)
   if (!removed) return refuse('You have nothing like that to sell.')
   if (mode === 'overcharge') {
-    const take = withCarriedBonus(state, content, def.price)
+    const take = withCarriedBonus(state, content, overchargePrice(def.price))
     const sold = { ...removed, player: { ...removed.player, coins: removed.player.coins + take } }
     return {
       state: remember(sold, v.id, 'robbed', -15),

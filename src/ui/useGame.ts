@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { content as shippedContent } from '../data'
 import type { ActionId, Content } from '../data/schema'
-import { doAction, travel } from '../engine/actions'
+import { dealWithSurvivor, doAction, travel } from '../engine/actions'
 import { fightTurn, type FightAction } from '../engine/combat'
 import { WORLD_TICK_MS } from '../engine/config'
 import { resolveContract, withReactions } from '../engine/constellations'
@@ -79,9 +79,9 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
     case 'useItem':
       return useConsumable(state, a.itemId, c, a.stat)
     case 'trade':
-      return withReactions(tradeWithSurvivor(state, a.survivorId, a.itemId, a.mode, c, rng), rng, c)
+      return dealWithSurvivor(state, (s) => tradeWithSurvivor(s, a.survivorId, a.itemId, a.mode, c, rng), rng, c)
     case 'give':
-      return withReactions(giveToSurvivor(state, a.survivorId, a.itemId, c), rng, c)
+      return dealWithSurvivor(state, (s) => giveToSurvivor(s, a.survivorId, a.itemId, c), rng, c)
     case 'attack':
       if (state.pendingChoice) return refuse(state, 'Finish what you are doing first.')
       return withReactions(attackSurvivor(state, a.survivorId), rng, c)

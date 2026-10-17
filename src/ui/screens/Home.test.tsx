@@ -169,3 +169,12 @@ test('after travelling, the zone panel shows the zone you arrived in', () => {
   expect(within(zone).getByRole('heading', { name: /riverside park/i })).toBeInTheDocument();
   expect(within(zone).queryAllByText(/you are not here/i)).toHaveLength(0);
 });
+test('the trade panel shows what each deal really pays and what it costs', () => {
+  const s = { ...playingState(), survivors: [makeSurvivor('s-0', { met: true, name: 'Mara' })] };
+  renderWithGame(s);
+  fireEvent.click(screen.getByRole('button', { name: /trade with mara/i }));
+  // Bike Chain: price 20, sells for 10, overcharges for 15.
+  expect(screen.getByRole('button', { name: /overcharge mara for bike chain at 15/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /sell bike chain to mara for 10/i })).toBeInTheDocument();
+  expect(screen.getByText(/each deal: 5 energy · 1h/i)).toBeInTheDocument();
+});

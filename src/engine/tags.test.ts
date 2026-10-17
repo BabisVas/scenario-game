@@ -14,10 +14,10 @@ const friend = (attitude: number) => (s: GameState): GameState => ({ ...s, survi
 const byId = (s: GameState) => s.survivors.find(v => v.id === 's-1')!;
 
 describe('greed', () => {
-  test('overcharging a survivor sells at full price, and they remember being robbed', () => {
+  test('overcharging a survivor sells at three quarters of the price, and they remember being robbed', () => {
     const s = withItem(withCoins(friend(0)(baseState()), 0), 'crowbar');
     const r = tradeWithSurvivor(s, 's-1', 'crowbar', 'overcharge', content, seqRng(0.99));
-    expect(r.state.player.coins).toBe(60);
+    expect(r.state.player.coins).toBe(45);
     expect(tags(r.events)).toContain('greed');
     expect(byId(r.state)).toMatchObject({ attitude: -15, memories: ['robbed'] });
   });

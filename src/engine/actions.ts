@@ -98,6 +98,24 @@ export function travel(state: GameState, toZoneId: string, rng: Rng, content: Co
   return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
 
+/**
+ * Each deal with a survivor (a trade, a gift, a robbery) costs what the zone's
+ * trade action costs. A refused deal costs nothing. A robbery that turns into a
+ * fight has already spent its hour on the fight.
+ */
+export function dealWithSurvivor(state: GameState, deal: (s: GameState) => Step, rng: Rng, content: Content): Step {
+  const cost = ACTION_COST.trade
+  if (state.phase.kind === 'dead') return { state, events: [{ kind: 'system', text: REFUSAL.dead }] }
+  if (state.fight || state.pendingChoice) return { state, events: [{ kind: 'system', text: REFUSAL.busy }] }
+  if (state.energy < cost.energy) return { state, events: [{ kind: 'system', text: REFUSAL.energy }] }
+  const step = deal(state)
+  if (step.state === state) return step
+  let s: GameState = { ...step.state, energy: step.state.energy - cost.energy }
+  if (!s.fight) s = spendHours(s, cost.hours)
+  const clock = checkScenarioClock(s, rng, content)
+  return withReactions({ state: clock.state, events: [...step.events, ...clock.events] }, rng, content)
+}
+
 /** Survive, protect and reach scenarios are never safe: any action or arrival in one can be ambushed. */
 export function ambushChance(danger: number): number {
   return Math.min(AMBUSH_CHANCE_MAX, 0.1 + 0.05 * danger)
