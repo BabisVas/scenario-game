@@ -16,13 +16,13 @@ test('no ranking tab before the first clear', () => {
 });
 test('the digest shows on return', () => {
   renderWithGame({ ...playingState(), digest: [{ id: 1, kind: 'digest', text: 'A party formed', inGameHour: 0 }] });
-  expect(screen.getByText(/while you were gone/i)).toBeInTheDocument();
+  expect(screen.getByText(/while you were away/i)).toBeInTheDocument();
 });
 
 test('continue closes the digest', () => {
   renderWithGame({ ...playingState(), digest: [{ id: 1, kind: 'digest', text: 'A party formed', inGameHour: 0 }] });
   fireEvent.click(screen.getByRole('button', { name: /continue/i }));
-  expect(screen.queryByText(/while you were gone/i)).toBeNull();
+  expect(screen.queryByText(/while you were away/i)).toBeNull();
 });
 test('clicking an action runs it and shows the result', () => {
   const { storage } = renderWithGame(playingState());

@@ -9,6 +9,7 @@ import {
   WORLD_TICK_MS,
   WORLD_TICKS_MAX_PER_CATCHUP,
 } from './config'
+import { DIGEST_LINE_LOSSES, DIGEST_LINE_QUIET } from '../data/screens'
 import type { Rng } from './rng'
 import type { GameEvent, GameState, LogEntry, Step } from './types'
 
@@ -53,10 +54,13 @@ export function catchUp(
   // Whatever a tick did, time away never touches the player or the scenario clock.
   s = { ...s, player: state.player, phase: state.phase, inGameHour: state.inGameHour, worldTickAt: now, lastSeenAt: now }
   if (events.length > 0) {
-    const digest: LogEntry[] = events
+    // The opening line is a system message, so it must be true: losses only if someone died.
+    const living = (x: GameState) => x.survivors.filter((v) => v.alive).length
+    const opening = living(s) < living(state) ? DIGEST_LINE_LOSSES : DIGEST_LINE_QUIET
+    const news: LogEntry[] = events
       .slice(-DIGEST_MAX_ENTRIES)
-      .map((e, i) => ({ id: i + 1, kind: 'digest', text: e.text, inGameHour: state.inGameHour }))
-    s = { ...s, digest }
+      .map((e, i) => ({ id: i + 2, kind: 'digest', text: e.text, inGameHour: state.inGameHour }))
+    s = { ...s, digest: [{ id: 1, kind: 'system', text: opening, inGameHour: state.inGameHour }, ...news] }
   }
   return { state: s, events }
 }

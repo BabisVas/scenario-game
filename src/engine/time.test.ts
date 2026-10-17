@@ -2,6 +2,7 @@ import { catchUp, msUntilNextEnergy, refillEnergy } from './time'
 import { createRng } from './rng'
 import type { GameState } from './types'
 import { baseState } from '../test/fixtures'
+import { DIGEST_LINE_LOSSES, DIGEST_LINE_QUIET } from '../data/screens'
 
 test('8 hours away refills from 0 to full', () => {
   const s = { ...baseState(), energy: 0, energyUpdatedAt: 0 };
@@ -53,7 +54,7 @@ test('catch-up never touches hp, scenario hours or in-game time', () => {
   expect(r.player.hp).toBe(s.player.hp);
   expect(r.phase).toEqual(s.phase);
   expect(r.inGameHour).toBe(s.inGameHour);
-  expect(r.digest).toHaveLength(3);
+  expect(r.digest).toHaveLength(4);
 });
 test('catch-up undoes a tick that misbehaves and touches the player or the clock', () => {
   const s = baseState();
@@ -66,16 +67,34 @@ test('catch-up undoes a tick that misbehaves and touches the player or the clock
   expect(r.phase).toEqual(s.phase);
   expect(r.inGameHour).toBe(s.inGameHour);
 });
-test('the digest keeps the newest 12 events as digest entries', () => {
+test('the digest keeps the newest 12 events as digest entries, after its opening line', () => {
   let n = 0;
   const tick = (x: GameState) => ({ state: x, events: [{ kind: 'survivor' as const, text: `e${n++}` }, { kind: 'constellation' as const, text: `e${n++}` }] });
   const r = catchUp(baseState(), 24 * 3600_000, createRng(1), tick);
-  expect(r.state.digest).toHaveLength(12);
-  expect(r.state.digest!.every(d => d.kind === 'digest')).toBe(true);
+  expect(r.state.digest).toHaveLength(13);
+  expect(r.state.digest!.slice(1).every(d => d.kind === 'digest')).toBe(true);
   expect(r.state.digest!.at(-1)!.text).toBe('e143');
   expect(r.events).toHaveLength(144);
 });
 test('no events leaves no digest', () => {
   const tick = (x: GameState) => ({ state: x, events: [] });
   expect(catchUp(baseState(), 3600_000, createRng(1), tick).state.digest).toBeNull();
+});
+
+describe('the digest opens with a true line about the time away', () => {
+  const dies = (x: GameState) => ({
+    state: { ...x, survivors: x.survivors.map((v, i) => (i === 0 ? { ...v, alive: false } : v)) },
+    events: [{ kind: 'survivor' as const, text: 'someone fell' }],
+  });
+  const quiet = (x: GameState) => ({ state: x, events: [{ kind: 'survivor' as const, text: 'a party formed' }] });
+  test('when someone died while the player was away, it says others were less fortunate', () => {
+    const r = catchUp(baseState(), 3600_000, createRng(1), dies).state;
+    expect(r.digest![0]).toMatchObject({ kind: 'system', text: DIGEST_LINE_LOSSES });
+    expect(DIGEST_LINE_LOSSES).toMatch(/less fortunate/i);
+  });
+  test('when nobody died, it never says so', () => {
+    const r = catchUp(baseState(), 3600_000, createRng(1), quiet).state;
+    expect(r.digest![0]).toMatchObject({ kind: 'system', text: DIGEST_LINE_QUIET });
+    expect(DIGEST_LINE_QUIET).not.toMatch(/less fortunate/i);
+  });
 });
