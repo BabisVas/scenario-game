@@ -7,7 +7,7 @@ import { doAction, travel } from '../engine/actions'
 import { fightTurn, type FightAction } from '../engine/combat'
 import { WORLD_TICK_MS } from '../engine/config'
 import { resolveContract, withReactions } from '../engine/constellations'
-import { buyStat } from '../engine/growth'
+import { buySkill, buyStat } from '../engine/growth'
 import { buyFromShop, equip, sellToShop, useConsumable } from '../engine/inventory'
 import { appendEvents } from '../engine/log'
 import { newGame as createNewGame } from '../engine/newGame'
@@ -26,6 +26,7 @@ export type PlayerAction =
   | { kind: 'choice'; optionId: string; targetSurvivorId: string | null; spareIds?: string[] }
   | { kind: 'contract'; accept: boolean }
   | { kind: 'buyStat'; stat: StatKey }
+  | { kind: 'buySkill'; skillId: string }
   | { kind: 'shop'; mode: 'buy' | 'sell'; itemId: string }
   | { kind: 'equip'; itemId: string }
   | { kind: 'useItem'; itemId: string; stat?: StatKey }
@@ -69,6 +70,8 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
   switch (a.kind) {
     case 'buyStat':
       return buyStat(state, a.stat)
+    case 'buySkill':
+      return buySkill(state, a.skillId, c)
     case 'shop':
       return a.mode === 'buy' ? buyFromShop(state, a.itemId, c) : sellToShop(state, a.itemId, c)
     case 'equip':

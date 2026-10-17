@@ -109,3 +109,19 @@ test('a full-heal relic and a coin charm are labelled by what they do', () => {
   expect(screen.getByRole('button', { name: /use fixture ticket/i })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: /use fixture tooth/i })).toBeNull();
 });
+test('the shop teaches skills that have a price, and not ones you know', () => {
+  fixtureContent.skills = fixtureContent.skills.filter(k => k.id !== 'fx-shop-skill');
+  fixtureContent.skills.push({ id: 'fx-shop-skill', name: 'Fixture Lesson', blurb: 'b', kind: 'attack', power: 5, cooldown: 2, price: 40 });
+  const { storage } = renderWithGame(withCoins(playingState(), 50));
+  const shop = screen.getByRole('region', { name: /system shop/i });
+  fireEvent.click(within(shop).getByRole('button', { name: /learn fixture lesson for 40/i }));
+  const loaded = loadGame(storage);
+  expect(loaded.ok && loaded.state.player.skills.some(k => k.skillId === 'fx-shop-skill')).toBe(true);
+  expect(within(screen.getByRole('region', { name: /system shop/i })).queryByRole('button', { name: /learn fixture lesson/i })).toBeNull();
+});
+test('the shop shows the sale price a carried coin charm really pays', () => {
+  itemFixture({ id: 'fx-tooth-shop', name: 'Fixture Tooth', kind: 'rare', power: 0, price: 600, inShop: false, passive: { coinPercent: 20 } });
+  renderWithGame(withItem(withItem(playingState(), 'fx-tooth-shop'), 'bandage'));
+  // Bandage sells for 5; with the charm, 6.
+  expect(within(screen.getByRole('region', { name: /system shop/i })).getByRole('button', { name: /sell bandage for 6/i })).toBeInTheDocument();
+});

@@ -68,6 +68,10 @@ export type SkillDef = {
   kind: 'attack' | 'heal' | 'buff' | 'escape'
   power: number
   cooldown: number
+  /** Sold in the system shop at this price. */
+  price?: number
+  /** Training can teach it. */
+  trainable?: boolean
 }
 
 /** A constellation's lent power: a skill that is stronger and levels up to maxLevel. */

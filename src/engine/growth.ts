@@ -41,6 +41,17 @@ export function buyStat(state: GameState, stat: StatKey): Step {
   }
 }
 
+/** Learning a skill from the system shop. */
+export function buySkill(state: GameState, skillId: string, content: Content): Step {
+  const def = content.skills.find((k) => k.id === skillId)
+  const refuse = (text: string): Step => ({ state, events: [{ kind: 'system', text }] })
+  if (!def || def.price === undefined) return refuse('The shop does not teach that.')
+  if (state.player.skills.some((k) => k.skillId === skillId)) return refuse(`You already know ${def.name}.`)
+  if (state.player.coins < def.price) return refuse(`Not enough coins: ${def.name} costs ${def.price}.`)
+  const player = { ...state.player, coins: state.player.coins - def.price, skills: [...state.player.skills, { skillId, level: 1, uses: 0 }] }
+  return { state: { ...state, player }, events: [{ kind: 'player', text: `You learn ${def.name} for ${def.price} coins.` }] }
+}
+
 export function recordSkillUse(state: GameState, skillId: string): Step {
   const skill = state.player.skills.find((s) => s.skillId === skillId)
   if (!skill) return { state, events: [] }

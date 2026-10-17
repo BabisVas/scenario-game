@@ -193,7 +193,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       run(explore(s, zone, rng, content))
       break
     case 'train':
-      run(train(s, rng))
+      run(train(s, rng, content))
       break
     case 'rest': {
       const cap = maxHp(s.player.stats)
@@ -267,11 +267,20 @@ function explore(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step 
   return { state: next, events }
 }
 
-function train(s: GameState, rng: Rng): Step {
+/** A training session that does not break through may teach a new trainable skill. */
+const TEACH_CHANCE = 0.15
+
+function train(s: GameState, rng: Rng, content: Content): Step {
   if (rng.chance(0.1)) {
     const stat = rng.pick(STATS)
     const next = { ...s, player: { ...s.player, stats: { ...s.player.stats, [stat]: s.player.stats[stat] + 1 } } }
     return { state: next, events: [{ kind: 'player', text: `A breakthrough! Your ${stat} rises to ${next.player.stats[stat]}.` }] }
+  }
+  const unknown = content.skills.filter((k) => k.trainable && !s.player.skills.some((x) => x.skillId === k.id))
+  if (unknown.length > 0 && rng.chance(TEACH_CHANCE)) {
+    const def = rng.pick(unknown)
+    const next = { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId: def.id, level: 1, uses: 0 }] } }
+    return { state: next, events: [{ kind: 'system', text: `Skill learned: ${def.name}. Something in the drill finally clicks.` }] }
   }
   if (s.player.skills.length === 0) {
     return { state: s, events: [{ kind: 'player', text: 'You train until your arms shake. Nothing new clicks yet.' }] }
