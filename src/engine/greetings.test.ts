@@ -62,3 +62,8 @@ describe('greetings content', () => {
     expect(validateContent(bad)).toContainEqual(expect.stringContaining('{name}'))
   })
 })
+
+test('two strangers of the same kind do not open with the same line', () => {
+  const first = (id: string) => greet(alone(makeSurvivor(id, { name: 'Wren', personality: 'kind', attitude: 10 }))).events[0].text
+  expect(first('s-1')).not.toBe(first('s-2'))
+})

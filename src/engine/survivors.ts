@@ -206,7 +206,7 @@ export function attitudeBand(attitude: number): AttitudeBand {
  */
 function greeting(v: Survivor, content: Content): string {
   const lines = content.greetings[v.personality][attitudeBand(v.attitude)]
-  const offset = Number(v.id.replace(/D/g, '')) || 0
+  const offset = Number(v.id.replace(/\D/g, '')) || 0
   return lines[(v.timesMet + offset) % lines.length].replaceAll('{name}', v.name)
 }
 
