@@ -162,3 +162,10 @@ test('a protect scenario shows where the ward is and how many wounds they can ta
   expect(within(panel).getByText(/2 wounds left/i)).toBeInTheDocument();
   expect(within(panel).getByText(/glass towers/i)).toBeInTheDocument();
 });
+test('after travelling, the zone panel shows the zone you arrived in', () => {
+  renderWithGame(inRest(playingState(), 50));
+  fireEvent.click(within(screen.getByRole('region', { name: /map/i })).getByRole('button', { name: /travel to riverside park/i }));
+  const zone = screen.getByRole('region', { name: /zone/i });
+  expect(within(zone).getByRole('heading', { name: /riverside park/i })).toBeInTheDocument();
+  expect(within(zone).queryAllByText(/you are not here/i)).toHaveLength(0);
+});

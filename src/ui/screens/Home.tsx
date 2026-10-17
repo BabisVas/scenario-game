@@ -32,6 +32,12 @@ export function Home({ game, state }: { game: Game; state: GameState }) {
   const firstOpen = content.zones.find((z) => !(state.zones[z.id]?.sealed ?? z.startsSealed)) ?? content.zones[0]
   const here = content.zones.find((z) => z.id === state.zoneId && !(state.zones[z.id]?.sealed ?? z.startsSealed))
   const [zoneId, setZoneId] = useState((here ?? firstOpen).id)
+  // Moving (travel, or being pushed out of a sealing zone) brings the zone panel along.
+  const [standingIn, setStandingIn] = useState(state.zoneId)
+  if (standingIn !== state.zoneId) {
+    setStandingIn(state.zoneId)
+    setZoneId(state.zoneId)
+  }
   const digest = state.digest ? <DigestModal entries={state.digest} onContinue={game.dismissDigest} /> : null
 
   if (state.fight) {

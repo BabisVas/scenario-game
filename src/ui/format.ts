@@ -34,6 +34,12 @@ export function hoursText(n: number): string {
   return `${n} ${n === 1 ? 'hour' : 'hours'}`
 }
 
+/** "3 spirits", "1 beast", "2 enemies". */
+function foes(count: number, tag?: string): string {
+  if (!tag) return `${count} ${count === 1 ? 'enemy' : 'enemies'}`
+  return `${count} ${tag}${count === 1 ? '' : 's'}`
+}
+
 export function goalText(def: ScenarioDef, state: GameState, content: Content): string {
   const phase = state.phase.kind === 'scenario' ? state.phase : null
   const progress = phase?.progress ?? 0
@@ -42,7 +48,7 @@ export function goalText(def: ScenarioDef, state: GameState, content: Content): 
     case 'survive':
       return 'Survive until the clock runs out.'
     case 'kill':
-      return `Kill ${g.count}${g.enemyTag ? ` ${g.enemyTag}` : ''} ${g.count === 1 ? 'enemy' : 'enemies'} (${Math.min(progress, g.count)}/${g.count}).`
+      return `Kill ${foes(g.count, g.enemyTag)} (${Math.min(progress, g.count)}/${g.count}).`
     case 'reach':
       return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}.`
     case 'protect': {
@@ -62,7 +68,7 @@ export function subGoalText(def: SubScenarioDef, progress: number, content: Cont
 
 export function hiddenGoalText(def: HiddenScenarioDef, progress: number, content: Content): string {
   const g = def.goal
-  if (g.kind === 'kill') return `Kill ${g.count}${g.enemyTag ? ` ${g.enemyTag}` : ''} (${Math.min(progress, g.count)}/${g.count})`
+  if (g.kind === 'kill') return `Kill ${foes(g.count, g.enemyTag)} (${Math.min(progress, g.count)}/${g.count})`
   if (g.kind === 'reach') return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
   if (g.zoneId) return `Be in the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId} when its clock runs out`
   return 'Stay alive until its clock runs out'
