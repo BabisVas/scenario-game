@@ -4,7 +4,7 @@
 import type { Content, ScenarioDef } from '../data/schema'
 import { ANNOUNCER, SYSTEM } from '../data/names'
 import { combatantFromEnemy, zoneDanger } from './actions'
-import { withCoinBonus } from './attributes'
+import { withCarriedBonus, withCoinBonus } from './attributes'
 import { startFight } from './combat'
 import { REST_PERIOD_HOURS, WARD_WOUNDS } from './config'
 import { onScenarioCleared, withReactions } from './constellations'
@@ -282,7 +282,10 @@ export function resolveChoice(
   events.push(...found.events)
   const out = option.outcome
 
-  if (out.coins) s = { ...s, player: { ...s.player, coins: Math.max(0, s.player.coins + out.coins) } }
+  if (out.coins) {
+    const gain = out.coins > 0 ? withCarriedBonus(s, content, out.coins) : out.coins
+    s = { ...s, player: { ...s.player, coins: Math.max(0, s.player.coins + gain) } }
+  }
   if (out.kill && target) {
     const victim = target
     s = {

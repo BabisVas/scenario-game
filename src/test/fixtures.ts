@@ -3,7 +3,7 @@
 import { appendEvents } from '../engine/log'
 import { newGame } from '../engine/newGame'
 import { content } from '../data'
-import type { AttributeDef, AttributeEffect, Content, HiddenScenarioDef, ScenarioDef } from '../data/schema'
+import type { AttributeDef, AttributeEffect, Content, HiddenScenarioDef, ItemDef, ScenarioDef } from '../data/schema'
 import type { Rng } from '../engine/rng'
 import type { Combatant, ConstellationState, GameState, StigmaState, Survivor, Tag } from '../engine/types'
 
@@ -311,4 +311,14 @@ export function clearHiddenDefs(): void {
 /** Places the player in a zone (as if they had travelled there). */
 export function at(s: GameState, zoneId: string): GameState {
   return { ...s, zoneId }
+}
+
+// --- Item fixtures -------------------------------------------------------------
+
+/** Registers a fixture item in fixtureContent (replacing one with the same id). */
+export function itemFixture(def: ItemDef): ItemDef {
+  const i = fixtureContent.items.findIndex((x) => x.id === def.id)
+  if (i >= 0) fixtureContent.items[i] = def
+  else fixtureContent.items.push(def)
+  return def
 }

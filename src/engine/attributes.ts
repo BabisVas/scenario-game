@@ -44,9 +44,20 @@ function effectsOf<K extends AttributeEffect['kind']>(state: GameState, content:
 
 const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0)
 
-/** Coins the player actually receives when they find or earn `base`. */
+/** Percent more coins from items carried (never used up), from every source. */
+function carriedPercent(state: GameState, content: Content): number {
+  return sum(state.player.inventory.map((i) => content.items.find((d) => d.id === i.itemId)?.passive?.coinPercent ?? 0))
+}
+
+/** Coins the player actually receives when they find or earn `base`: attribute and carried charms. */
 export function withCoinBonus(state: GameState, content: Content, base: number): number {
-  const pct = sum(effectsOf(state, content, 'coins').map((e) => e.percent))
+  const pct = sum(effectsOf(state, content, 'coins').map((e) => e.percent)) + carriedPercent(state, content)
+  return pct ? Math.floor(base * (1 + pct / 100)) : base
+}
+
+/** Coins from sales and sponsors: only carried charms add to these. */
+export function withCarriedBonus(state: GameState, content: Content, base: number): number {
+  const pct = carriedPercent(state, content)
   return pct ? Math.floor(base * (1 + pct / 100)) : base
 }
 

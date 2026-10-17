@@ -744,6 +744,17 @@ h3 {
   font-size: 0.9rem;
 }
 
+.rows li.wrap {
+  flex-wrap: wrap;
+}
+
+.stat-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
 .equipped {
   color: var(--ok);
 }

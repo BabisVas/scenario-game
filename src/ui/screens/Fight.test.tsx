@@ -1,6 +1,6 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { loadGame } from '../../save/save'
-import { fixtureContent, inFight, makeSurvivor, playingState, weakEnemy, withCoins, withItem, withSkill, withStigma } from '../../test/fixtures'
+import { fixtureContent, inFight, itemFixture, makeSurvivor, playingState, weakEnemy, withCoins, withItem, withSkill, withStigma } from '../../test/fixtures'
 import { renderWithGame } from '../../test/render'
 import { content } from '../../data'
 
@@ -85,4 +85,27 @@ test('the inventory offers Use for a usable rare item', () => {
   if (!fixtureContent.items.some(i => i.id === 'fx-relic')) fixtureContent.items.push({ id: 'fx-relic', name: 'Fixture Relic', kind: 'rare', power: 0, price: 300, inShop: false, effect: { heal: 30 } });
   renderWithGame(withItem(playingState(), 'fx-relic'));
   expect(screen.getByRole('button', { name: /use fixture relic/i })).toBeInTheDocument();
+});
+
+test('a stat relic is not offered in fights', () => {
+  itemFixture({ id: 'fx-crown-ui', name: 'Fixture Crown', kind: 'rare', power: 0, price: 260, inShop: false, effect: { statPoint: 1 } });
+  renderWithGame(inFight(withItem(playingState(), 'fx-crown-ui'), weakEnemy()));
+  expect(screen.queryByRole('button', { name: /fixture crown/i })).toBeNull();
+});
+test('a stat relic asks which stat, then raises it', () => {
+  itemFixture({ id: 'fx-crown-ui', name: 'Fixture Crown', kind: 'rare', power: 0, price: 260, inShop: false, effect: { statPoint: 1 } });
+  const { storage } = renderWithGame(withItem(playingState(), 'fx-crown-ui'));
+  fireEvent.click(screen.getByRole('button', { name: /use fixture crown/i }));
+  fireEvent.click(screen.getByRole('button', { name: /^raise strength$/i }));
+  const loaded = loadGame(storage);
+  expect(loaded.ok && loaded.state.player.stats.strength).toBe(playingState().player.stats.strength + 1);
+});
+test('a full-heal relic and a coin charm are labelled by what they do', () => {
+  itemFixture({ id: 'fx-ticket-ui', name: 'Fixture Ticket', kind: 'rare', power: 0, price: 400, inShop: false, effect: { fullHeal: true } });
+  itemFixture({ id: 'fx-tooth-ui', name: 'Fixture Tooth', kind: 'rare', power: 0, price: 600, inShop: false, passive: { coinPercent: 20 } });
+  renderWithGame(withItem(withItem(playingState(), 'fx-ticket-ui'), 'fx-tooth-ui'));
+  expect(screen.getByText(/heals to full/i)).toBeInTheDocument();
+  expect(screen.getByText(/\+20% coins while carried/i)).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /use fixture ticket/i })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /use fixture tooth/i })).toBeNull();
 });

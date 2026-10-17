@@ -1,6 +1,6 @@
 // Small display helpers shared by screens and panels.
 
-import type { Content, HiddenScenarioDef, ScenarioDef, SubScenarioDef } from '../data/schema'
+import type { Content, HiddenScenarioDef, ItemDef, ScenarioDef, SubScenarioDef } from '../data/schema'
 import type { GameState, LogKind } from '../engine/types'
 
 /** "Day 2, 06:00" for an in-game hour count that started at day 1, 00:00. */
@@ -14,6 +14,20 @@ export function clockText(inGameHour: number): string {
 export function mmss(ms: number): string {
   const total = Math.max(0, Math.ceil(ms / 1000))
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+}
+
+/** What an item does, in a few words: " heals 25", " deals 40, stuns". Empty for plain gear. */
+export function itemEffectText(def: ItemDef): string {
+  const e = def.effect
+  const parts: string[] = []
+  if (e?.heal) parts.push(`heals ${e.heal}`)
+  if (e?.fullHeal) parts.push('heals to full')
+  if (e?.damage) parts.push(`deals ${e.damage}`)
+  if (e?.stun) parts.push('stuns')
+  if (e?.escape) parts.push('sure escape')
+  if (e?.statPoint) parts.push(`+${e.statPoint} to a stat`)
+  if (def.passive) parts.push(`+${def.passive.coinPercent}% coins while carried`)
+  return parts.length ? ' ' + parts.join(', ') : ''
 }
 
 export function hoursText(n: number): string {

@@ -28,7 +28,7 @@ export type PlayerAction =
   | { kind: 'buyStat'; stat: StatKey }
   | { kind: 'shop'; mode: 'buy' | 'sell'; itemId: string }
   | { kind: 'equip'; itemId: string }
-  | { kind: 'useItem'; itemId: string }
+  | { kind: 'useItem'; itemId: string; stat?: StatKey }
   | { kind: 'meet'; zoneId: string }
   | { kind: 'trade'; survivorId: string; itemId: string; mode: TradeMode }
   | { kind: 'give'; survivorId: string; itemId: string }
@@ -74,7 +74,7 @@ export function runAction(state: GameState, a: PlayerAction, rng: Rng, c: Conten
     case 'equip':
       return { state: equip(state, a.itemId, c), events: [] }
     case 'useItem':
-      return useConsumable(state, a.itemId, c)
+      return useConsumable(state, a.itemId, c, a.stat)
     case 'trade':
       return withReactions(tradeWithSurvivor(state, a.survivorId, a.itemId, a.mode, c, rng), rng, c)
     case 'give':

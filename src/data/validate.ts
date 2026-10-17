@@ -142,6 +142,14 @@ export function validateContent(c: Content): string[] {
     for (const z of c.zones) if (!reached.has(z.id)) problems.push(`zone ${z.id}: cannot be reached from ${c.zones[0].id}`)
   }
   for (const e of c.enemies) for (const d of e.drops) ref('item', d.itemId, itemIds, `enemy ${e.id} drop`)
+  for (const it of c.items) {
+    const where = `item ${it.id}`
+    const e = it.effect
+    if (e?.stun && !e.damage) problems.push(`${where}: stun needs damage`)
+    if (e?.statPoint !== undefined && (!Number.isInteger(e.statPoint) || e.statPoint < 1)) problems.push(`${where}: statPoint must be a whole number, 1 or more`)
+    if (it.passive && e) problems.push(`${where}: a passive item is never used up, so it cannot also have an effect`)
+    if (it.passive && !(it.passive.coinPercent > 0)) problems.push(`${where}: passive coinPercent must be above 0`)
+  }
   const stigmaIds = ids(c.stigmas)
   for (const k of c.constellations) ref('stigma', k.contract.stigmaId, stigmaIds, `constellation ${k.id} contract`)
 

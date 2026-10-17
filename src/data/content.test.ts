@@ -89,3 +89,16 @@ describe('choice outcomes the engine cannot run are rejected', () => {
     expect(validateContent(withOption({ outcome: { spareCount: 0, cityAttitude: -25, announce: 'x', coins: 150 } }))).toEqual([]);
   });
 });
+
+describe('item effects the engine cannot run are rejected', () => {
+  const rare = { id: 'fx-odd', name: 'Odd', kind: 'rare' as const, power: 0, price: 1, inShop: false };
+  const withItemDef = (over: object) => ({ ...content, items: [...content.items, { ...rare, ...over }] });
+  test.each([
+    ['a stun with no damage', { effect: { stun: true } }, 'stun'],
+    ['a stat point that is not a whole number above 0', { effect: { statPoint: 0.5 } }, 'statPoint'],
+    ['a passive item that also has a use', { effect: { heal: 5 }, passive: { coinPercent: 20 } }, 'passive'],
+    ['a passive coin percent of 0 or less', { passive: { coinPercent: 0 } }, 'coinPercent'],
+  ])('%s', (_, over, needle) => {
+    expect(validateContent(withItemDef(over))).toContainEqual(expect.stringContaining(needle));
+  });
+});

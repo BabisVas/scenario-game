@@ -2,7 +2,7 @@
 
 import type { Content, ScenarioDef, SurvivorTemplate } from '../data/schema'
 import { zoneDanger } from './actions'
-import { rollAttribute } from './attributes'
+import { rollAttribute, withCarriedBonus } from './attributes'
 import { startFight } from './combat'
 import { SURVIVOR_COUNT } from './config'
 import { hiddenRumor } from './hidden'
@@ -266,13 +266,14 @@ export function tradeWithSurvivor(
   const removed = removeItem(state, itemId)
   if (!removed) return refuse('You have nothing like that to sell.')
   if (mode === 'overcharge') {
-    const sold = { ...removed, player: { ...removed.player, coins: removed.player.coins + def.price } }
+    const take = withCarriedBonus(state, content, def.price)
+    const sold = { ...removed, player: { ...removed.player, coins: removed.player.coins + take } }
     return {
       state: remember(sold, v.id, 'robbed', -15),
-      events: [{ kind: 'player', text: `You talk ${v.name} into paying ${def.price} coins for a ${def.name}. They will figure it out later.`, tags: ['greed'] }],
+      events: [{ kind: 'player', text: `You talk ${v.name} into paying ${take} coins for a ${def.name}. They will figure it out later.`, tags: ['greed'] }],
     }
   }
-  const price = sellPrice(def)
+  const price = withCarriedBonus(state, content, sellPrice(def))
   const sold = { ...removed, player: { ...removed.player, coins: removed.player.coins + price } }
   return {
     state: remember(sold, v.id, 'traded', 3),

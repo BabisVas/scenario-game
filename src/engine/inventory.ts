@@ -1,9 +1,9 @@
 // Items: carrying, equipping, the system shop and consumables.
 
 import type { Content, ItemDef } from '../data/schema'
-import { withHealingBonus } from './attributes'
+import { withCarriedBonus, withHealingBonus } from './attributes'
 import { maxHp } from './newGame'
-import type { GameState, Step } from './types'
+import type { GameState, StatKey, Step } from './types'
 
 const refuse = (state: GameState, text: string): Step => ({ state, events: [{ kind: 'system', text }] })
 
@@ -61,7 +61,7 @@ export function sellToShop(state: GameState, itemId: string, content: Content): 
   const def = itemDef(content, itemId)
   const removed = removeItem(state, itemId)
   if (!def || !removed) return refuse(state, 'You have nothing like that to sell.')
-  const price = sellPrice(def)
+  const price = withCarriedBonus(state, content, sellPrice(def))
   return {
     state: { ...removed, player: { ...removed.player, coins: removed.player.coins + price } },
     events: [{ kind: 'player', text: `Sold ${def.name} for ${price} coins.` }],
@@ -73,13 +73,33 @@ export function isUsable(def: ItemDef): boolean {
   return (def.kind === 'consumable' || def.kind === 'rare') && !!def.effect
 }
 
-/** Uses a healing consumable outside a fight. Damage consumables only work in fights. */
-export function useConsumable(state: GameState, itemId: string, content: Content): Step {
+/** Heals and full heals work anywhere. */
+export function heals(def: ItemDef): boolean {
+  return !!def.effect?.heal || !!def.effect?.fullHeal
+}
+
+/**
+ * Uses an item outside a fight: a heal, or a stat relic (which needs the stat
+ * the player picks). Damage and escape items only work in fights.
+ */
+export function useConsumable(state: GameState, itemId: string, content: Content, stat?: StatKey): Step {
   const def = itemDef(content, itemId)
-  if (!def || !isUsable(def) || !def.effect?.heal) return refuse(state, 'That cannot be used here.')
+  if (!def || !isUsable(def) || !def.effect) return refuse(state, 'That cannot be used here.')
   const removed = removeItem(state, itemId)
   if (!removed) return refuse(state, `You have no ${def.name} left.`)
-  const hp = Math.min(maxHp(removed.player.stats), removed.player.hp + withHealingBonus(removed, content, def.effect.heal))
+  const points = def.effect.statPoint
+  if (points) {
+    if (!stat) return refuse(state, `Choose which stat the ${def.name} raises.`)
+    const stats = { ...removed.player.stats, [stat]: removed.player.stats[stat] + points }
+    const hp = removed.player.hp + (maxHp(stats) - maxHp(removed.player.stats))
+    return {
+      state: { ...removed, player: { ...removed.player, stats, hp } },
+      events: [{ kind: 'player', text: `You use the ${def.name}. Your ${stat} rises to ${stats[stat]}.` }],
+    }
+  }
+  if (!heals(def)) return refuse(state, 'That cannot be used here.')
+  const cap = maxHp(removed.player.stats)
+  const hp = def.effect.fullHeal ? cap : Math.min(cap, removed.player.hp + withHealingBonus(removed, content, def.effect.heal ?? 0))
   const healed = hp - removed.player.hp
   return {
     state: { ...removed, player: { ...removed.player, hp } },

@@ -43,7 +43,20 @@ export type ItemDef = {
   power: number
   price: number
   inShop: boolean
-  effect?: { heal?: number; damage?: number }
+  /** What using it once does. */
+  effect?: {
+    heal?: number
+    fullHeal?: boolean
+    damage?: number
+    /** With damage: the enemy loses its next turn. */
+    stun?: boolean
+    /** A sure escape, except from a Final Wave or a scenario's own fight. */
+    escape?: boolean
+    /** Outside fights: this much more of a stat the player picks, for good. */
+    statPoint?: number
+  }
+  /** Works while carried and is never used up. */
+  passive?: { coinPercent: number }
 }
 
 export type SkillDef = {

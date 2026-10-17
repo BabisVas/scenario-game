@@ -1,6 +1,7 @@
 // Constellations: powerful watchers who react to how the player acts.
 
 import type { ConstellationDef, Content } from '../data/schema'
+import { withCarriedBonus } from './attributes'
 import { CONTRACT_INTEREST, HOSTILE_INTEREST } from './config'
 import type { Rng } from './rng'
 import type { ConstellationState, GameEvent, GameState, Step, Tag } from './types'
@@ -39,7 +40,7 @@ export function reactTo(state: GameState, tags: Tag[], rng: Rng, content: Conten
       events.push(delta > 0 ? say(def, 'is delighted', rng.pick(def.lines.like)) : say(def, 'frowns', rng.pick(def.lines.dislike)))
     }
     if (delta > 0 && next.interest >= 20 && rng.chance(0.3)) {
-      const coins = rng.int(5, 15) + Math.floor(next.interest / 10)
+      const coins = withCarriedBonus(s, content, rng.int(5, 15) + Math.floor(next.interest / 10))
       s = { ...s, player: { ...s.player, coins: s.player.coins + coins } }
       events.push(say(def, `sponsors you ${coins} coins`, rng.pick(def.lines.sponsor)))
     }
@@ -109,9 +110,10 @@ export function onScenarioCleared(state: GameState, content: Content): Step {
     if (cur.contract !== 'active') continue
     const stigma = s.player.stigma?.constellationId === def.id ? s.player.stigma : null
     if (cur.demandMetThisScenario) {
-      s = { ...s, player: { ...s.player, coins: s.player.coins + def.contract.coinsPerScenario } }
+      const pay = withCarriedBonus(s, content, def.contract.coinsPerScenario)
+      s = { ...s, player: { ...s.player, coins: s.player.coins + pay } }
       s = { ...s, constellations: { ...s.constellations, [def.id]: { ...cur, demandMetThisScenario: false } } }
-      events.push({ ...say(def, `pays ${def.contract.coinsPerScenario} coins as promised`, rng0(def.lines.sponsor)), tags: ['loyalty'] })
+      events.push({ ...say(def, `pays ${pay} coins as promised`, rng0(def.lines.sponsor)), tags: ['loyalty'] })
       if (stigma?.sealed) {
         s = { ...s, player: { ...s.player, stigma: { ...stigma, sealed: false } } }
         events.push({ kind: 'system', text: 'The seal on your stigma breaks. It answers you again.' })

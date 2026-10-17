@@ -20,7 +20,7 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
   const stigmaCooldown = stigma ? (fight.cooldowns[STIGMA_COOLDOWN_PREFIX + stigma.stigmaId] ?? 0) : 0
   const consumables = p.inventory
     .map((stack) => ({ stack, def: content.items.find((i) => i.id === stack.itemId) }))
-    .filter((x) => !!x.def && isUsable(x.def))
+    .filter((x) => !!x.def && isUsable(x.def) && !x.def.effect?.statPoint)
 
   // The newest run of fight lines at the end of the log tells this fight's story.
   const lines = []

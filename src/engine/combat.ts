@@ -3,7 +3,7 @@
 import type { Content, SkillDef } from '../data/schema'
 import { attributeRunBonus, damageMultiplier, withCoinBonus, withHealingBonus } from './attributes'
 import { recordSkillUse, recordStigmaUse, spiritMultiplier } from './growth'
-import { addItem, isUsable, removeItem, useConsumable } from './inventory'
+import { addItem, heals, isUsable, removeItem, useConsumable } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
 import { withReactions } from './constellations'
@@ -85,6 +85,7 @@ function isEscape(action: FightAction, s: GameState, content: Content): boolean 
   if (action.kind === 'run') return true
   if (action.kind === 'skill') return content.skills.find((k) => k.id === action.skillId)?.kind === 'escape'
   if (action.kind === 'stigma') return content.stigmas.find((x) => x.id === s.player.stigma?.stigmaId)?.kind === 'escape'
+  if (action.kind === 'item') return !!content.items.find((i) => i.id === action.itemId)?.effect?.escape
   return false
 }
 
@@ -125,8 +126,12 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
   const events: GameEvent[] = []
   const guarding = enemy.behavior === 'defensive' && fight.round % GUARD_EVERY === 0
   if (fight.origin === 'final-wave' && isEscape(action, s, content)) return notNow(state, 'There is nowhere left to run. Beat it.')
+  if (fight.origin === 'scenario' && action.kind === 'item' && isEscape(action, s, content)) {
+    return notNow(state, 'The scenario holds you here. This fight has to be finished.')
+  }
   let usedSkill: { id: string; cooldown: number } | null = null
   let braced = 0
+  let stunned = false
   let finishedWithCrit = false
 
   const hitEnemy = (bonusPower: number, verb: string, ability = false) => {
@@ -190,19 +195,26 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
     }
     case 'item': {
       const def = content.items.find((i) => i.id === action.itemId)
-      if (!def || !isUsable(def) || !def.effect) return notNow(state, 'That cannot be used in a fight.')
+      if (!def || !isUsable(def) || !def.effect || def.effect.statPoint) return notNow(state, 'That cannot be used in a fight.')
+      if (def.effect.escape) {
+        const removed = removeItem(s, def.id)
+        if (!removed) return notNow(state, `You have no ${def.name} left.`)
+        events.push({ kind: 'fight', text: `You use the ${def.name}. ${enemy.name} loses you completely.`, tags: ['cowardice'] })
+        return { state: spendHours({ ...removed, fight: null }, 1), events, result: 'fled' }
+      }
       if (def.effect.damage) {
         const removed = removeItem(s, def.id)
         if (!removed) return notNow(state, `You have no ${def.name} left.`)
         s = removed
         enemy = { ...enemy, hp: enemy.hp - def.effect.damage }
+        stunned = !!def.effect.stun
         events.push({ kind: 'fight', text: `You use the ${def.name}. ${enemy.name} takes ${def.effect.damage}.` })
-      } else {
+      } else if (heals(def)) {
         const used = useConsumable(s, def.id, content)
         if (used.state === s) return notNow(state, used.events[0]?.text ?? 'That cannot be used.')
         s = used.state
         events.push(...used.events.map((e) => ({ ...e, kind: 'fight' as const })))
-      }
+      } else return notNow(state, 'That cannot be used in a fight.')
       break
     }
     case 'run':
@@ -217,7 +229,7 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
     if (action.kind !== 'attack') flair.push('cunning')
     return win(s, enemy, fight, rng, content, events, flair)
   }
-  return enemyActs(s, enemy, fight, rng, content, events, braced, usedSkill)
+  return enemyActs(s, enemy, fight, rng, content, events, braced, usedSkill, stunned)
 }
 
 function runAway(
@@ -247,17 +259,21 @@ function enemyActs(
   events: GameEvent[],
   braced: number,
   usedSkill: { id: string; cooldown: number } | null,
+  stunned = false,
 ): FightStep {
   const guarding = enemy.behavior === 'defensive' && fight.round % GUARD_EVERY === 0
   let attacks = 1
-  if (enemy.behavior === 'erratic') {
+  if (stunned) {
+    attacks = 0
+    events.push({ kind: 'fight', text: `${enemy.name} reels and loses its turn.` })
+  } else if (enemy.behavior === 'erratic') {
     const roll = rng.next()
     attacks = roll < 0.25 ? 2 : roll < 0.5 ? 0 : 1
   }
 
   let hp = s.player.hp
   if (attacks === 0) {
-    events.push({ kind: 'fight', text: `${enemy.name} twitches and hesitates.` })
+    if (!stunned) events.push({ kind: 'fight', text: `${enemy.name} twitches and hesitates.` })
   } else {
     const me = playerCombatant(s, content)
     let total = 0
