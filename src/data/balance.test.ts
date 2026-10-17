@@ -2,6 +2,7 @@
 // and the enemies they meet then. Attack only, no items: a floor, not a forecast.
 
 import { content } from '.'
+import { scenarioFightDanger } from '../engine/scenario'
 import { winRate } from '../test/balance'
 
 const zone = (id: string) => content.zones.find((z) => z.id === id)!
@@ -33,13 +34,18 @@ describe('each stage of the game can win the fights it meets', () => {
 })
 
 describe('the named fights are fair for when they come', () => {
+  // Fights a scenario arranges come at its own strength, wherever the player stands.
+  const danger = (id: string) => scenarioFightDanger(content.scenarios.find((d) => d.id === id)!.number)
   test.each([
-    ['first Final Wave', 'fresh', 'feral-hound', 2, 0.85],
-    ['toll-keeper', 'early', 'toll-keeper', 2, 0.75],
-    ['second Final Wave', 'mid', 'bell-gargoyle', 3, 0.5],
-    ['the swim', 'late', 'salt-eel', 3, 0.75],
-    ['last Final Wave', 'finale', 'the-understudy', 4, 0.4],
-  ] as [string, string, string, number, number][])('%s', (_, profile, enemyId, danger, floor) => {
-    expect(winRate(profile, enemyId, danger)).toBeGreaterThanOrEqual(floor)
+    ['first Final Wave', 'fresh', 'feral-hound', 's01', 0.85],
+    ['toll-keeper', 'early', 'toll-keeper', 's04', 0.75],
+    ['second Final Wave', 'mid', 'bell-gargoyle', 's05', 0.75],
+    ['the swim', 'late', 'salt-eel', 's08', 0.75],
+    ['last Final Wave', 'finale', 'the-understudy', 's10', 0.4],
+  ] as [string, string, string, string, number][])('%s', (_, profile, enemyId, scenarioId, floor) => {
+    expect(winRate(profile, enemyId, danger(scenarioId))).toBeGreaterThanOrEqual(floor)
+  })
+  test('the named waves are the ones the scenarios name', () => {
+    expect(['s01', 's05', 's10'].map((id) => content.scenarios.find((d) => d.id === id)!.finalWave)).toEqual(['feral-hound', 'bell-gargoyle', 'the-understudy'])
   })
 })

@@ -1,5 +1,5 @@
 import { checkScenarioClock, spendHours } from './scenario'
-import { combatantFromEnemy, doAction, zoneDanger } from './actions'
+import { combatantFromEnemy, doAction } from './actions'
 import { fightTurn } from './combat'
 import { createRng } from './rng'
 import type { GameState } from './types'
@@ -44,14 +44,21 @@ test('protect scenarios have ambushes too', () => {
   const s = { ...inScenario(baseState(), protectDef({ hours: 20 })), survivors: [makeSurvivor('s-0')] };
   expect(doAction(s, 'old-market', 'rest', seqRng(0.0, 0.0, 0.5), content).state.fight).not.toBeNull();
 });
-test('a named Final Wave comes at the normal strength of where you stand; the default one is a step stronger', () => {
-  const named = surviveDef({ hours: 2 });
-  content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = { ...named, finalWave: 'feral-hound' };
-  const hound = content.enemies.find(e => e.id === 'feral-hound')!;
-  const s = spendHours(inScenario(baseState(), { ...named, finalWave: 'feral-hound' }), 2);
-  const here = zoneDanger(s, content.zones.find(z => z.id === s.zoneId)!);
-  expect(checkScenarioClock(s, createRng(1), content).state.fight!.enemy.maxHp).toBe(combatantFromEnemy(hound, here).maxHp);
-  content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = named;
+test('the default Final Wave is the toughest enemy where you stand, a step stronger', () => {
   const strongest = content.enemies.filter(e => content.zones.find(z => z.id === 'old-market')!.enemyIds.includes(e.id)).sort((a, b) => b.hp - a.hp)[0];
   expect(checkScenarioClock(clockOut(), createRng(1), content).state.fight!.enemy.maxHp).toBeGreaterThan(strongest.hp);
+});
+
+test("a named Final Wave's strength is the scenario's own, wherever the player stands", () => {
+  const named = { ...surviveDef({ hours: 2 }), finalWave: 'feral-hound', number: 5 };
+  content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = named;
+  const hound = content.enemies.find(e => e.id === 'feral-hound')!;
+  const at = (zoneId: string, bonus: number) => {
+    const s = spendHours(inScenario({ ...baseState(), zoneId, zones: { ...baseState().zones, [zoneId]: { sealed: false, dangerBonus: bonus } } }, named), 2);
+    return checkScenarioClock(s, createRng(1), content).state.fight!.enemy.maxHp;
+  };
+  // Scenario 5: danger 1 + floor(5 / 3) = 2, the same as fights a scenario arranges.
+  expect(at('old-market', 0)).toBe(combatantFromEnemy(hound, 2).maxHp);
+  expect(at('subway-tunnels', 4)).toBe(combatantFromEnemy(hound, 2).maxHp);
+  content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = surviveDef({ hours: 2 });
 });
