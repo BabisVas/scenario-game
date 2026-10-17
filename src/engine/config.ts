@@ -19,6 +19,8 @@ export const SAVE_KEY = 'scenario-game/save/v1'
 /** Protect scenarios: wounds the ward can take, and the chance per action away from them. */
 export const WARD_WOUNDS = 3
 export const WARD_ATTACK_CHANCE = 0.2
+/** Danger can climb past 5 as scenarios stack it; ambushes stop getting likelier here. */
+export const AMBUSH_CHANCE_MAX = 0.5
 /** Spirit: skill and stigma damage and all healing grow by this much per point above STAT_START. */
 export const SPIRIT_PER_POINT = 0.04
 export const SCHEMA_VERSION = 3

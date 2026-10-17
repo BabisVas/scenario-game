@@ -10,7 +10,7 @@ import { addItem } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
 import { findTrader, meetSurvivor } from './survivors'
-import { WARD_ATTACK_CHANCE, WARD_WOUNDS } from './config'
+import { AMBUSH_CHANCE_MAX, WARD_ATTACK_CHANCE, WARD_WOUNDS } from './config'
 import { checkScenarioClock, recordProgress, spendHours } from './scenario'
 import type { Combatant, GameEvent, GameState, StatKey, Step, Survivor, ZoneState } from './types'
 
@@ -99,7 +99,7 @@ export function travel(state: GameState, toZoneId: string, rng: Rng, content: Co
 
 /** Survive, protect and reach scenarios are never safe: any action or arrival in one can be ambushed. */
 export function ambushChance(danger: number): number {
-  return 0.1 + 0.05 * danger
+  return Math.min(AMBUSH_CHANCE_MAX, 0.1 + 0.05 * danger)
 }
 
 function inScenarioOf(state: GameState, content: Content, kinds: string[]): boolean {

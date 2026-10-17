@@ -8,7 +8,7 @@ export function DangerPips({ danger }: { danger: number }) {
     <span className="pips" aria-label={`danger ${danger}`}>
       {'●'.repeat(shown)}
       <span className="off">{'○'.repeat(5 - shown)}</span>
-      {danger > 5 ? '+' : ''}
+      {danger > 5 ? `+${danger - 5}` : ''}
     </span>
   )
 }

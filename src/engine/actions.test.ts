@@ -123,3 +123,18 @@ describe('reach scenarios are never safe either', () => {
     expect(r.events.some(e => /ambush/i.test(e.text))).toBe(true);
   });
 });
+
+describe('danger above 5', () => {
+  test('the ambush chance keeps rising past danger 5 but never above 50%', () => {
+    expect(ambushChance(7)).toBeCloseTo(0.45);
+    expect(ambushChance(8)).toBeCloseTo(0.5);
+    expect(ambushChance(12)).toBeCloseTo(0.5);
+  });
+  test('enemies keep scaling past danger 5', () => {
+    const def = content.enemies[0];
+    const at7 = combatantFromEnemy(def, 7);
+    expect(at7.hp).toBe(Math.round(def.hp * 1.9));
+    expect(at7.stats.strength).toBe(Math.round(def.stats.strength * 1.9));
+    expect(at7.hp).toBeGreaterThan(combatantFromEnemy(def, 5).hp);
+  });
+});
