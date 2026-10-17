@@ -21,7 +21,9 @@ Placeholders `«CITY»`, `«SYSTEM»` and `«ANNOUNCER»` stay until Babis picks
 3. **Skill sources.** Eight of the twelve skills had no way to be earned (nothing taught skills except rewards). The system shop now teaches six of them for coins, and training can teach five (15% on a session that does not break through). Prices and which ones are in [Skills](#skills-12). OK?
 4. **Survivor greetings** are now in data and written in the style: five voices, four attitude bands, three or four lines each, never the same line twice in a row. See [Survivor greetings](#survivor-greetings). Any voice off?
 5. **The Harbor Cranes and the Bowl have no rest action.** A player who clears a scenario there must travel to wait out the rest period. Intended?
-6. **Lifeboat swim and fleeing the Salt Eel.** The boarders are chosen before the fight. If you flee the eel, the choice re-opens (the round-1 rule for fights in choices), with the drowned already gone. Fine, or should fleeing be refused in that fight?
+6. **Fights a scenario arranges can no longer be fled** (the toll-keeper, the Salt Eel), exactly like a Final Wave. The code review found that fleeing and choosing again could be repeated forever, re-applying the option each time. Choosing to fight is now a commitment. OK?
+7. **Final Wave strength.** A named wave used to scale with the danger where you stand, and danger bonuses stack, so the scenario 5 wave in the Subway Tunnels was nearly unwinnable. Named waves (and choice fights) now come at the scenario's own strength: danger 1 + scenario number ÷ 3, rounded down (s01 1, s04 2, s05 2, s08 3, s10 4), wherever you stand. OK?
+8. **Deals with survivors cost 5 energy and an hour each** (trade, sell, overcharge, rob, give), like the zone's Trade action, and **overcharging now gets 75% of the price**, not 100%. The review found free deals could farm thousands of coins and constellation interest. OK?
 
 ---
 
@@ -93,11 +95,11 @@ Most targets are 2–4 moves away. Every 1-move route to a target is either next
 ## How waiting is never safe
 
 1. **Ambushes.** In survive, protect and reach scenarios, every action (resting included) and every arrival has a 10% + 5% × danger chance of an ambush, never more than 50%.
-2. **The Final Wave.** When a survive scenario's clock hits zero, one last enemy comes, and it must be beaten. There is no running. A named wave comes at normal strength. The default (the toughest enemy where you stand) is a step stronger.
+2. **The Final Wave.** When a survive scenario's clock hits zero, one last enemy comes, and it must be beaten. There is no running. A named wave comes at the scenario's own strength (danger 1 + number ÷ 3, rounded down), wherever you stand. The default (the toughest enemy where you stand) is a step stronger than that zone.
 
 | Scenario | Hours | Chance of no ambush while only resting | Final Wave |
 | --- | --- | --- | --- |
-| 1. First Light | 24 | 26% | **Feral Hound**, normal strength |
+| 1. First Light | 24 | 26% | **Feral Hound**, danger 1 |
 | 5. Lights Out | 30 | 10% | **Bell Gargoyle** |
 | 10. Curtain Call | 36 | 7.5% | **The Understudy** |
 
@@ -127,7 +129,7 @@ Each scenario shows its system notice, then «ANNOUNCER», then a line of narrat
 The sky has words in it. Everyone in the street is reading them at the same time, lips moving, and nobody is reading them aloud.
 
 - **Goal:** survive. **Hours:** 24. **Zone changes:** Old Market danger +1. **Rewards:** 50 coins, 2 Bandages. **Death rate:** 0.15.
-- **Final Wave:** Feral Hound (`feral-hound`), normal strength.
+- **Final Wave:** Feral Hound (`feral-hound`), danger 1.
 
 ```
 [Final challenger approaching: Feral Hound.]
@@ -896,7 +898,7 @@ World rumors (`{zone}` is the zone): Rumor: something in {zone} has started sing
 
 ## Decided (all rounds)
 
-- **Final Wave** in survive scenarios: must be beaten, no running. Named waves come at normal strength.
+- **Final Wave** in survive scenarios: must be beaten, no running. Named waves come at the scenario's own strength. Fights a scenario arranges cannot be fled either.
 - **Ambushes** in survive and protect scenarios. Arrival ambushes also apply in reach scenarios.
 - **Tag triggers** as in the table above. Bravery is earned.
 - **"Only some survive"** uses the group present (4–6 where you stand, met first). You pick who is spared, and the rest of the group dies. The Lifeboat crates spread the news (−25 citywide) and «ANNOUNCER» speaks.
