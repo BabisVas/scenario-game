@@ -104,3 +104,12 @@ test('runAction passes trade and gift tags on to the constellations', () => {
   const r = runAction(s, { kind: 'give', survivorId: 's-1', itemId: 'bandage' }, createRng(1), content);
   expect(r.state.constellations[lover.id].interest).toBeGreaterThan(s.constellations[lover.id].interest);
 });
+test('a save that passes the checks but breaks while loading shows unreadable, not a crash', () => {
+  const st = memoryStorage();
+  // Right version and top-level shape, but the survivors are missing: catch-up would throw.
+  const broken = { ...baseState(), worldTickAt: 0, survivors: undefined };
+  st.setItem(SAVE_KEY, JSON.stringify(broken));
+  const { result } = renderHook(() => useGame(), { wrapper: withStorage(st) });
+  expect(result.current.status).toBe('unreadable');
+  expect(st.getItem(SAVE_KEY)).toBe(JSON.stringify(broken));
+});

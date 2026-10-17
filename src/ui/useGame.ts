@@ -134,7 +134,17 @@ export function useGame() {
     const loaded = loadGame(storage)
     if (!loaded.ok) commit(loaded.reason === 'none' ? 'no-save' : 'unreadable', null)
     else if (loaded.state.phase.kind === 'dead') commit('dead', loaded.state)
-    else commit('playing', catchUpTo(loaded.state, Date.now(), true, content))
+    else {
+      // A save that looks right but breaks the engine is as unreadable as a corrupt one; it stays untouched.
+      let caughtUp: GameState | null = null
+      try {
+        caughtUp = catchUpTo(loaded.state, Date.now(), true, content)
+      } catch {
+        caughtUp = null
+      }
+      if (caughtUp) commit('playing', caughtUp)
+      else commit('unreadable', null)
+    }
     return () => guard.dispose()
   }, [storage, commit, content])
 
