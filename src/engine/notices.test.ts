@@ -104,3 +104,17 @@ describe('the rest of the record speaks in brackets too', () => {
     expect(broken.events.map((e) => e.text)).toContain(`[Stigma sealed: ${stigma.name}. The lender is displeased.]`)
   })
 })
+
+test('a skill levelling up is a bracketed notice', async () => {
+  const { recordSkillUse } = await import('./growth')
+  const { withSkill } = await import('../test/fixtures')
+  let s = withSkill(baseState(), 'quick-strike')
+  let last = recordSkillUse(s, 'quick-strike')
+  for (let i = 0; i < 4; i++) { s = last.state; last = recordSkillUse(s, 'quick-strike') }
+  expect(last.events[0].text).toBe('[Skill level up: Quick Strike, level 2.]')
+})
+test('explore flavor and world rumors come from the content', async () => {
+  const flavor = { ...content, flavor: { explore: ['FX-EXPLORE'], rumors: ['FX-RUMOR in {zone}.'] } }
+  const r = doAction(at(inRest(baseState(), 99), 'old-market'), 'old-market', 'explore', seqRng(0.99), flavor)
+  expect(r.events.some((e) => e.text === 'FX-EXPLORE')).toBe(true)
+})

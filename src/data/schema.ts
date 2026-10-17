@@ -207,6 +207,9 @@ export type HiddenScenarioDef = {
   rumor: string
 }
 
+/** Small texture: exploring that finds nothing else, and survivors' rumors ({zone} = the zone). */
+export type Flavor = { explore: string[]; rumors: string[] }
+
 export type Content = {
   backgrounds: Background[]
   zones: ZoneDef[]
@@ -222,4 +225,5 @@ export type Content = {
   stigmas: StigmaDef[]
   hiddenScenarios: HiddenScenarioDef[]
   greetings: Greetings
+  flavor: Flavor
 }

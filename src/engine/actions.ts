@@ -242,12 +242,6 @@ function scavenge(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step
   return { state: next, events: [{ kind: 'player', text: `You scavenge ${zoneRef(content, zone.id)}: ${coins} coins${extra}.` }] }
 }
 
-const FLAVOR = [
-  'You find a wall covered in handwritten warnings. Some are crossed out. Some are in blood.',
-  'A radio in a parked car still plays music. Nobody comes to turn it off.',
-  'Footprints in the dust lead somewhere you decide not to follow. For now.',
-  'Someone has drawn a map on the pavement in chalk. Half of it is wrong.',
-]
 
 function explore(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step {
   const events: GameEvent[] = []
@@ -259,7 +253,7 @@ function explore(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step 
     events.push({ kind: 'system', text: subScenarioNotice(def, content) })
     if (def.narration) events.push({ kind: 'player', text: def.narration })
   } else {
-    events.push({ kind: 'player', text: rng.pick(FLAVOR) })
+    events.push({ kind: 'player', text: rng.pick(content.flavor.explore) })
   }
   if (rng.chance(0.25)) {
     const fight = randomFight(next, zone, rng, content, 'hunt')

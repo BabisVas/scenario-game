@@ -221,6 +221,12 @@ export function validateContent(c: Content): string[] {
     }
   }
 
+  if (c.flavor) {
+    if (c.flavor.explore.length === 0) problems.push('flavor: needs at least one explore line')
+    if (c.flavor.rumors.length === 0) problems.push('flavor: needs at least one rumor')
+    for (const r of c.flavor.rumors) if (!r.includes('{zone}')) problems.push(`flavor: a rumor without {zone}: ${r}`)
+  }
+
   const texts: string[] = []
   const collect = (v: unknown) => {
     if (typeof v === 'string') texts.push(v)

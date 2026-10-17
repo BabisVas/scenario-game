@@ -8,7 +8,7 @@ import { SURVIVOR_COUNT } from './config'
 import { hiddenRumor } from './hidden'
 import { addItem, removeItem, sellPrice } from './inventory'
 import { maxHp } from './newGame'
-import { zoneRef } from './places'
+import { capitalize, zoneRef } from './places'
 import type { Rng } from './rng'
 import type { Combatant, GameEvent, GameState, StatKey, Step, Survivor, Tag } from './types'
 
@@ -107,12 +107,6 @@ const withSurvivor = (state: GameState, v: Survivor): GameState => ({
   survivors: state.survivors.map((x) => (x.id === v.id ? v : x)),
 })
 
-const RUMORS = [
-  (z: string) => `Rumor: something in ${z} has started singing at night.`,
-  (z: string) => `Rumor: a cache of supplies is buried somewhere in ${z}.`,
-  (z: string) => `Rumor: ${z} is safer than it looks. Nobody believes it.`,
-  (z: string) => `Rumor: someone saw the announcer's shadow over ${z}.`,
-]
 
 /** One real-time tick of the world. Never touches the player or the scenario clock. */
 export function worldTick(state: GameState, rng: Rng, content: Content): Step {
@@ -163,7 +157,7 @@ export function worldTick(state: GameState, rng: Rng, content: Content): Step {
         events.push({ kind: 'survivor', text: `${v.name} heads for ${zoneRef(content, to.id)}.` })
       }
     } else if (roll === 5 && zone) {
-      events.push({ kind: 'survivor', text: rng.pick(RUMORS)(zoneRef(content, zone.id)) })
+      events.push({ kind: 'survivor', text: capitalize(rng.pick(content.flavor.rumors).replaceAll('{zone}', zoneRef(content, zone.id))) })
     } else if (roll === 6 && zone) {
       const chance = zoneDanger(s, zone) * 0.01 * (1 - power(v) / 40)
       if (rng.chance(chance) && canDie(s, v, content)) {

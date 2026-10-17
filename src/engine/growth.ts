@@ -62,7 +62,7 @@ export function recordSkillUse(state: GameState, skillId: string): Step {
   const skills = state.player.skills.map((s) => (s === skill ? updated : s))
   return {
     state: { ...state, player: { ...state.player, skills } },
-    events: levelUp ? [{ kind: 'system', text: `Skill level up! ${titleCase(skillId)} is now level ${updated.level}.` }] : [],
+    events: levelUp ? [{ kind: 'system', text: `[Skill level up: ${titleCase(skillId)}, level ${updated.level}.]` }] : [],
   }
 }
 
@@ -76,6 +76,6 @@ export function recordStigmaUse(state: GameState, content: Content): Step {
   const stigma = levelUp ? { ...held, level: held.level + 1, uses: 0 } : { ...held, uses }
   return {
     state: { ...state, player: { ...state.player, stigma } },
-    events: levelUp ? [{ kind: 'system', text: `Stigma level up! ${def.name} is now level ${stigma.level}.` }] : [],
+    events: levelUp ? [{ kind: 'system', text: `[Stigma level up: ${def.name}, level ${stigma.level}.]` }] : [],
   }
 }

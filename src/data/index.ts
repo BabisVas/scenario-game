@@ -2,6 +2,7 @@ import { attributes } from './attributes'
 import { backgrounds } from './backgrounds'
 import { constellations } from './constellations'
 import { enemies } from './enemies'
+import { flavor } from './flavor'
 import { greetings } from './greetings'
 import { hiddenScenarios } from './hiddenScenarios'
 import { items } from './items'
@@ -27,4 +28,5 @@ export const content: Content = {
   stigmas,
   hiddenScenarios,
   greetings,
+  flavor,
 }
