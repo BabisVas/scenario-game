@@ -129,13 +129,15 @@ test('a fight option starts a scenario fight that clears the choice when won', (
   const winning = { ...r.state, fight: { ...r.state.fight!, enemy: { ...r.state.fight!.enemy, hp: 1 } } };
   expect(fightTurn(winning, { kind: 'attack' }, createRng(1), content).state.phase.kind).toBe('rest');
 });
-test('running from a scenario fight puts the choice back', () => {
+test('a fight a scenario arranges cannot be run from: refused, no turn spent', () => {
   const s = inScenario(baseState(), choiceDef());
   const started = resolveChoice(s, 'fight-it', null, createRng(1), content).state;
   const fast = { ...started, player: { ...started.player, stats: { ...started.player.stats, agility: 40 } } };
-  let r = fightTurn(fast, { kind: 'run' }, createRng(1), content);
-  for (let i = 2; r.result !== 'fled'; i++) r = fightTurn(fast, { kind: 'run' }, createRng(i), content);
-  expect(r.state.pendingChoice).toEqual({ source: 'scenario', scenarioId: 'fx-choice' });
+  const r = fightTurn(fast, { kind: 'run' }, createRng(1), content);
+  expect(r.state).toEqual(fast);
+  expect(r.result).toBe('ongoing');
+  const skilled = { ...fast, player: { ...fast.player, skills: [{ skillId: 'vanishing-step', level: 1, uses: 0 }] } };
+  expect(fightTurn(skilled, { kind: 'skill', skillId: 'vanishing-step' }, createRng(1), content).state).toEqual(skilled);
 });
 test('losing a fight kills the player', () => {
   const s = inFight({ ...baseState(), player: { ...baseState().player, hp: 1 } }, brutalEnemy());

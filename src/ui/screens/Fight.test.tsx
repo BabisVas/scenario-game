@@ -130,3 +130,8 @@ test('an item shows its lore in the inventory', () => {
   renderWithGame(withItem(playingState(), 'fx-lore'));
   expect(screen.getByText(/FX-LORE hums one low note/)).toBeInTheDocument();
 });
+test("a scenario's own fight disables Run", () => {
+  const s = inFight(playingState(), weakEnemy());
+  renderWithGame({ ...s, fight: { ...s.fight!, origin: 'scenario' } });
+  expect(screen.getByRole('button', { name: /run/i })).toBeDisabled();
+});

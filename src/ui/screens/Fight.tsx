@@ -14,7 +14,8 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
   const p = state.player
   const enemy = fight.enemy
   const chance = Math.round(playerRunChance(state, enemy, content) * 100)
-  const finalWave = fight.origin === 'final-wave'
+  // The scenario's own fights cannot be run from.
+  const held = fight.origin === 'final-wave' || fight.origin === 'scenario'
   const stigma = p.stigma
   const stigmaDef = stigma ? content.stigmas.find((x) => x.id === stigma.stigmaId) : undefined
   const stigmaCooldown = stigma ? (fight.cooldowns[STIGMA_COOLDOWN_PREFIX + stigma.stigmaId] ?? 0) : 0
@@ -79,8 +80,8 @@ export function Fight({ state, act }: { state: GameState; act: (a: PlayerAction)
                 {def!.name} ×{stack.qty}
               </button>
             ))}
-            <button className="btn danger" disabled={finalWave} onClick={() => turn({ kind: 'run' })}>
-              {finalWave ? 'Run (nowhere to run)' : `Run (${chance}%)`}
+            <button className="btn danger" disabled={held} onClick={() => turn({ kind: 'run' })}>
+              {held ? 'Run (nowhere to run)' : `Run (${chance}%)`}
             </button>
           </div>
         </div>

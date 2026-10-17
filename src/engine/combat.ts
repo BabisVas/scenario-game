@@ -125,10 +125,9 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
   let enemy = { ...fight.enemy }
   const events: GameEvent[] = []
   const guarding = enemy.behavior === 'defensive' && fight.round % GUARD_EVERY === 0
+  // Fights the scenario itself sets (Final Waves, choice fights) must be finished: no escape of any kind.
   if (fight.origin === 'final-wave' && isEscape(action, s, content)) return notNow(state, 'There is nowhere left to run. Beat it.')
-  if (fight.origin === 'scenario' && action.kind === 'item' && isEscape(action, s, content)) {
-    return notNow(state, 'The scenario holds you here. This fight has to be finished.')
-  }
+  if (fight.origin === 'scenario' && isEscape(action, s, content)) return notNow(state, 'The scenario holds you here. This fight has to be finished.')
   let usedSkill: { id: string; cooldown: number } | null = null
   let braced = 0
   let stunned = false
