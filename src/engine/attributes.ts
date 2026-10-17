@@ -1,6 +1,7 @@
 // Attributes: one per person, rolled on the first morning, with an always-on effect.
 
 import type { AttributeDef, AttributeEffect, Content } from '../data/schema'
+import { spiritMultiplier } from './growth'
 import type { Rng } from './rng'
 import type { GameState } from './types'
 
@@ -49,10 +50,10 @@ export function withCoinBonus(state: GameState, content: Content, base: number):
   return pct ? Math.floor(base * (1 + pct / 100)) : base
 }
 
-/** HP the player actually recovers from a heal of `base`. */
+/** HP the player actually recovers from a heal of `base`: attribute and spirit included. */
 export function withHealingBonus(state: GameState, content: Content, base: number): number {
   const pct = sum(effectsOf(state, content, 'healing').map((e) => e.percent))
-  return pct ? Math.round(base * (1 + pct / 100)) : base
+  return Math.round(base * (1 + pct / 100) * spiritMultiplier(state.player.stats.spirit))
 }
 
 export function attributeRunBonus(state: GameState, content: Content): number {

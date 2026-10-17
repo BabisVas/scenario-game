@@ -1,7 +1,13 @@
 // Getting stronger: coins buy stats, and skills level up with use.
 
 import type { Content } from '../data/schema'
+import { SPIRIT_PER_POINT, STAT_START } from './config'
 import type { GameState, StatKey, Step } from './types'
+
+/** Spirit's reach: skill and stigma damage, and every heal. Below the starting value it costs nothing. */
+export function spiritMultiplier(spirit: number): number {
+  return 1 + SPIRIT_PER_POINT * Math.max(0, spirit - STAT_START)
+}
 
 const STAT_LABEL: Record<StatKey, string> = {
   strength: 'Strength',

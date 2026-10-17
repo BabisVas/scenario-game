@@ -2,7 +2,7 @@
 
 import type { Content, SkillDef } from '../data/schema'
 import { attributeRunBonus, damageMultiplier, withCoinBonus, withHealingBonus } from './attributes'
-import { recordSkillUse, recordStigmaUse } from './growth'
+import { recordSkillUse, recordStigmaUse, spiritMultiplier } from './growth'
 import { addItem, isUsable, removeItem, useConsumable } from './inventory'
 import { maxHp } from './newGame'
 import type { Rng } from './rng'
@@ -129,9 +129,10 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
   let braced = 0
   let finishedWithCrit = false
 
-  const hitEnemy = (bonusPower: number, verb: string) => {
+  const hitEnemy = (bonusPower: number, verb: string, ability = false) => {
     let { damage, crit } = rollDamage(playerCombatant(s, content), enemy, rng, bonusPower)
-    const mult = damageMultiplier(s, content, enemyTags(fight, content))
+    // Spirit drives skills and stigmas, not plain blows.
+    const mult = damageMultiplier(s, content, enemyTags(fight, content)) * (ability ? spiritMultiplier(s.player.stats.spirit) : 1)
     if (mult !== 1) damage = Math.max(1, Math.round(damage * mult))
     if (guarding) damage = Math.max(1, Math.round(damage / 2))
     enemy = { ...enemy, hp: enemy.hp - damage }
@@ -143,7 +144,7 @@ function fightRound(state: GameState, action: FightAction, rng: Rng, content: Co
   /** A skill or stigma taking effect. Escapes are resolved by the caller as a run. */
   const applyAbility = (kind: SkillDef['kind'], power: number, name: string, cooldownKey: string, cooldown: number) => {
     usedSkill = { id: cooldownKey, cooldown }
-    if (kind === 'attack') hitEnemy(Math.round(power), `use ${name} on`)
+    if (kind === 'attack') hitEnemy(Math.round(power), `use ${name} on`, true)
     else if (kind === 'heal') {
       const hp = Math.min(maxHp(s.player.stats), s.player.hp + withHealingBonus(s, content, Math.round(power)))
       events.push({ kind: 'fight', text: `${name}. +${hp - s.player.hp} HP.` })
