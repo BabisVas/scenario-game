@@ -138,3 +138,21 @@ describe('danger above 5', () => {
     expect(at7.hp).toBeGreaterThan(combatantFromEnemy(def, 5).hp);
   });
 });
+
+describe('zone finds', () => {
+  const finds = (zoneId: string, itemId: string, chance: number) => ({
+    ...fixtureContent,
+    zones: fixtureContent.zones.map((z) => (z.id === zoneId ? { ...z, finds: [{ itemId, chance }] } : z)),
+  });
+  test("scavenging can turn up one of the zone's own finds", () => {
+    const c = finds('old-market', 'flare', 0.08);
+    // coins roll, enemy-pool roll misses (0.9), then the find roll hits (0.05 < 8%)
+    const r = doAction(inRest(baseState(), 99), 'old-market', 'scavenge', seqRng(0.5, 0.9, 0.05), c);
+    expect(r.state.player.inventory.some((i) => i.itemId === 'flare')).toBe(true);
+  });
+  test('a find roll above its chance finds nothing', () => {
+    const c = finds('old-market', 'flare', 0.08);
+    const r = doAction(inRest(baseState(), 99), 'old-market', 'scavenge', seqRng(0.5, 0.9, 0.09), c);
+    expect(r.state.player.inventory.some((i) => i.itemId === 'flare')).toBe(false);
+  });
+});

@@ -108,3 +108,8 @@ describe('item effects the engine cannot run are rejected', () => {
     expect(validateContent({ ...content, enemies: missing })).toContainEqual(expect.stringContaining('chance'));
   });
 });
+test('a zone find naming an unknown item or a bad chance is reported', () => {
+  const zones = (f: object) => content.zones.map((z, i) => (i === 0 ? { ...z, finds: [f] } : z)) as typeof content.zones;
+  expect(validateContent({ ...content, zones: zones({ itemId: 'ghost-find', chance: 0.1 }) })).toContainEqual(expect.stringContaining('ghost-find'));
+  expect(validateContent({ ...content, zones: zones({ itemId: content.items[0].id, chance: 0 }) })).toContainEqual(expect.stringContaining('chance'));
+});

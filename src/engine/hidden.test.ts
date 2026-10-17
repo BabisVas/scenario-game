@@ -1,4 +1,4 @@
-import { doAction } from './actions'
+import { doAction, travel } from './actions'
 import { checkScenarioClock, recordProgress, resolveChoice, spendHours, startScenario } from './scenario'
 import { appendEvents } from './log'
 import { worldTick } from './survivors'
@@ -52,10 +52,11 @@ test('only one hidden scenario runs at a time', () => {
 });
 
 describe('trigger kinds', () => {
-  test('carrying an item into a zone', () => {
+  test('carrying an item into a zone: only arriving with it counts, not acting there', () => {
     hiddenDef('flare-bearer', { kind: 'carry-item', itemId: 'flare', zoneId: 'glass-towers' });
-    expect(discovered(act(calm(), 'glass-towers', 'scavenge'))).toBe(false);
-    expect(discovered(act(withItem(calm(), 'flare'), 'glass-towers', 'scavenge'))).toBe(true);
+    expect(discovered(act(withItem(calm(), 'flare'), 'glass-towers', 'scavenge'))).toBe(false);
+    expect(discovered(travel(at(withItem(calm(), 'flare'), 'old-market'), 'glass-towers', createRng(1), content))).toBe(true);
+    expect(discovered(travel(at(calm(), 'old-market'), 'glass-towers', createRng(1), content))).toBe(false);
   });
   test('meeting the same survivor N times', () => {
     hiddenDef('old-friend', { kind: 'meet-survivor', count: 3 });

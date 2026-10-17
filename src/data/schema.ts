@@ -23,6 +23,8 @@ export type ZoneDef = {
   /** Zones one move away. Connections always go both ways. */
   connections: string[]
   startsSealed?: boolean
+  /** Things only this zone turns up when scavenged, each rolled on its own. */
+  finds?: { itemId: string; chance: number }[]
 }
 
 export type EnemyDef = {

@@ -131,6 +131,10 @@ export function validateContent(c: Content): string[] {
       else if (!c.zones.find((o) => o.id === n)!.connections.includes(z.id)) problems.push(`zone ${z.id}: connection to ${n} is one-way; connections must go both ways`)
     }
     for (const e of z.enemyIds) ref('enemy', e, enemyIds, `zone ${z.id}`)
+    for (const f of z.finds ?? []) {
+      ref('item', f.itemId, itemIds, `zone ${z.id} find`)
+      if (!(f.chance > 0 && f.chance <= 1)) problems.push(`zone ${z.id} find ${f.itemId}: chance must be above 0 and at most 1`)
+    }
   }
   if (c.zones.length > 0) {
     const reached = new Set([c.zones[0].id])

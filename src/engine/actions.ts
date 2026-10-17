@@ -92,7 +92,7 @@ export function travel(state: GameState, toZoneId: string, rng: Rng, content: Co
   s = recordProgress(s, 'reach', { zoneId: to.id }, content)
   run(dangerAfter(s, to, rng, content, ['survive', 'protect', 'reach'], `Ambush on the way into the ${to.name}!`))
   const carried = state.player.inventory.map((i) => i.itemId)
-  run(checkHiddenTriggers(s, { zoneId: to.id, carried }, content))
+  run(checkHiddenTriggers(s, { zoneId: to.id, carried, arrived: true }, content))
   const clock = checkScenarioClock(s, rng, content)
   return withReactions({ state: clock.state, events: [...events, ...clock.events] }, rng, content)
 }
@@ -227,16 +227,18 @@ function scavenge(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step
   const danger = zoneDanger(s, zone)
   const coins = withCoinBonus(s, content, rng.int(danger * 3, danger * 8))
   let next: GameState = { ...s, player: { ...s.player, coins: s.player.coins + coins } }
-  let found = ''
+  const found: string[] = []
+  const take = (itemId: string) => {
+    next = addItem(next, itemId)
+    found.push(`a ${content.items.find((i) => i.id === itemId)?.name ?? itemId}`)
+  }
   if (rng.chance(0.2)) {
     const pool = content.enemies.filter((e) => zone.enemyIds.includes(e.id)).flatMap((e) => e.drops.map((d) => d.itemId))
-    if (pool.length > 0) {
-      const itemId = rng.pick(pool)
-      next = addItem(next, itemId)
-      found = ` and a ${content.items.find((i) => i.id === itemId)?.name ?? itemId}`
-    }
+    if (pool.length > 0) take(rng.pick(pool))
   }
-  return { state: next, events: [{ kind: 'player', text: `You scavenge the ${zone.name}: ${coins} coins${found}.` }] }
+  for (const f of zone.finds ?? []) if (rng.chance(f.chance)) take(f.itemId)
+  const extra = found.length ? ` and ${found.join(' and ')}` : ''
+  return { state: next, events: [{ kind: 'player', text: `You scavenge the ${zone.name}: ${coins} coins${extra}.` }] }
 }
 
 const FLAVOR = [

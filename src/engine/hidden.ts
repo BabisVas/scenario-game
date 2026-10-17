@@ -13,8 +13,10 @@ const RUMOR_CHANCE = 0.1
 export type HiddenContext = {
   zoneId?: string
   action?: ActionId
-  /** Item ids held when the action began: what the player carried into the zone. */
+  /** Item ids held when the action or move began. */
   carried?: string[]
+  /** The player has just arrived in zoneId: only then is an item "carried into" it. */
+  arrived?: boolean
   choice?: { scenarioId: string; optionId: string }
 }
 
@@ -29,7 +31,7 @@ function triggered(def: HiddenScenarioDef, state: GameState, ctx: HiddenContext,
     case 'repeat-action':
       return ctx.zoneId === t.zoneId && ctx.action === t.action && (state.actionCounts[`${t.zoneId}/${t.action}`] ?? 0) >= t.count
     case 'carry-item':
-      return ctx.zoneId === t.zoneId && (ctx.carried ?? []).includes(t.itemId)
+      return !!ctx.arrived && ctx.zoneId === t.zoneId && (ctx.carried ?? []).includes(t.itemId)
     case 'meet-survivor':
       return ctx.action === 'talk' && state.survivors.some((v) => v.timesMet >= t.count)
     case 'zone-during-scenario': {
