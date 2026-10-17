@@ -26,8 +26,8 @@ export const enemies: EnemyDef[] = [
     id: 'iron-boar',
     name: 'Iron-Bristled Boar',
     tags: ['beast'],
-    stats: { strength: 8, agility: 3, endurance: 6, spirit: 2 },
-    hp: 48,
+    stats: { strength: 7, agility: 3, endurance: 4, spirit: 2 },
+    hp: 46,
     behavior: 'defensive',
     coins: [8, 15],
     drops: [
@@ -105,8 +105,8 @@ export const enemies: EnemyDef[] = [
     id: 'paper-golem',
     name: 'Paper Golem',
     tags: ['monster'],
-    stats: { strength: 8, agility: 2, endurance: 7, spirit: 3 },
-    hp: 50,
+    stats: { strength: 7, agility: 2, endurance: 4, spirit: 3 },
+    hp: 44,
     behavior: 'defensive',
     coins: [10, 16],
     drops: [
