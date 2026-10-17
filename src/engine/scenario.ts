@@ -11,6 +11,7 @@ import { onScenarioCleared, withReactions } from './constellations'
 import { killPlayer } from './death'
 import { checkHiddenTriggers, judgeHidden, windowRumors } from './hidden'
 import { addItem } from './inventory'
+import { capitalize, zoneRef } from './places'
 import type { Rng } from './rng'
 import { resolveScenarioForSurvivors } from './survivors'
 import type { GameEvent, GameState, Step, Survivor, Tag } from './types'
@@ -78,8 +79,7 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
   if (zones[zoneId]?.sealed) {
     const open = nearestOpenZone(zoneId, zones, content)
     if (open) {
-      const fromName = content.zones.find((z) => z.id === zoneId)?.name ?? zoneId
-      sealedEvents.push({ kind: 'system', text: `The ${fromName} seals. You are pushed out into the ${open.name}.` })
+      sealedEvents.push({ kind: 'system', text: `${capitalize(zoneRef(content, zoneId))} seals. You are pushed out into ${zoneRef(content, open.id)}.` })
       zoneId = open.id
     }
   }

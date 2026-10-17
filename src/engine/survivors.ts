@@ -8,6 +8,7 @@ import { SURVIVOR_COUNT } from './config'
 import { hiddenRumor } from './hidden'
 import { addItem, removeItem, sellPrice } from './inventory'
 import { maxHp } from './newGame'
+import { zoneRef } from './places'
 import type { Rng } from './rng'
 import type { Combatant, GameEvent, GameState, StatKey, Step, Survivor, Tag } from './types'
 
@@ -107,10 +108,10 @@ const withSurvivor = (state: GameState, v: Survivor): GameState => ({
 })
 
 const RUMORS = [
-  (z: string) => `Rumor: something in the ${z} has started singing at night.`,
-  (z: string) => `Rumor: a cache of supplies is buried somewhere in the ${z}.`,
-  (z: string) => `Rumor: the ${z} is safer than it looks. Nobody believes it.`,
-  (z: string) => `Rumor: someone saw the announcer's shadow over the ${z}.`,
+  (z: string) => `Rumor: something in ${z} has started singing at night.`,
+  (z: string) => `Rumor: a cache of supplies is buried somewhere in ${z}.`,
+  (z: string) => `Rumor: ${z} is safer than it looks. Nobody believes it.`,
+  (z: string) => `Rumor: someone saw the announcer's shadow over ${z}.`,
 ]
 
 /** One real-time tick of the world. Never touches the player or the scenario clock. */
@@ -153,21 +154,21 @@ export function worldTick(state: GameState, rng: Rng, content: Content): Step {
         events.push({ kind: 'survivor', text: `${v.name} betrays ${victim.name} and walks off with their share.` })
       }
     } else if (roll === 3) {
-      events.push({ kind: 'survivor', text: `${v.name} trades supplies with a stranger in the ${zone?.name ?? 'city'}.` })
+      events.push({ kind: 'survivor', text: `${v.name} trades supplies with a stranger in ${zone ? zoneRef(content, zone.id) : 'the city'}.` })
     } else if (roll === 4 && !(s.phase.kind === 'scenario' && s.phase.protectedSurvivorId === v.id) && !inOpenGroup(s, v.id)) {
       const open = content.zones.filter((z) => z.id !== v.zoneId && !(s.zones[z.id]?.sealed ?? z.startsSealed))
       if (open.length > 0) {
         const to = rng.pick(open)
         s = withSurvivor(s, { ...v, zoneId: to.id, partyId: null })
-        events.push({ kind: 'survivor', text: `${v.name} heads for the ${to.name}.` })
+        events.push({ kind: 'survivor', text: `${v.name} heads for ${zoneRef(content, to.id)}.` })
       }
     } else if (roll === 5 && zone) {
-      events.push({ kind: 'survivor', text: rng.pick(RUMORS)(zone.name) })
+      events.push({ kind: 'survivor', text: rng.pick(RUMORS)(zoneRef(content, zone.id)) })
     } else if (roll === 6 && zone) {
       const chance = zoneDanger(s, zone) * 0.01 * (1 - power(v) / 40)
       if (rng.chance(chance) && canDie(s, v, content)) {
-        s = withSurvivor(s, { ...v, alive: false, hp: 0, partyId: null, deathNote: `Died in the ${zone.name}.` })
-        events.push({ kind: 'survivor', text: `${v.name} died in the ${zone.name}.` })
+        s = withSurvivor(s, { ...v, alive: false, hp: 0, partyId: null, deathNote: `Died in ${zoneRef(content, zone.id)}.` })
+        events.push({ kind: 'survivor', text: `${v.name} died in ${zoneRef(content, zone.id)}.` })
       }
     }
   }

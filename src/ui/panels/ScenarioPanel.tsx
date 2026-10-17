@@ -1,4 +1,5 @@
 import { SYSTEM } from '../../data/names'
+import { zoneRef } from '../../engine/places'
 import type { GameState } from '../../engine/types'
 import { goalText, hiddenGoalText, hoursText, subGoalText } from '../format'
 import { useContent } from '../useGame'
@@ -87,7 +88,7 @@ function WardLine({ state }: { state: GameState }) {
   const id = state.phase.protectedSurvivorId
   const ward = state.survivors.find((v) => v.id === id)
   if (!ward) return null
-  const zone = content.zones.find((z) => z.id === ward.zoneId)?.name ?? ward.zoneId
+  const zone = zoneRef(content, ward.zoneId)
   const wounds = state.phase.wardWounds ?? 0
-  return <p className="small ward">{`${ward.name} waits in the ${zone} · ${wounds} ${wounds === 1 ? 'wound' : 'wounds'} left`}</p>
+  return <p className="small ward">{`${ward.name} waits in ${zone} · ${wounds} ${wounds === 1 ? 'wound' : 'wounds'} left`}</p>
 }

@@ -15,6 +15,7 @@ export const zones: ZoneDef[] = [
   },
   {
     id: 'riverside-park',
+    proper: true,
     name: 'Riverside Park',
     blurb:
       'Open lawns, a frozen fountain, and something long moving under the river ice. The ducks left on the first morning and did not say where.',
@@ -35,6 +36,7 @@ export const zones: ZoneDef[] = [
   },
   {
     id: 'university-hill',
+    proper: true,
     name: 'University Hill',
     blurb: 'Lecture halls with the lights still on and no one in them. A sign on the library gate says Returns accepted at all hours.',
     danger: 2,
@@ -45,6 +47,7 @@ export const zones: ZoneDef[] = [
   },
   {
     id: 'clocktower-square',
+    proper: true,
     name: 'Clocktower Square',
     blurb:
       'Cobbles, pigeons, and a clock that is right twice a day, though not the same two times as yesterday. Someone has chalked four small marks by the clock-keeper\'s door.',

@@ -8,6 +8,7 @@ import { recordSkillUse } from './growth'
 import { checkHiddenTriggers, countAction } from './hidden'
 import { addItem } from './inventory'
 import { maxHp } from './newGame'
+import { zoneRef } from './places'
 import type { Rng } from './rng'
 import { findTrader, meetSurvivor } from './survivors'
 import { AMBUSH_CHANCE_MAX, WARD_ATTACK_CHANCE, WARD_WOUNDS } from './config'
@@ -84,13 +85,13 @@ export function travel(state: GameState, toZoneId: string, rng: Rng, content: Co
   const to = content.zones.find((z) => z.id === toZoneId)!
 
   let s = spendHours({ ...state, energy: state.energy - TRAVEL_COST.energy, zoneId: to.id }, TRAVEL_COST.hours)
-  const events: GameEvent[] = [{ kind: 'player', text: `You leave the ${from.name} for the ${to.name}.` }]
+  const events: GameEvent[] = [{ kind: 'player', text: `You leave ${zoneRef(content, from.id)} for ${zoneRef(content, to.id)}.` }]
   const run = (step: Step) => {
     s = step.state
     events.push(...step.events)
   }
   s = recordProgress(s, 'reach', { zoneId: to.id }, content)
-  run(dangerAfter(s, to, rng, content, ['survive', 'protect', 'reach'], `Ambush on the way into the ${to.name}!`))
+  run(dangerAfter(s, to, rng, content, ['survive', 'protect', 'reach'], `Ambush on the way into ${zoneRef(content, to.id)}!`))
   const carried = state.player.inventory.map((i) => i.itemId)
   run(checkHiddenTriggers(s, { zoneId: to.id, carried, arrived: true }, content))
   const clock = checkScenarioClock(s, rng, content)
@@ -126,9 +127,9 @@ function dangerAfter(s: GameState, zone: ZoneDef, rng: Rng, content: Content, am
   if (ward && s.phase.kind === 'scenario' && s.zoneId !== ward.zoneId) {
     if (!rng.chance(WARD_ATTACK_CHANCE)) return { state: s, events: [] }
     const left = Math.max(0, (s.phase.wardWounds ?? WARD_WOUNDS) - 1)
-    const wardZone = content.zones.find((z) => z.id === ward.zoneId)?.name ?? ward.zoneId
+    const wardZone = zoneRef(content, ward.zoneId)
     let next: GameState = { ...s, phase: { ...s.phase, wardWounds: left } }
-    const events: GameEvent[] = [{ kind: 'survivor', text: `While you are away, ${ward.name} is attacked in the ${wardZone}. ${left} wounds left.` }]
+    const events: GameEvent[] = [{ kind: 'survivor', text: `While you are away, ${ward.name} is attacked in ${wardZone}. ${left} wounds left.` }]
     if (left === 0) {
       next = { ...next, survivors: next.survivors.map((v) => (v.id === ward.id ? { ...v, alive: false, hp: 0, deathNote: 'Fell while waiting for help.' } : v)) }
       events.push({ kind: 'survivor', text: `${ward.name} has fallen.` })
@@ -198,7 +199,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
     case 'rest': {
       const cap = maxHp(s.player.stats)
       const hp = Math.min(cap, s.player.hp + withHealingBonus(s, content, Math.round(cap * 0.3)))
-      events.push({ kind: 'player', text: `You rest in the ${zone.name}. +${hp - s.player.hp} HP.` })
+      events.push({ kind: 'player', text: `You rest in ${zoneRef(content, zone.id)}. +${hp - s.player.hp} HP.` })
       s = { ...s, player: { ...s.player, hp } }
       break
     }
@@ -238,7 +239,7 @@ function scavenge(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step
   }
   for (const f of zone.finds ?? []) if (rng.chance(f.chance)) take(f.itemId)
   const extra = found.length ? ` and ${found.join(' and ')}` : ''
-  return { state: next, events: [{ kind: 'player', text: `You scavenge the ${zone.name}: ${coins} coins${extra}.` }] }
+  return { state: next, events: [{ kind: 'player', text: `You scavenge ${zoneRef(content, zone.id)}: ${coins} coins${extra}.` }] }
 }
 
 const FLAVOR = [
@@ -274,7 +275,7 @@ const TEACH_CHANCE = 0.15
 /** The bracketed notice for an offered sub-scenario: objective, time limit, reward, failure. */
 function subScenarioNotice(def: SubScenarioDef, content: Content): string {
   const g = def.goal
-  const objective = g.kind === 'kill' ? `Kill ${g.count}` : `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
+  const objective = g.kind === 'kill' ? `Kill ${g.count}` : `Reach ${zoneRef(content, g.zoneId)}`
   const reward = [`${def.rewards.coins} coins`, ...(def.rewards.itemIds ?? []).map((id) => content.items.find((i) => i.id === id)?.name ?? id)]
   return [
     `[Sub-scenario available: ${def.title}.]`,

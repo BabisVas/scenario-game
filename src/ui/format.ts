@@ -1,6 +1,7 @@
 // Small display helpers shared by screens and panels.
 
 import type { Content, HiddenScenarioDef, ItemDef, ScenarioDef, SubScenarioDef } from '../data/schema'
+import { zoneRef } from '../engine/places'
 import type { GameState, LogKind } from '../engine/types'
 
 /** "Day 2, 06:00" for an in-game hour count that started at day 1, 00:00. */
@@ -50,7 +51,7 @@ export function goalText(def: ScenarioDef, state: GameState, content: Content): 
     case 'kill':
       return `Kill ${foes(g.count, g.enemyTag)} (${Math.min(progress, g.count)}/${g.count}).`
     case 'reach':
-      return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}.`
+      return `Reach ${zoneRef(content, g.zoneId)}.`
     case 'protect': {
       const who = state.survivors.find((v) => v.id === phase?.protectedSurvivorId)
       return who ? `Keep ${who.name} alive until the clock runs out.` : 'Survive until the clock runs out.'
@@ -63,14 +64,14 @@ export function goalText(def: ScenarioDef, state: GameState, content: Content): 
 export function subGoalText(def: SubScenarioDef, progress: number, content: Content): string {
   const g = def.goal
   if (g.kind === 'kill') return `Kill ${g.count} (${Math.min(progress, g.count)}/${g.count})`
-  return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
+  return `Reach ${zoneRef(content, g.zoneId)}`
 }
 
 export function hiddenGoalText(def: HiddenScenarioDef, progress: number, content: Content): string {
   const g = def.goal
   if (g.kind === 'kill') return `Kill ${foes(g.count, g.enemyTag)} (${Math.min(progress, g.count)}/${g.count})`
-  if (g.kind === 'reach') return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
-  if (g.zoneId) return `Be in the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId} when its clock runs out`
+  if (g.kind === 'reach') return `Reach ${zoneRef(content, g.zoneId)}`
+  if (g.zoneId) return `Be in ${zoneRef(content, g.zoneId)} when its clock runs out`
   return 'Stay alive until its clock runs out'
 }
 
