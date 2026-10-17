@@ -90,3 +90,14 @@ describe('zone connections are validated', () => {
     expect(validateContent(bad)).toContainEqual(expect.stringContaining(cut));
   });
 });
+test('a zone that seals under you pushes you to an open neighbor, not to the first open zone on the list', () => {
+  const def = { ...surviveDef({ hours: 10 }), zoneChanges: { seal: ['harbor-cranes'] } };
+  const r = startScenario(at(calm(), 'harbor-cranes'), def, createRng(1), content);
+  expect(content.zones.find(z => z.id === 'harbor-cranes')!.connections).toContain(r.state.zoneId);
+});
+test('when every neighbor is sealed too, you go to the nearest open zone two moves away', () => {
+  const def = { ...surviveDef({ hours: 10 }), zoneChanges: { seal: ['harbor-cranes', 'riverside-park', 'subway-tunnels'] } };
+  const r = startScenario(at(calm(), 'harbor-cranes'), def, createRng(1), content);
+  // Two moves from the harbor: Old Market, University Hill (sealed at the start), Glass Towers, The Bowl (sealed).
+  expect(['old-market', 'glass-towers']).toContain(r.state.zoneId);
+});

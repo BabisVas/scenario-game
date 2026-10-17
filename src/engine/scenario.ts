@@ -419,7 +419,8 @@ function nearestOpenZone(fromId: string, zones: GameState['zones'], content: Con
   const seen = new Set([fromId])
   const queue = [fromId]
   while (queue.length > 0) {
-    const here = content.zones.find((z) => z.id === queue.shift())
+    const id = queue.shift()
+    const here = content.zones.find((z) => z.id === id)
     for (const n of here?.connections ?? []) {
       if (seen.has(n)) continue
       seen.add(n)

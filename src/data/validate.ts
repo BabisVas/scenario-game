@@ -140,7 +140,8 @@ export function validateContent(c: Content): string[] {
     const reached = new Set([c.zones[0].id])
     const queue = [c.zones[0].id]
     while (queue.length > 0) {
-      const here = c.zones.find((z) => z.id === queue.shift())
+      const id = queue.shift()
+      const here = c.zones.find((z) => z.id === id)
       for (const n of here?.connections ?? []) if (zoneIds.has(n) && !reached.has(n)) { reached.add(n); queue.push(n) }
     }
     for (const z of c.zones) if (!reached.has(z.id)) problems.push(`zone ${z.id}: cannot be reached from ${c.zones[0].id}`)
