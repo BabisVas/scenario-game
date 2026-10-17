@@ -73,14 +73,14 @@ test('world ticks make news', () => {
 test('meeting someone marks them met', () => {
   const s = twoInZone(baseStateWithSurvivors(), 'glass-towers', ['s-3']);
   const only = { ...s, survivors: s.survivors.map(v => ({ ...v, zoneId: v.id === 's-3' ? 'glass-towers' : 'old-market' })) };
-  const r = meetSurvivor(only, 'glass-towers', createRng(1));
+  const r = meetSurvivor(only, 'glass-towers', createRng(1), content);
   expect(byId(r.state, 's-3').met).toBe(true);
   expect(r.events[0].kind).toBe('survivor');
 });
 test('a hostile survivor may attack on sight', () => {
   const s = baseStateWithSurvivors();
   const only = { ...s, survivors: s.survivors.map(v => ({ ...v, zoneId: v.id === 's-3' ? 'glass-towers' : 'old-market', attitude: v.id === 's-3' ? -80 : 0 })) };
-  const r = meetSurvivor(only, 'glass-towers', seqRng(0.1));
+  const r = meetSurvivor(only, 'glass-towers', seqRng(0.1), content);
   expect(r.state.fight).toMatchObject({ origin: 'survivor', survivorId: 's-3' });
 });
 test('talking in a zone meets someone there', () => {

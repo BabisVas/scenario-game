@@ -134,6 +134,12 @@ export type SurvivorTemplate = {
   personality: 'brave' | 'cautious' | 'ruthless' | 'kind' | 'schemer'
 }
 
+/** How a survivor feels about the player, as a greeting sees it. */
+export type AttitudeBand = 'hostile' | 'wary' | 'neutral' | 'friendly'
+
+/** Greeting lines by personality and attitude band. Each line names the survivor as {name}. */
+export type Greetings = Record<SurvivorTemplate['personality'], Record<AttitudeBand, string[]>>
+
 export type SubScenarioDef = {
   id: string
   zoneIds: string[]
@@ -200,4 +206,5 @@ export type Content = {
   attributes: AttributeDef[]
   stigmas: StigmaDef[]
   hiddenScenarios: HiddenScenarioDef[]
+  greetings: Greetings
 }

@@ -212,6 +212,14 @@ export function validateContent(c: Content): string[] {
     if (h.rewards.skillId) ref('skill', h.rewards.skillId, skillIds, `${where} reward`)
   }
 
+  for (const [personality, bands] of Object.entries(c.greetings ?? {})) {
+    for (const [band, lines] of Object.entries(bands)) {
+      const where = `greetings ${personality}/${band}`
+      if (lines.length < 3) problems.push(`${where}: needs at least 3 lines, has ${lines.length}`)
+      for (const line of lines) if (!line.includes('{name}')) problems.push(`${where}: a line without {name}: ${line}`)
+    }
+  }
+
   const texts: string[] = []
   const collect = (v: unknown) => {
     if (typeof v === 'string') texts.push(v)

@@ -1,6 +1,6 @@
 // The other survivors: they live, fight and die whether or not the player is watching.
 
-import type { Content, ScenarioDef, SurvivorTemplate } from '../data/schema'
+import type { AttitudeBand, Content, ScenarioDef, SurvivorTemplate } from '../data/schema'
 import { zoneDanger } from './actions'
 import { rollAttribute, withCarriedBonus } from './attributes'
 import { startFight } from './combat'
@@ -197,31 +197,31 @@ export function survivorCombatant(v: Survivor): Combatant {
   return { name: v.name, stats: v.stats, hp: v.hp, maxHp: maxHp(v.stats), behavior: 'survivor', weaponPower: 2, armorPower: 1 }
 }
 
-function greeting(v: Survivor): string {
-  if (v.attitude <= -50) return `${v.name} sees you and their hand goes to their weapon.`
-  if (v.attitude < 0) return `${v.name} keeps their distance. "I remember you."`
-  if (v.attitude >= 50) return `${v.name} grins. "There you are! Still alive, then."`
-  switch (v.personality) {
-    case 'brave':
-      return `${v.name} nods. "Stick close if things get loud."`
-    case 'cautious':
-      return `${v.name} watches you for a long moment before speaking.`
-    case 'ruthless':
-      return `${v.name} sizes you up like a price tag.`
-    case 'kind':
-      return `${v.name} offers you half a sandwich. "You look like you need it."`
-    case 'schemer':
-      return `${v.name} smiles a little too quickly. "Friends, yes?"`
-  }
+/** Hostile at −50 or worse (they may attack), wary below 0, friendly at 50 or better. */
+export function attitudeBand(attitude: number): AttitudeBand {
+  if (attitude <= -50) return 'hostile'
+  if (attitude < 0) return 'wary'
+  if (attitude >= 50) return 'friendly'
+  return 'neutral'
 }
 
-export function meetSurvivor(state: GameState, zoneId: string, rng: Rng): Step {
+/**
+ * The survivor's lines take turns by how often you have talked, offset per
+ * person, so meeting the same person twice in a row never repeats a line.
+ */
+function greeting(v: Survivor, content: Content): string {
+  const lines = content.greetings[v.personality][attitudeBand(v.attitude)]
+  const offset = Number(v.id.replace(/D/g, '')) || 0
+  return lines[(v.timesMet + offset) % lines.length].replaceAll('{name}', v.name)
+}
+
+export function meetSurvivor(state: GameState, zoneId: string, rng: Rng, content: Content): Step {
   const here = survivorsInZone(state, zoneId)
   if (here.length === 0) return { state, events: [{ kind: 'survivor', text: 'Nobody here wants to be found.' }] }
   const strangers = here.filter((v) => !v.met)
   const v = rng.pick(strangers.length > 0 ? strangers : here)
   const s = withSurvivor(state, { ...v, met: true, timesMet: v.timesMet + 1 })
-  const events: GameEvent[] = [{ kind: 'survivor', text: greeting(v) }]
+  const events: GameEvent[] = [{ kind: 'survivor', text: greeting(v, content) }]
   if (v.attitude <= -50 && rng.chance(0.5)) {
     const fight = startFight(s, survivorCombatant(v), 'survivor', { survivorId: v.id })
     return { state: fight.state, events: [...events, ...fight.events] }

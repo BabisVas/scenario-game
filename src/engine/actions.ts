@@ -206,7 +206,7 @@ export function doAction(state: GameState, zoneId: string, action: ActionId, rng
       run(randomFight(s, zone, rng, content, 'hunt'))
       break
     case 'talk':
-      run(meetSurvivor(s, zoneId, rng))
+      run(meetSurvivor(s, zoneId, rng, content))
       break
     case 'trade':
       run(findTrader(s, zoneId, rng))
