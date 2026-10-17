@@ -1,4 +1,3 @@
-import { SYSTEM } from '../data/names'
 import type { Content } from '../data/schema'
 import { attributeDef, rollAttribute } from './attributes'
 import { BACKGROUND_STAT_BONUS, ENERGY_MAX, SCHEMA_VERSION, STAT_START } from './config'
@@ -82,7 +81,7 @@ export function newGame(
   }
 
   const announce: GameEvent[] = attribute
-    ? [{ kind: 'system', text: `${SYSTEM} grants you an attribute: ${attribute.name} (${attribute.rarity}). ${attribute.blurb}` }]
+    ? [{ kind: 'system', text: `[Attribute assigned: ${attribute.name} (${attribute.rarity}).]\n${attribute.blurb}` }]
     : []
   const step = startScenario(base, first, rng, content)
   return { ...appendEvents(step.state, [...announce, ...step.events]), rngState: rng.getState() }

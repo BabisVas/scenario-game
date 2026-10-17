@@ -93,7 +93,7 @@ export function resolveContract(state: GameState, accept: boolean, content: Cont
   const name = stigma?.name ?? def.contract.stigmaId
   events.push(
     say(def, 'seals the contract', `Show me ${def.contract.demandTag} every scenario. Take ${name}.`),
-    { kind: 'system', text: `Contract signed. Stigma granted: ${name}.` },
+    { kind: 'system', text: `[Stigma granted: ${name}. Lent by «${def.title}». Terms apply.]` },
   )
   return { state: s, events }
 }
@@ -121,7 +121,11 @@ export function onScenarioCleared(state: GameState, content: Content): Step {
     } else {
       s = { ...s, constellations: { ...s.constellations, [def.id]: { ...cur, demandMetThisScenario: false, interest: clamp(cur.interest - 10) } } }
       events.push(say(def, 'seals your stigma', rng0(def.lines.dislike)))
-      if (stigma && !stigma.sealed) s = { ...s, player: { ...s.player, stigma: { ...stigma, sealed: true } } }
+      if (stigma && !stigma.sealed) {
+        s = { ...s, player: { ...s.player, stigma: { ...stigma, sealed: true } } }
+        const name = content.stigmas.find((x) => x.id === stigma.stigmaId)?.name ?? stigma.stigmaId
+        events.push({ kind: 'system', text: `[Stigma sealed: ${name}. The lender is displeased.]` })
+      }
     }
   }
   return { state: s, events }

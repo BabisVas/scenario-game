@@ -4,6 +4,7 @@
 import type { ActionId, Content, HiddenScenarioDef } from '../data/schema'
 import { withCoinBonus } from './attributes'
 import { addItem } from './inventory'
+import { rewardList } from './rewards'
 import type { Rng } from './rng'
 import type { GameEvent, GameState, Step, Survivor } from './types'
 
@@ -107,22 +108,17 @@ export function judgeHidden(state: GameState, content: Content): Step {
   if (goalMet(def, active.progress, active.hoursLeft, state.zoneId)) {
     const coins = withCoinBonus(state, content, def.rewards.coins)
     let s: GameState = { ...state, hiddenScenario: null, player: { ...state.player, coins: state.player.coins + coins } }
-    const loot = [`${coins} coins`]
-    for (const itemId of def.rewards.itemIds ?? []) {
-      s = addItem(s, itemId)
-      loot.push(content.items.find((i) => i.id === itemId)?.name ?? itemId)
-    }
+    for (const itemId of def.rewards.itemIds ?? []) s = addItem(s, itemId)
     const skillId = def.rewards.skillId
-    if (skillId && !s.player.skills.some((k) => k.skillId === skillId)) {
-      s = { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId, level: 1, uses: 0 }] } }
-      loot.push(`skill ${content.skills.find((k) => k.id === skillId)?.name ?? skillId}`)
-    }
-    return { state: s, events: [{ kind: 'system', text: `Hidden scenario cleared: ${def.title}! Rewards: ${loot.join(', ')}.` }] }
+    const learns = !!skillId && !s.player.skills.some((k) => k.skillId === skillId)
+    if (learns) s = { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId: skillId!, level: 1, uses: 0 }] } }
+    const loot = rewardList(content, coins, def.rewards.itemIds, learns ? skillId : undefined)
+    return { state: s, events: [{ kind: 'system', text: `[Hidden scenario cleared: ${def.title}.] [Rewards: ${loot}.]` }] }
   }
   if (active.hoursLeft <= 0) {
     return {
       state: { ...state, hiddenScenario: null },
-      events: [{ kind: 'system', text: `Hidden scenario over: ${def.title}. The chance has passed. Nothing lost but the reward.` }],
+      events: [{ kind: 'system', text: `[Hidden scenario failed: ${def.title}. The reward is withdrawn.]` }],
     }
   }
   return { state, events: [] }

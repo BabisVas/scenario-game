@@ -59,3 +59,48 @@ describe('sub-scenario and hidden-scenario notices', () => {
     expect(r.events[0].text).toBe('[Hidden scenario discovered: Fx Quiet.]')
   })
 })
+
+describe('the rest of the record speaks in brackets too', () => {
+  beforeEach(() => clearHiddenDefs())
+  test('the attribute of the first morning', async () => {
+    const { newGame } = await import('./newGame')
+    const { onlyAttribute, attributeDef } = await import('../test/fixtures')
+    const def = attributeDef({ kind: 'coins', percent: 10 }, { name: 'Fx Luck', blurb: 'FX-BLURB.' })
+    const s = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 0 }, onlyAttribute(def))
+    expect(s.log[0].text).toBe('[Attribute assigned: Fx Luck (common).]\nFX-BLURB.')
+  })
+  test('a cleared main scenario lists its rewards, counting repeats', async () => {
+    const { clearScenario } = await import('./scenario')
+    const def = { ...surviveDef({ hours: 2 }), rewards: { coins: 50, itemIds: ['bandage', 'bandage'] } }
+    content.scenarios[content.scenarios.findIndex((d) => d.id === def.id)] = def
+    const r = clearScenario(inScenario(baseState(), def), createRng(1), content)
+    expect(r.events[0].text).toBe(`[Main Scenario #${def.number} cleared: ${def.title}.] [Rewards: 50 coins. Bandage ×2.]`)
+  })
+  test('a hidden scenario that runs out says the reward is withdrawn', () => {
+    hiddenDef('fx-late', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { title: 'Fx Late', goal: { kind: 'kill', count: 9 } })
+    const s = { ...inRest(baseState(), 99), hiddenScenario: { defId: 'fx-late', hoursLeft: 0, progress: 0 }, foundHiddenIds: ['fx-late'] }
+    expect(checkScenarioClock(s, createRng(1), content).events[0].text).toBe('[Hidden scenario failed: Fx Late. The reward is withdrawn.]')
+  })
+  test('a cleared hidden scenario lists its rewards', () => {
+    hiddenDef('fx-won', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { title: 'Fx Won', goal: { kind: 'kill', count: 1 } })
+    const s = { ...inRest(baseState(), 99), hiddenScenario: { defId: 'fx-won', hoursLeft: 3, progress: 1 }, foundHiddenIds: ['fx-won'] }
+    expect(checkScenarioClock(s, createRng(1), content).events[0].text).toBe('[Hidden scenario cleared: Fx Won.] [Rewards: 100 coins.]')
+  })
+  test('sub-scenarios clear and fail in brackets', () => {
+    const sub = content.subScenarios[0]
+    const won = { ...inRest(baseState(), 99), subScenario: { defId: sub.id, hoursLeft: 3, progress: 99 } }
+    expect(checkScenarioClock(won, createRng(1), content).events[0].text.startsWith(`[Sub-scenario cleared: ${sub.title}.] [Rewards: ${sub.rewards.coins} coins`)).toBe(true)
+    const lost = { ...inRest(baseState(), 99), subScenario: { defId: sub.id, hoursLeft: 0, progress: 0 } }
+    expect(checkScenarioClock(lost, createRng(1), content).events[0].text).toBe(`[Sub-scenario failed: ${sub.title}. The reward is withdrawn.]`)
+  })
+  test('a stigma is granted, and sealed, in the record', async () => {
+    const { resolveContract, onScenarioCleared } = await import('./constellations')
+    const c = content.constellations[0]
+    const stigma = content.stigmas.find((x) => x.id === c.contract.stigmaId)!
+    const offered = { ...baseState(), pendingChoice: { source: 'contract' as const, constellationId: c.id }, constellations: { ...baseState().constellations, [c.id]: { interest: 70, contract: 'offered' as const, demandMetThisScenario: false } } }
+    const signed = resolveContract(offered, true, content)
+    expect(signed.events.map((e) => e.text)).toContain(`[Stigma granted: ${stigma.name}. Lent by «${c.title}». Terms apply.]`)
+    const broken = onScenarioCleared(signed.state, content)
+    expect(broken.events.map((e) => e.text)).toContain(`[Stigma sealed: ${stigma.name}. The lender is displeased.]`)
+  })
+})

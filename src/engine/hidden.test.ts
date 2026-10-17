@@ -231,7 +231,7 @@ describe('a hidden survive goal can require a zone', () => {
     const r = checkScenarioClock(s, createRng(1), content);
     expect(r.state.hiddenScenario).toBeNull();
     expect(r.state.player).toEqual(s.player);
-    expect(r.events.some(e => /hidden scenario over/i.test(e.text))).toBe(true);
+    expect(r.events.some(e => /hidden scenario failed/i.test(e.text))).toBe(true);
   });
 });
 

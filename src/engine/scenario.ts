@@ -12,6 +12,7 @@ import { killPlayer } from './death'
 import { checkHiddenTriggers, judgeHidden, windowRumors } from './hidden'
 import { addItem } from './inventory'
 import { capitalize, zoneRef } from './places'
+import { rewardList } from './rewards'
 import type { Rng } from './rng'
 import { resolveScenarioForSurvivors } from './survivors'
 import type { GameEvent, GameState, Step, Survivor, Tag } from './types'
@@ -134,18 +135,13 @@ export function clearScenario(state: GameState, rng: Rng, content: Content): Ste
     },
     clearedScenarioIds: [...state.clearedScenarioIds, def.id],
   }
-  const loot: string[] = [`${withCoinBonus(state, content, def.rewards.coins)} coins`]
-  for (const itemId of def.rewards.itemIds ?? []) {
-    s = addItem(s, itemId)
-    loot.push(content.items.find((i) => i.id === itemId)?.name ?? itemId)
-  }
+  for (const itemId of def.rewards.itemIds ?? []) s = addItem(s, itemId)
   const skillId = def.rewards.skillId
-  if (skillId && !s.player.skills.some((k) => k.skillId === skillId)) {
-    s = { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId, level: 1, uses: 0 }] } }
-    loot.push(`skill ${content.skills.find((k) => k.id === skillId)?.name ?? skillId}`)
-  }
+  const learns = !!skillId && !s.player.skills.some((k) => k.skillId === skillId)
+  if (learns) s = { ...s, player: { ...s.player, skills: [...s.player.skills, { skillId: skillId!, level: 1, uses: 0 }] } }
+  const loot = rewardList(content, withCoinBonus(state, content, def.rewards.coins), def.rewards.itemIds, learns ? skillId : undefined)
 
-  const events: GameEvent[] = [{ kind: 'system', text: `Scenario cleared: ${def.title}! Rewards: ${loot.join(', ')}.` }]
+  const events: GameEvent[] = [{ kind: 'system', text: `[Main Scenario #${def.number} cleared: ${def.title}.] [Rewards: ${loot}.]` }]
   const paid = onScenarioCleared(s, content)
   s = paid.state
   events.push(...paid.events)
@@ -197,10 +193,10 @@ export function checkScenarioClock(state: GameState, rng: Rng, content: Content)
       const coins = withCoinBonus(s, content, def.rewards.coins)
       s = { ...s, subScenario: null, player: { ...s.player, coins: s.player.coins + coins } }
       for (const itemId of def.rewards.itemIds ?? []) s = addItem(s, itemId)
-      events.push({ kind: 'system', text: `Sub-scenario complete: ${def.title}. +${coins} coins.` })
+      events.push({ kind: 'system', text: `[Sub-scenario cleared: ${def.title}.] [Rewards: ${rewardList(content, coins, def.rewards.itemIds)}.]` })
     } else if (!def || sub.hoursLeft <= 0) {
       s = { ...s, subScenario: null }
-      events.push({ kind: 'system', text: `Sub-scenario over: ${def?.title ?? 'unknown'}. Time ran out. No reward, no harm done.` })
+      events.push({ kind: 'system', text: `[Sub-scenario failed: ${def?.title ?? 'unknown'}. The reward is withdrawn.]` })
     }
   }
 
