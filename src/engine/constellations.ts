@@ -60,7 +60,8 @@ export function reactTo(state: GameState, tags: Tag[], rng: Rng, content: Conten
 /** Passes a step's event tags to every constellation. */
 export function withReactions(step: Step, rng: Rng, content: Content): Step {
   const tags = step.events.flatMap((e) => e.tags ?? [])
-  if (tags.length === 0) return step
+  // After a death the constellations have said their farewells; nothing else follows.
+  if (tags.length === 0 || step.state.phase.kind === 'dead') return step
   const r = reactTo(step.state, tags, rng, content)
   return { state: r.state, events: [...step.events, ...r.events] }
 }

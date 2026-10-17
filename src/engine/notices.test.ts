@@ -118,3 +118,19 @@ test('explore flavor and world rumors come from the content', async () => {
   const r = doAction(at(inRest(baseState(), 99), 'old-market'), 'old-market', 'explore', seqRng(0.99), flavor)
   expect(r.events.some((e) => e.text === 'FX-EXPLORE')).toBe(true)
 })
+
+test('after death, the constellations only say farewell', () => {
+  // Winning a stylish fight as the clock runs out: the win's tags arrive after the death.
+  const def = killDef({ hours: 1, count: 9 })
+  const watched = { ...baseState(), constellations: { ...baseState().constellations, [content.constellations[0].id]: { interest: 30, contract: 'none' as const, demandMetThisScenario: false } } }
+  const base = inScenario(watched, def)
+  const s = inFight({ ...base, phase: { ...base.phase, hoursLeft: 0 } as typeof base.phase }, { ...brutalEnemy(), hp: 1, maxHp: 1 })
+  let checked = 0
+  for (let seed = 1; seed <= 40; seed++) {
+    const r = fightTurn(s, { kind: 'attack' }, createRng(seed), content)
+    expect(r.state.phase.kind).toBe('dead')
+    const after = r.events.slice(r.events.findIndex((e) => e.text.startsWith('You died')) + 1)
+    for (const e of after) { checked++; expect(e.text).toMatch(/watches you fall/) }
+  }
+  expect(checked).toBeGreaterThan(0)
+})
