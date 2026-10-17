@@ -75,7 +75,9 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
 
   let protectedSurvivorId: string | undefined
   if (def.goal.kind === 'protect') {
-    const pool = livingMet(state).length > 0 ? livingMet(state) : living(state)
+    // Someone who would attack you on sight is never put in your care.
+    const friendly = (list: Survivor[]) => list.filter((v) => v.attitude > -50)
+    const pool = [friendly(livingMet(state)), friendly(living(state)), living(state)].find((list) => list.length > 0) ?? []
     protectedSurvivorId = pool.length > 0 ? rng.pick(pool).id : undefined
   }
 

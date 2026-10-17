@@ -1,9 +1,9 @@
 import { doAction, travel } from './actions'
 import { startScenario } from './scenario'
-import { worldTick } from './survivors'
+import { attackSurvivor, meetSurvivor, worldTick } from './survivors'
 import { createRng } from './rng'
 import type { GameState } from './types'
-import { baseState, fixtureContent as content, makeSurvivor, protectDef, seqRng } from '../test/fixtures'
+import { baseState, fixtureContent as content, inScenario, makeSurvivor, protectDef, seqRng } from '../test/fixtures'
 
 /** Guarding a ward who waits in the Glass Towers while the player stands in the Old Market. */
 function guarding(wardZone = 'glass-towers'): GameState {
@@ -49,4 +49,25 @@ test('real-time world ticks never wound the ward', () => {
   for (let i = 0; i < 500; i++) s = worldTick(s, createRng(i), content).state;
   expect(wounds(s)).toBe(3);
   expect(ward(s)).toMatchObject({ alive: true, zoneId: 'glass-towers' });
+});
+
+describe('the ward is never a fight waiting to happen', () => {
+  test('a survivor hostile to you is not picked as the ward', () => {
+    const s = { ...baseState(), survivors: [makeSurvivor('s-0', { met: true, attitude: -80 }), makeSurvivor('s-1', { met: true, attitude: 0 })] };
+    for (let seed = 1; seed < 20; seed++) {
+      expect(startScenario(s, protectDef({ hours: 5 }), createRng(seed), content).state.phase).toMatchObject({ protectedSurvivorId: 's-1' });
+    }
+  });
+  test('a ward who turns hostile does not attack you on sight', () => {
+    const base = inScenario({ ...baseState(), zoneId: 'old-market', survivors: [makeSurvivor('w', { met: true, attitude: -90, zoneId: 'old-market' })] }, protectDef({ hours: 10 }));
+    const s = { ...base, phase: { ...base.phase, protectedSurvivorId: 'w', wardWounds: 3 } as typeof base.phase };
+    for (let seed = 1; seed < 20; seed++) expect(meetSurvivor(s, 'old-market', createRng(seed), content).state.fight).toBeNull();
+  });
+  test('you cannot attack your ward', () => {
+    const base = inScenario({ ...baseState(), survivors: [makeSurvivor('w', { met: true, zoneId: 'old-market' })] }, protectDef({ hours: 10 }));
+    const s = { ...base, phase: { ...base.phase, protectedSurvivorId: 'w', wardWounds: 3 } as typeof base.phase };
+    const r = attackSurvivor(s, 'w');
+    expect(r.state).toEqual(s);
+    expect(r.events[0].text).toMatch(/protect/i);
+  });
 });

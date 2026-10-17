@@ -217,7 +217,8 @@ export function meetSurvivor(state: GameState, zoneId: string, rng: Rng, content
   const v = rng.pick(strangers.length > 0 ? strangers : here)
   const s = withSurvivor(state, { ...v, met: true, timesMet: v.timesMet + 1 })
   const events: GameEvent[] = [{ kind: 'survivor', text: greeting(v, content) }]
-  if (v.attitude <= -50 && rng.chance(0.5)) {
+  const ward = s.phase.kind === 'scenario' && s.phase.protectedSurvivorId === v.id
+  if (v.attitude <= -50 && !ward && rng.chance(0.5)) {
     const fight = startFight(s, survivorCombatant(v), 'survivor', { survivorId: v.id })
     return { state: fight.state, events: [...events, ...fight.events] }
   }
@@ -324,6 +325,9 @@ export function giveToSurvivor(state: GameState, survivorId: string, itemId: str
 export function attackSurvivor(state: GameState, survivorId: string): Step {
   const v = state.survivors.find((x) => x.id === survivorId)
   if (!v || !v.alive || state.fight) return { state, events: [] }
+  if (state.phase.kind === 'scenario' && state.phase.protectedSurvivorId === v.id) {
+    return { state, events: [{ kind: 'system', text: `[${v.name} is under the scenario's protection. Attacks on them are refused.]` }] }
+  }
   let s = state
   for (const w of survivorsInZone(state, v.zoneId)) if (w.id !== v.id) s = remember(s, w.id, 'attacked', -20)
   s = remember(s, v.id, 'attacked', -50)
