@@ -214,3 +214,22 @@ describe('hidden scenarios never bring a Final Wave', () => {
     expect(r.state.phase.kind).toBe('rest');
   });
 });
+
+describe('a hidden survive goal can require a zone', () => {
+  const running = (zoneId: string) => {
+    hiddenDef('platform', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { goal: { kind: 'survive', zoneId: 'subway-tunnels' }, hours: 4 });
+    return { ...at(calm(), zoneId), hiddenScenario: { defId: 'platform', hoursLeft: 0, progress: 0 }, foundHiddenIds: ['platform'] };
+  };
+  test('standing in the zone when the clock ends pays', () => {
+    const s = running('subway-tunnels');
+    const r = checkScenarioClock(s, createRng(1), content);
+    expect(r.state.player.coins).toBe(s.player.coins + 100);
+  });
+  test('standing anywhere else when the clock ends pays nothing, and costs nothing else', () => {
+    const s = running('old-market');
+    const r = checkScenarioClock(s, createRng(1), content);
+    expect(r.state.hiddenScenario).toBeNull();
+    expect(r.state.player).toEqual(s.player);
+    expect(r.events.some(e => /hidden scenario over/i.test(e.text))).toBe(true);
+  });
+});

@@ -200,7 +200,7 @@ export function validateContent(c: Content): string[] {
         problems.push(`${where} trigger: scenario ${s.id} has no option "${t.optionId}"`)
       }
     }
-    if (h.goal.kind === 'reach') ref('zone', h.goal.zoneId, zoneIds, `${where} goal`)
+    if (h.goal.kind === 'reach' || (h.goal.kind === 'survive' && h.goal.zoneId)) ref('zone', h.goal.zoneId!, zoneIds, `${where} goal`)
     for (const it of h.rewards.itemIds ?? []) ref('item', it, itemIds, `${where} reward`)
     if (h.rewards.skillId) ref('skill', h.rewards.skillId, skillIds, `${where} reward`)
   }

@@ -176,7 +176,8 @@ export type HiddenScenarioDef = {
   title: string
   announcement: string
   trigger: HiddenTrigger
-  goal: { kind: 'kill'; count: number; enemyTag?: string } | { kind: 'reach'; zoneId: string } | { kind: 'survive' }
+  /** A survive goal with a zone pays only if the player stands there when the clock ends. */
+  goal: { kind: 'kill'; count: number; enemyTag?: string } | { kind: 'reach'; zoneId: string } | { kind: 'survive'; zoneId?: string }
   hours: number
   rewards: { coins: number; itemIds?: string[]; skillId?: string }
   /** What survivors whisper about it while it is undiscovered. */

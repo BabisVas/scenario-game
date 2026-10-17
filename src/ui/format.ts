@@ -64,6 +64,7 @@ export function hiddenGoalText(def: HiddenScenarioDef, progress: number, content
   const g = def.goal
   if (g.kind === 'kill') return `Kill ${g.count}${g.enemyTag ? ` ${g.enemyTag}` : ''} (${Math.min(progress, g.count)}/${g.count})`
   if (g.kind === 'reach') return `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
+  if (g.zoneId) return `Be in the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId} when its clock runs out`
   return 'Stay alive until its clock runs out'
 }
 

@@ -67,14 +67,14 @@ export function checkHiddenTriggers(state: GameState, ctx: HiddenContext, conten
   }
 }
 
-function goalMet(def: HiddenScenarioDef, progress: number, hoursLeft: number): boolean {
+function goalMet(def: HiddenScenarioDef, progress: number, hoursLeft: number, zoneId: string): boolean {
   switch (def.goal.kind) {
     case 'kill':
       return progress >= def.goal.count
     case 'reach':
       return progress >= 1
     case 'survive':
-      return hoursLeft <= 0
+      return hoursLeft <= 0 && (!def.goal.zoneId || def.goal.zoneId === zoneId)
   }
 }
 
@@ -89,7 +89,7 @@ export function judgeHidden(state: GameState, content: Content): Step {
   const def = content.hiddenScenarios.find((d) => d.id === active.defId)
   if (!def) return { state: { ...state, hiddenScenario: null }, events: [] }
 
-  if (goalMet(def, active.progress, active.hoursLeft)) {
+  if (goalMet(def, active.progress, active.hoursLeft, state.zoneId)) {
     const coins = withCoinBonus(state, content, def.rewards.coins)
     let s: GameState = { ...state, hiddenScenario: null, player: { ...state.player, coins: state.player.coins + coins } }
     const loot = [`${coins} coins`]
