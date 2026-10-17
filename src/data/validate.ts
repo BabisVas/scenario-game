@@ -142,6 +142,9 @@ export function validateContent(c: Content): string[] {
     for (const z of c.zones) if (!reached.has(z.id)) problems.push(`zone ${z.id}: cannot be reached from ${c.zones[0].id}`)
   }
   for (const e of c.enemies) for (const d of e.drops) ref('item', d.itemId, itemIds, `enemy ${e.id} drop`)
+  for (const e of c.enemies) for (const d of e.drops) {
+    if (typeof d.chance !== 'number' || !(d.chance > 0 && d.chance <= 1)) problems.push(`enemy ${e.id} drop ${d.itemId}: chance must be above 0 and at most 1`)
+  }
   for (const it of c.items) {
     const where = `item ${it.id}`
     const e = it.effect

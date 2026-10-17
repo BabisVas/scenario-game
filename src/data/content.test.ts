@@ -101,4 +101,10 @@ describe('item effects the engine cannot run are rejected', () => {
   ])('%s', (_, over, needle) => {
     expect(validateContent(withItemDef(over))).toContainEqual(expect.stringContaining(needle));
   });
+  test('every drop has a chance between 0 and 1', () => {
+    const enemies = content.enemies.map((e, i) => (i === 0 ? { ...e, drops: [{ itemId: content.items[0].id, chance: 1.5 }] } : e));
+    expect(validateContent({ ...content, enemies })).toContainEqual(expect.stringContaining('chance'));
+    const missing = content.enemies.map((e, i) => (i === 0 ? { ...e, drops: [{ itemId: content.items[0].id } as never] } : e));
+    expect(validateContent({ ...content, enemies: missing })).toContainEqual(expect.stringContaining('chance'));
+  });
 });
