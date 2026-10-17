@@ -78,7 +78,11 @@ function goalMet(def: HiddenScenarioDef, progress: number, hoursLeft: number): b
   }
 }
 
-/** Pays out a met goal, or ends a timed-out one with nothing lost but the reward. */
+/**
+ * Pays out a met goal, or ends a timed-out one with nothing lost but the reward.
+ * A hidden survive goal never brings a Final Wave: failing a hidden scenario must
+ * never put the player's life at risk, so its end is only ever a payout or nothing.
+ */
 export function judgeHidden(state: GameState, content: Content): Step {
   const active = state.hiddenScenario
   if (!active) return { state, events: [] }

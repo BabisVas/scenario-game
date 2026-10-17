@@ -397,7 +397,8 @@ export function afterFinalWave(state: GameState): GameState {
 /**
  * When a survive scenario's clock hits zero, one last enemy always comes: the
  * scenario's named Final Wave at normal strength, or the toughest enemy where
- * the player stands, one danger level stronger.
+ * the player stands, one danger level stronger. Main survive scenarios only:
+ * hidden scenarios never bring one (see judgeHidden).
  */
 function startFinalWave(state: GameState, def: ScenarioDef, content: Content): Step {
   const zone = content.zones.find((z) => z.id === state.zoneId) ?? content.zones[0]

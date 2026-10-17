@@ -194,3 +194,23 @@ describe('a hidden scenario outlives its main scenario', () => {
     expect(r.player.hp).toBe(s.player.hp);
   });
 });
+
+describe('hidden scenarios never bring a Final Wave', () => {
+  test('a hidden survive goal ending inside a main survive scenario pays and starts no fight', () => {
+    const main = surviveDef({ hours: 20 });
+    hiddenDef('wait', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { goal: { kind: 'survive' }, hours: 4 });
+    let s = inScenario(at(baseState(), 'old-market'), main);
+    s = { ...s, hiddenScenario: { defId: 'wait', hoursLeft: 0, progress: 0 }, foundHiddenIds: ['wait'] };
+    const r = checkScenarioClock(s, createRng(1), content);
+    expect(r.state.fight).toBeNull();
+    expect(r.state.hiddenScenario).toBeNull();
+    expect(r.events.some(e => /final wave/i.test(e.text))).toBe(false);
+  });
+  test('a hidden survive goal ending in a rest period pays and starts no fight', () => {
+    hiddenDef('wait', { kind: 'repeat-action', zoneId: 'old-market', action: 'rest', count: 1 }, { goal: { kind: 'survive' }, hours: 4 });
+    const s = { ...calm(), hiddenScenario: { defId: 'wait', hoursLeft: 0, progress: 0 }, foundHiddenIds: ['wait'] };
+    const r = checkScenarioClock(s, createRng(1), content);
+    expect(r.state.fight).toBeNull();
+    expect(r.state.phase.kind).toBe('rest');
+  });
+});
