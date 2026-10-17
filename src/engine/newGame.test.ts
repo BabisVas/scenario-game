@@ -14,7 +14,7 @@ test('new game applies background bonus and starts scenario 1', () => {
 test('new game gives the background starting item and sets the scenario hours', () => {
   const s = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 1000 }, content);
   expect(s.player.inventory).toEqual([{ itemId: 'bike-chain', qty: 1 }]);
-  expect(s.phase).toMatchObject({ hoursLeft: 12 });
+  expect(s.phase).toMatchObject({ hoursLeft: content.scenarios[0].hours });
 });
 test('the scenario announcement follows the attribute line', () => {
   const s = newGame({ name: 'Ari', backgroundId: 'courier', seed: 1, now: 1000 }, content);

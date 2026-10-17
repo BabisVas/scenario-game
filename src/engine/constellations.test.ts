@@ -68,12 +68,10 @@ test('a contract offer never overwrites a pending scenario choice', () => {
   expect(r.constellations[braveryLover(content)].contract).toBe('none');
 });
 test('constellation lines name the constellation by its title', () => {
-  const id = braveryLover(content);
-  const title = content.constellations.find(c => c.id === id)!.title;
   let seen = 0;
   for (let seed = 0; seed < 30; seed++) {
     const ev = reactTo(baseState(), ['bravery'], createRng(seed), content).events.filter(e => e.kind === 'constellation');
-    for (const e of ev) { seen++; expect(e.text).toMatch(new RegExp(`^The constellation «${title}» .*: ".+"$`)); }
+    for (const e of ev) { seen++; expect(content.constellations.some(c => e.text.startsWith(`The constellation «${c.title}» `))).toBe(true); expect(e.text).toMatch(/: ".+"$/); }
   }
   expect(seen).toBeGreaterThan(0);
 });

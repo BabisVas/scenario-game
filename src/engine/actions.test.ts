@@ -66,10 +66,11 @@ test('danger makes enemies tougher', () => {
 test('exploring can start a sub-scenario offered in that zone', () => {
   // first roll 0.1 < 0.3 starts the sub-scenario; 0.9 skips the random fight
   const r = doAction(baseState(), 'old-market', 'explore', seqRng(0.1, 0.9), content).state;
-  expect(r.subScenario).toMatchObject({ defId: 'market-pest-control', progress: 0 });
+  expect(r.subScenario).toMatchObject({ defId: 'stall-sweep', progress: 0 });
 });
 test('a new game knows every zone and seals the ones that start sealed', () => {
-  expect(baseState().zones['old-market']).toEqual({ sealed: false, dangerBonus: 0 });
+  expect(baseState().zones['riverside-park']).toEqual({ sealed: false, dangerBonus: 0 });
+  expect(baseState().zones['university-hill']).toMatchObject({ sealed: true });
 });
 
 describe('ambushes in survive scenarios', () => {
@@ -84,7 +85,8 @@ describe('ambushes in survive scenarios', () => {
     expect(r.events.some(e => /ambush/i.test(e.text))).toBe(true);
   });
   test('a roll above the chance passes quietly', () => {
-    expect(doAction(baseState(), 'old-market', 'rest', seqRng(0.16), content).state.fight).toBeNull();
+    // The first scenario raises the market to danger 2: a 20% chance.
+    expect(doAction(baseState(), 'old-market', 'rest', seqRng(0.21), content).state.fight).toBeNull();
   });
   test('danger raised by the scenario raises the chance', () => {
     const s = { ...baseState(), zones: { ...baseState().zones, 'old-market': { sealed: false, dangerBonus: 2 } } };

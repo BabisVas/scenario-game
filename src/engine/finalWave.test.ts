@@ -1,5 +1,5 @@
 import { checkScenarioClock, spendHours } from './scenario'
-import { doAction } from './actions'
+import { combatantFromEnemy, doAction, zoneDanger } from './actions'
 import { fightTurn } from './combat'
 import { createRng } from './rng'
 import type { GameState } from './types'
@@ -49,7 +49,8 @@ test('a named Final Wave comes at the normal strength of where you stand; the de
   content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = { ...named, finalWave: 'feral-hound' };
   const hound = content.enemies.find(e => e.id === 'feral-hound')!;
   const s = spendHours(inScenario(baseState(), { ...named, finalWave: 'feral-hound' }), 2);
-  expect(checkScenarioClock(s, createRng(1), content).state.fight!.enemy.maxHp).toBe(hound.hp);
+  const here = zoneDanger(s, content.zones.find(z => z.id === s.zoneId)!);
+  expect(checkScenarioClock(s, createRng(1), content).state.fight!.enemy.maxHp).toBe(combatantFromEnemy(hound, here).maxHp);
   content.scenarios[content.scenarios.findIndex(d => d.id === named.id)] = named;
   const strongest = content.enemies.filter(e => content.zones.find(z => z.id === 'old-market')!.enemyIds.includes(e.id)).sort((a, b) => b.hp - a.hp)[0];
   expect(checkScenarioClock(clockOut(), createRng(1), content).state.fight!.enemy.maxHp).toBeGreaterThan(strongest.hp);

@@ -28,7 +28,7 @@ test('clicking an action runs it and shows the result', () => {
   const { storage } = renderWithGame(playingState());
   fireEvent.click(screen.getByRole('button', { name: /rest/i }));
   expect(loadGame(storage)).toMatchObject({ ok: true, state: { inGameHour: 4 } });
-  expect(screen.getByText(/8 hours left/i)).toBeInTheDocument();
+  expect(screen.getByText(new RegExp(`${content.scenarios[0].hours - 4} hours left`, 'i'))).toBeInTheDocument();
 });
 test('a sealed zone is marked and its actions are disabled', () => {
   renderWithGame(sealZone(playingState(), 'old-market'));

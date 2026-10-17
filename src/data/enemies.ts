@@ -1,5 +1,6 @@
 import type { EnemyDef } from './schema'
 
+// Stats are at danger 1; every danger level above 1 adds 15% hp, strength and endurance.
 export const enemies: EnemyDef[] = [
   {
     id: 'rat-swarm',
@@ -29,7 +30,33 @@ export const enemies: EnemyDef[] = [
     hp: 48,
     behavior: 'defensive',
     coins: [8, 15],
-    drops: [{ itemId: 'riot-vest', chance: 0.08 }],
+    drops: [
+      { itemId: 'riot-vest', chance: 0.08 },
+      { itemId: 'painkillers', chance: 0.15 },
+    ],
+  },
+  {
+    id: 'crane-crab',
+    name: 'Crane Crab',
+    tags: ['beast'],
+    stats: { strength: 8, agility: 3, endurance: 8, spirit: 2 },
+    hp: 46,
+    behavior: 'defensive',
+    coins: [9, 16],
+    drops: [
+      { itemId: 'painkillers', chance: 0.2 },
+      { itemId: 'welding-apron', chance: 0.05 },
+    ],
+  },
+  {
+    id: 'salt-eel',
+    name: 'Salt Eel',
+    tags: ['beast'],
+    stats: { strength: 9, agility: 8, endurance: 4, spirit: 3 },
+    hp: 42,
+    behavior: 'aggressive',
+    coins: [10, 18],
+    drops: [{ itemId: 'energy-drink', chance: 0.15 }],
   },
   {
     id: 'glass-wraith',
@@ -39,7 +66,17 @@ export const enemies: EnemyDef[] = [
     hp: 36,
     behavior: 'erratic',
     coins: [8, 14],
-    drops: [{ itemId: 'mirror-shard', chance: 0.1 }],
+    drops: [{ itemId: 'pepper-spray', chance: 0.15 }],
+  },
+  {
+    id: 'ink-wisp',
+    name: 'Ink Wisp',
+    tags: ['spirit'],
+    stats: { strength: 5, agility: 8, endurance: 2, spirit: 9 },
+    hp: 26,
+    behavior: 'erratic',
+    coins: [6, 12],
+    drops: [{ itemId: 'painkillers', chance: 0.2 }],
   },
   {
     id: 'rooftop-harpy',
@@ -61,7 +98,76 @@ export const enemies: EnemyDef[] = [
     coins: [12, 22],
     drops: [
       { itemId: 'crowbar', chance: 0.15 },
-      { itemId: 'mirror-shard', chance: 0.05 },
+      { itemId: 'energy-drink', chance: 0.1 },
     ],
+  },
+  {
+    id: 'paper-golem',
+    name: 'Paper Golem',
+    tags: ['monster'],
+    stats: { strength: 8, agility: 2, endurance: 7, spirit: 3 },
+    hp: 50,
+    behavior: 'defensive',
+    coins: [10, 16],
+    drops: [
+      { itemId: 'bandage', chance: 0.2 },
+      { itemId: 'rebar-spear', chance: 0.05 },
+    ],
+  },
+  {
+    id: 'bell-gargoyle',
+    name: 'Bell Gargoyle',
+    tags: ['monster'],
+    stats: { strength: 9, agility: 4, endurance: 7, spirit: 5 },
+    hp: 58,
+    behavior: 'defensive',
+    coins: [14, 24],
+    drops: [{ itemId: 'firecracker-string', chance: 0.15 }],
+  },
+  {
+    id: 'clockwork-hound',
+    name: 'Clockwork Hound',
+    tags: ['monster'],
+    stats: { strength: 9, agility: 8, endurance: 5, spirit: 2 },
+    hp: 44,
+    behavior: 'aggressive',
+    coins: [12, 20],
+    drops: [
+      { itemId: 'flare', chance: 0.2 },
+      { itemId: 'fire-axe', chance: 0.05 },
+    ],
+  },
+  {
+    id: 'arena-gladiator',
+    name: 'Arena Gladiator',
+    tags: ['monster'],
+    stats: { strength: 10, agility: 6, endurance: 7, spirit: 4 },
+    hp: 64,
+    behavior: 'defensive',
+    coins: [20, 35],
+    drops: [
+      { itemId: 'stage-armor', chance: 0.1 },
+      { itemId: 'med-kit', chance: 0.15 },
+    ],
+  },
+  {
+    id: 'toll-keeper',
+    name: 'Toll-Keeper',
+    tags: ['monster'],
+    stats: { strength: 8, agility: 5, endurance: 6, spirit: 6 },
+    hp: 52,
+    behavior: 'defensive',
+    coins: [30, 40],
+    drops: [],
+  },
+  {
+    id: 'the-understudy',
+    name: 'The Understudy',
+    tags: ['monster'],
+    stats: { strength: 11, agility: 8, endurance: 8, spirit: 9 },
+    hp: 95,
+    behavior: 'aggressive',
+    coins: [80, 120],
+    drops: [],
   },
 ]

@@ -1,15 +1,28 @@
 import type { SurvivorTemplate } from './schema'
 
-// First draft. Task 15 grows the pool so 40 survivors get unique names.
+// Forty strangers, eight per personality, from an original, mixed-origin name pool.
+const group = (personality: SurvivorTemplate['personality'], names: string[]): SurvivorTemplate[] =>
+  names.map((name) => ({ name, personality }))
+
 export const survivorTemplates: SurvivorTemplate[] = [
-  { name: 'Mara Okonkwo', personality: 'brave' },
-  { name: 'Teodor Vasquez', personality: 'cautious' },
-  { name: 'Ines Halloran', personality: 'kind' },
-  { name: 'Ruslan Achterberg', personality: 'ruthless' },
-  { name: 'Pia Lindqvist', personality: 'schemer' },
-  { name: 'Kofi Brandt', personality: 'brave' },
-  { name: 'Yuki Moreau', personality: 'cautious' },
-  { name: 'Dario Nakashima', personality: 'kind' },
-  { name: 'Selin Abernathy', personality: 'ruthless' },
-  { name: 'Ottilie Ferreira', personality: 'schemer' },
+  ...group('brave', [
+    'Mara Okonkwo', 'Kofi Brandt', 'Tamsin Oyelaran', 'Bruno Castellanos',
+    'Asel Nurmagan', 'Dagny Holmqvist', 'Rafael Quispe', 'Hana Kovaříková',
+  ]),
+  ...group('cautious', [
+    'Teodor Vasquez', 'Yuki Moreau', 'Eitan Albrecht', 'Noor Haddad',
+    'Wim Oosterhout', 'Lucía Ferraro', 'Anselm Iwu', 'Meiling Sørensen',
+  ]),
+  ...group('kind', [
+    'Ines Halloran', 'Dario Nakashima', 'Amara Lindgren', 'Tobiah Mensah',
+    'Sunniva Okafor', 'Ilse Marangoni', 'Jomo Varga', 'Rosalind Adebayo',
+  ]),
+  ...group('ruthless', [
+    'Ruslan Achterberg', 'Selin Abernathy', 'Viggo Strand', 'Kasia Wróbel',
+    'Dmitri Halvorsen', 'Marisol Dunne', 'Okan Barlas', 'Greta Valtonen',
+  ]),
+  ...group('schemer', [
+    'Pia Lindqvist', 'Ottilie Ferreira', 'Lazlo Mbatha', 'Corentin Aubry',
+    'Zainab Kessler', 'Fenna Pruitt', 'Ravi Okoye', 'Saoirse Delacroix',
+  ]),
 ]

@@ -71,7 +71,7 @@ describe('choice outcomes the engine cannot run are rejected', () => {
   const withOption = (option: object) => ({
     ...content,
     scenarios: [{ ...content.scenarios[0], goal: { kind: 'choice', prompt: 'p', fallbackOptionId: 'ok',
-      options: [{ id: 'ok', label: 'OK', tags: [], outcome: {} }, { id: 'odd', label: 'Odd', tags: [], ...option }] } } as ScenarioDef],
+      options: [{ id: 'ok', label: 'OK', tags: [], outcome: {} }, { id: 'odd', label: 'Odd', tags: [], ...option }] } } as ScenarioDef, ...content.scenarios.slice(1)],
   });
   test.each([
     ['an unknown outcome field', { outcome: { teleport: true } }, 'teleport'],
