@@ -1,5 +1,8 @@
 // Fixed screen wording: the digest's opening line and the death screen.
 
+/** The death screen's last line, before the only button. */
+export const DEATH_CLOSING = 'The city does not pause. Somewhere a market stall is empty, and it will stay that way.'
+
 /** The digest's first line when a survivor died while the player was away. */
 export const DIGEST_LINE_LOSSES = '[Elapsed time logged. You were not harmed. Others were less fortunate.]'
 /** The digest's first line when nobody died. System messages are never wrong. */

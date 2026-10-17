@@ -431,6 +431,13 @@ h3 {
   color: var(--faint);
 }
 
+/* Notices are several bracketed lines in one entry. */
+.log .text,
+.fight-log .text,
+.modal .list li {
+  white-space: pre-line;
+}
+
 .kind-system .tag,
 .kind-system .text {
   color: var(--accent);

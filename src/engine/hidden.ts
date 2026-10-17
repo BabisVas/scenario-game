@@ -76,7 +76,7 @@ export function checkHiddenTriggers(state: GameState, ctx: HiddenContext, conten
       foundHiddenIds: [...state.foundHiddenIds, def.id],
     },
     events: [
-      { kind: 'system', text: `Hidden scenario discovered: ${def.title}! ${def.hours} hours. Every constellation is watching.`, tags: ['cunning'] },
+      { kind: 'system', text: `[Hidden scenario discovered: ${def.title}.]`, tags: ['cunning'] },
       { kind: 'system', text: def.announcement },
     ],
   }

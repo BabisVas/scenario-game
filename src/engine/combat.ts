@@ -98,7 +98,7 @@ export function fightTurn(state: GameState, action: FightAction, rng: Rng, conte
 
   const events = [...step.events]
   if (step.result === 'lost') {
-    const death = killPlayer(step.state, `Killed by ${fight.enemy.name} in round ${fight.round}.`, content, rng)
+    const death = killPlayer(step.state, `${fight.enemy.name}, round ${fight.round}.`, content, rng)
     return { state: death.state, events: [...events, ...death.events], result: 'lost' }
   }
   let s = step.state

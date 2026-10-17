@@ -102,11 +102,9 @@ export function startScenario(state: GameState, def: ScenarioDef, rng: Rng, cont
     pendingChoice: def.goal.kind === 'choice' ? { source: 'scenario', scenarioId: def.id } : state.pendingChoice,
   }
 
-  const events: GameEvent[] = [
-    ...sealedEvents,
-    { kind: 'system', text: def.announcement },
-    { kind: 'system', text: `Main Scenario ${def.number}: ${def.title}. ${def.hours} hours. ${def.rules.join(' ')}`.trim() },
-  ]
+  const events: GameEvent[] = [...sealedEvents, { kind: 'system', text: def.announcement }]
+  if (def.announcer) events.push({ kind: 'system', text: `${ANNOUNCER}: "${def.announcer}"` })
+  if (def.narration) events.push({ kind: 'player', text: def.narration })
   if (gathered && gathered.ids.length > 0) {
     const names = gathered.ids.map((id) => s.survivors.find((v) => v.id === id)!.name)
     events.push({ kind: 'system', text: `The scenario gathers you with ${names.join(', ')}. Not all of you will leave.` })
@@ -219,10 +217,10 @@ export function checkScenarioClock(state: GameState, rng: Rng, content: Content)
       !!phase.protectedSurvivorId &&
       s.survivors.find((v) => v.id === phase.protectedSurvivorId)?.alive === false
     let step: Step | null = null
-    if (protectedDead) step = killPlayer(s, `The one you were sworn to protect died, and the scenario took you with them.`, content, rng)
+    if (protectedDead) step = killPlayer(s, `${s.survivors.find((v) => v.id === phase.protectedSurvivorId)?.name ?? 'Your ward'} did not survive. Neither did you.`, content, rng)
     else if (def.goal.kind === 'survive' && phase.hoursLeft <= 0 && !phase.finalWaveBeaten) step = startFinalWave(s, def, content)
     else if (goalMet(s, def)) step = clearScenario(s, rng, content)
-    else if (phase.hoursLeft <= 0) step = killPlayer(s, `Failed main scenario ${def.number}, "${def.title}". The clock ran out.`, content, rng)
+    else if (phase.hoursLeft <= 0) step = killPlayer(s, `Main Scenario #${def.number}, "${def.title}". The time limit expired.`, content, rng)
     if (step) {
       s = step.state
       events.push(...step.events)

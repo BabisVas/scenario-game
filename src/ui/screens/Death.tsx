@@ -1,3 +1,4 @@
+import { DEATH_CLOSING } from '../../data/screens'
 import type { GameState } from '../../engine/types'
 
 export function Death({ state, onNewLife }: { state: GameState; onNewLife: () => void }) {
@@ -17,8 +18,8 @@ export function Death({ state, onNewLife }: { state: GameState; onNewLife: () =>
       <section className="panel death" aria-labelledby="death-title">
         <h2 id="death-title">You died</h2>
         <div className="panel-body">
-          <p className="mono muted small">{state.player.name}</p>
-          <p className="cause">{cause}</p>
+          <p className="mono muted small">{`[Survivor record closed: ${state.player.name}.]`}</p>
+          <p className="cause mono">{`[Cause: ${cause}]`}</p>
           <div className="facts">
             {facts.map((f) => (
               <div key={f.label}>
@@ -34,7 +35,7 @@ export function Death({ state, onNewLife }: { state: GameState; onNewLife: () =>
               ))}
             </ul>
           )}
-          <p className="muted small">There is one life per game. This one is over. The next starts from nothing.</p>
+          <p className="muted small">{DEATH_CLOSING}</p>
           <button className="btn primary" onClick={onNewLife}>
             Start a new life
           </button>

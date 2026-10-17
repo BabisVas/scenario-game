@@ -114,7 +114,12 @@ export type ScenarioDef = {
   id: string
   number: number
   title: string
+  /** The system notice, in brackets, one line per rule. */
   announcement: string
+  /** What «ANNOUNCER» says after the notice. */
+  announcer?: string
+  /** A line of narration after that: what you see. */
+  narration?: string
   rules: string[]
   twist: string
   hours: number
@@ -153,6 +158,8 @@ export type SubScenarioDef = {
   goal: { kind: 'kill'; count: number } | { kind: 'reach'; zoneId: string }
   hours: number
   rewards: { coins: number; itemIds?: string[] }
+  /** A line of narration after its notice. */
+  narration?: string
 }
 
 /** What an attribute does, always on. */

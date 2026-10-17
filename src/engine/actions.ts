@@ -1,6 +1,6 @@
 // Zone actions: everything the player does on the map costs energy and in-game hours.
 
-import type { ActionId, Content, EnemyDef, ZoneDef } from '../data/schema'
+import type { ActionId, Content, EnemyDef, SubScenarioDef, ZoneDef } from '../data/schema'
 import { withCoinBonus, withHealingBonus } from './attributes'
 import { startFight } from './combat'
 import { withReactions } from './constellations'
@@ -255,7 +255,8 @@ function explore(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step 
   if (rng.chance(0.3) && !s.subScenario && offered.length > 0) {
     const def = rng.pick(offered)
     next = { ...next, subScenario: { defId: def.id, hoursLeft: def.hours, progress: 0 } }
-    events.push({ kind: 'system', text: `Sub-scenario: ${def.title}. ${def.hours} hours. Optional, but the rewards are real.` })
+    events.push({ kind: 'system', text: subScenarioNotice(def, content) })
+    if (def.narration) events.push({ kind: 'player', text: def.narration })
   } else {
     events.push({ kind: 'player', text: rng.pick(FLAVOR) })
   }
@@ -269,6 +270,18 @@ function explore(s: GameState, zone: ZoneDef, rng: Rng, content: Content): Step 
 
 /** A training session that does not break through may teach a new trainable skill. */
 const TEACH_CHANCE = 0.15
+
+/** The bracketed notice for an offered sub-scenario: objective, time limit, reward, failure. */
+function subScenarioNotice(def: SubScenarioDef, content: Content): string {
+  const g = def.goal
+  const objective = g.kind === 'kill' ? `Kill ${g.count}` : `Reach the ${content.zones.find((z) => z.id === g.zoneId)?.name ?? g.zoneId}`
+  const reward = [`${def.rewards.coins} coins`, ...(def.rewards.itemIds ?? []).map((id) => content.items.find((i) => i.id === id)?.name ?? id)]
+  return [
+    `[Sub-scenario available: ${def.title}.]`,
+    `[Objective: ${objective}.] [Time limit: ${def.hours} hours.] [Reward: ${reward.join('. ')}.]`,
+    '[Failure: The reward is withdrawn. Participation is optional. Participation is appreciated.]',
+  ].join('\n')
+}
 
 function train(s: GameState, rng: Rng, content: Content): Step {
   if (rng.chance(0.1)) {
