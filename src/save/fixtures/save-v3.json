@@ -1,0 +1,1165 @@
+{
+ "schemaVersion": 3,
+ "rngState": 4065264231,
+ "createdAt": 1792281600000,
+ "lastSeenAt": 1792281600000,
+ "player": {
+  "name": "Ari",
+  "backgroundId": "line-cook",
+  "stats": {
+   "strength": 9,
+   "agility": 5,
+   "endurance": 5,
+   "spirit": 5
+  },
+  "hp": 100,
+  "coins": 30,
+  "inventory": [
+   {
+    "itemId": "kitchen-knife",
+    "qty": 1
+   },
+   {
+    "itemId": "bandage",
+    "qty": 2
+   }
+  ],
+  "equipped": {
+   "weapon": "kitchen-knife"
+  },
+  "skills": [],
+  "points": 0,
+  "kills": 3,
+  "attributeId": "heavy-hands",
+  "stigma": null
+ },
+ "energy": 50,
+ "energyUpdatedAt": 1792281600000,
+ "worldTickAt": 1792281600000,
+ "inGameHour": 15,
+ "zoneId": "riverside-park",
+ "phase": {
+  "kind": "scenario",
+  "scenarioId": "s01",
+  "hoursLeft": 9,
+  "progress": 0,
+  "killsAtStart": 0
+ },
+ "clearedScenarioIds": [],
+ "subScenario": null,
+ "hiddenScenario": null,
+ "foundHiddenIds": [],
+ "actionCounts": {
+  "old-market/talk": 1,
+  "old-market/hunt": 1,
+  "old-market/scavenge": 1,
+  "old-market/rest": 1,
+  "riverside-park/hunt": 1,
+  "riverside-park/rest": 1
+ },
+ "fight": null,
+ "pendingChoice": null,
+ "zones": {
+  "old-market": {
+   "sealed": false,
+   "dangerBonus": 1
+  },
+  "riverside-park": {
+   "sealed": false,
+   "dangerBonus": 0
+  },
+  "glass-towers": {
+   "sealed": false,
+   "dangerBonus": 0
+  },
+  "university-hill": {
+   "sealed": true,
+   "dangerBonus": 0
+  },
+  "clocktower-square": {
+   "sealed": false,
+   "dangerBonus": 0
+  },
+  "harbor-cranes": {
+   "sealed": false,
+   "dangerBonus": 0
+  },
+  "the-bowl": {
+   "sealed": true,
+   "dangerBonus": 0
+  },
+  "subway-tunnels": {
+   "sealed": false,
+   "dangerBonus": 0
+  }
+ },
+ "survivors": [
+  {
+   "id": "s-0",
+   "name": "Rafael Quispe",
+   "personality": "brave",
+   "stats": {
+    "strength": 8,
+    "agility": 6,
+    "endurance": 6,
+    "spirit": 3
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-1",
+   "name": "Anselm Iwu",
+   "personality": "cautious",
+   "stats": {
+    "strength": 7,
+    "agility": 6,
+    "endurance": 7,
+    "spirit": 3
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "side-exit",
+   "timesMet": 0
+  },
+  {
+   "id": "s-2",
+   "name": "Pia Lindqvist",
+   "personality": "schemer",
+   "stats": {
+    "strength": 6,
+    "agility": 7,
+    "endurance": 5,
+    "spirit": 7
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "harbor-cranes",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "ghost-lamp",
+   "timesMet": 0
+  },
+  {
+   "id": "s-3",
+   "name": "Dario Nakashima",
+   "personality": "kind",
+   "stats": {
+    "strength": 6,
+    "agility": 7,
+    "endurance": 6,
+    "spirit": 5
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "riverside-park",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-4",
+   "name": "Selin Abernathy",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 9,
+    "agility": 5,
+    "endurance": 3,
+    "spirit": 5
+   },
+   "hp": 80,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-5",
+   "name": "Greta Valtonen",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 9,
+    "agility": 5,
+    "endurance": 7,
+    "spirit": 6
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "calm-under-sirens",
+   "timesMet": 0
+  },
+  {
+   "id": "s-6",
+   "name": "Marisol Dunne",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 7,
+    "agility": 5,
+    "endurance": 7,
+    "spirit": 7
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "first-out-the-door",
+   "timesMet": 0
+  },
+  {
+   "id": "s-7",
+   "name": "Jomo Varga",
+   "personality": "kind",
+   "stats": {
+    "strength": 7,
+    "agility": 7,
+    "endurance": 7,
+    "spirit": 7
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "old-market",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "side-exit",
+   "timesMet": 0
+  },
+  {
+   "id": "s-8",
+   "name": "Saoirse Delacroix",
+   "personality": "schemer",
+   "stats": {
+    "strength": 7,
+    "agility": 7,
+    "endurance": 3,
+    "spirit": 5
+   },
+   "hp": 80,
+   "alive": true,
+   "zoneId": "glass-towers",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "unkillable-optimist",
+   "timesMet": 0
+  },
+  {
+   "id": "s-9",
+   "name": "Wim Oosterhout",
+   "personality": "cautious",
+   "stats": {
+    "strength": 4,
+    "agility": 6,
+    "endurance": 8,
+    "spirit": 7
+   },
+   "hp": 130,
+   "alive": true,
+   "zoneId": "riverside-park",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-10",
+   "name": "Ottilie Ferreira",
+   "personality": "schemer",
+   "stats": {
+    "strength": 3,
+    "agility": 7,
+    "endurance": 3,
+    "spirit": 8
+   },
+   "hp": 80,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "night-shift-hands",
+   "timesMet": 0
+  },
+  {
+   "id": "s-11",
+   "name": "Hana Kovaříková",
+   "personality": "brave",
+   "stats": {
+    "strength": 6,
+    "agility": 3,
+    "endurance": 9,
+    "spirit": 4
+   },
+   "hp": 140,
+   "alive": true,
+   "zoneId": "old-market",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "heavy-hands",
+   "timesMet": 0
+  },
+  {
+   "id": "s-12",
+   "name": "Lazlo Mbatha",
+   "personality": "schemer",
+   "stats": {
+    "strength": 7,
+    "agility": 9,
+    "endurance": 6,
+    "spirit": 8
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "glass-towers",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "light-feet",
+   "timesMet": 0
+  },
+  {
+   "id": "s-13",
+   "name": "Sunniva Okafor",
+   "personality": "kind",
+   "stats": {
+    "strength": 4,
+    "agility": 3,
+    "endurance": 5,
+    "spirit": 9
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "old-market",
+   "partyId": null,
+   "met": true,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "iron-constitution",
+   "timesMet": 1
+  },
+  {
+   "id": "s-14",
+   "name": "Okan Barlas",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 5,
+    "agility": 5,
+    "endurance": 3,
+    "spirit": 4
+   },
+   "hp": 80,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "night-shift-hands",
+   "timesMet": 0
+  },
+  {
+   "id": "s-15",
+   "name": "Ilse Marangoni",
+   "personality": "kind",
+   "stats": {
+    "strength": 3,
+    "agility": 5,
+    "endurance": 7,
+    "spirit": 9
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "glass-towers",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "calm-under-sirens",
+   "timesMet": 0
+  },
+  {
+   "id": "s-16",
+   "name": "Corentin Aubry",
+   "personality": "schemer",
+   "stats": {
+    "strength": 6,
+    "agility": 9,
+    "endurance": 5,
+    "spirit": 7
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "first-out-the-door",
+   "timesMet": 0
+  },
+  {
+   "id": "s-17",
+   "name": "Ines Halloran",
+   "personality": "kind",
+   "stats": {
+    "strength": 4,
+    "agility": 5,
+    "endurance": 7,
+    "spirit": 5
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "riverside-park",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "stubborn",
+   "timesMet": 0
+  },
+  {
+   "id": "s-18",
+   "name": "Amara Lindgren",
+   "personality": "kind",
+   "stats": {
+    "strength": 5,
+    "agility": 5,
+    "endurance": 5,
+    "spirit": 6
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "riverside-park",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "bargain-hunter",
+   "timesMet": 0
+  },
+  {
+   "id": "s-19",
+   "name": "Meiling Sørensen",
+   "personality": "cautious",
+   "stats": {
+    "strength": 4,
+    "agility": 5,
+    "endurance": 6,
+    "spirit": 7
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "ghost-lamp",
+   "timesMet": 0
+  },
+  {
+   "id": "s-20",
+   "name": "Kasia Wróbel",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 5,
+    "agility": 6,
+    "endurance": 4,
+    "spirit": 7
+   },
+   "hp": 90,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-21",
+   "name": "Asel Nurmagan",
+   "personality": "brave",
+   "stats": {
+    "strength": 7,
+    "agility": 5,
+    "endurance": 7,
+    "spirit": 6
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "harbor-cranes",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-22",
+   "name": "Mara Okonkwo",
+   "personality": "brave",
+   "stats": {
+    "strength": 5,
+    "agility": 3,
+    "endurance": 6,
+    "spirit": 3
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "old-market",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "heavy-hands",
+   "timesMet": 0
+  },
+  {
+   "id": "s-23",
+   "name": "Lucía Ferraro",
+   "personality": "cautious",
+   "stats": {
+    "strength": 3,
+    "agility": 8,
+    "endurance": 7,
+    "spirit": 3
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "heavy-hands",
+   "timesMet": 0
+  },
+  {
+   "id": "s-24",
+   "name": "Rosalind Adebayo",
+   "personality": "kind",
+   "stats": {
+    "strength": 3,
+    "agility": 5,
+    "endurance": 6,
+    "spirit": 7
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "side-exit",
+   "timesMet": 0
+  },
+  {
+   "id": "s-25",
+   "name": "Eitan Albrecht",
+   "personality": "cautious",
+   "stats": {
+    "strength": 4,
+    "agility": 7,
+    "endurance": 5,
+    "spirit": 6
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "harbor-cranes",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "ghost-lamp",
+   "timesMet": 0
+  },
+  {
+   "id": "s-26",
+   "name": "Zainab Kessler",
+   "personality": "schemer",
+   "stats": {
+    "strength": 4,
+    "agility": 8,
+    "endurance": 6,
+    "spirit": 5
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "harbor-cranes",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "calm-under-sirens",
+   "timesMet": 0
+  },
+  {
+   "id": "s-27",
+   "name": "Fenna Pruitt",
+   "personality": "schemer",
+   "stats": {
+    "strength": 3,
+    "agility": 9,
+    "endurance": 5,
+    "spirit": 7
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "exterminator",
+   "timesMet": 0
+  },
+  {
+   "id": "s-28",
+   "name": "Bruno Castellanos",
+   "personality": "brave",
+   "stats": {
+    "strength": 9,
+    "agility": 4,
+    "endurance": 6,
+    "spirit": 6
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-29",
+   "name": "Noor Haddad",
+   "personality": "cautious",
+   "stats": {
+    "strength": 5,
+    "agility": 5,
+    "endurance": 6,
+    "spirit": 7
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "iron-constitution",
+   "timesMet": 0
+  },
+  {
+   "id": "s-30",
+   "name": "Tobiah Mensah",
+   "personality": "kind",
+   "stats": {
+    "strength": 7,
+    "agility": 7,
+    "endurance": 6,
+    "spirit": 6
+   },
+   "hp": 110,
+   "alive": true,
+   "zoneId": "harbor-cranes",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "heavy-hands",
+   "timesMet": 0
+  },
+  {
+   "id": "s-31",
+   "name": "Tamsin Oyelaran",
+   "personality": "brave",
+   "stats": {
+    "strength": 8,
+    "agility": 5,
+    "endurance": 9,
+    "spirit": 4
+   },
+   "hp": 140,
+   "alive": true,
+   "zoneId": "riverside-park",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "side-exit",
+   "timesMet": 0
+  },
+  {
+   "id": "s-32",
+   "name": "Kofi Brandt",
+   "personality": "brave",
+   "stats": {
+    "strength": 8,
+    "agility": 4,
+    "endurance": 7,
+    "spirit": 3
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "side-exit",
+   "timesMet": 0
+  },
+  {
+   "id": "s-33",
+   "name": "Yuki Moreau",
+   "personality": "cautious",
+   "stats": {
+    "strength": 5,
+    "agility": 8,
+    "endurance": 7,
+    "spirit": 7
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "glass-towers",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-34",
+   "name": "Dmitri Halvorsen",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 9,
+    "agility": 9,
+    "endurance": 5,
+    "spirit": 7
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "subway-tunnels",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "first-out-the-door",
+   "timesMet": 0
+  },
+  {
+   "id": "s-35",
+   "name": "Ravi Okoye",
+   "personality": "schemer",
+   "stats": {
+    "strength": 3,
+    "agility": 7,
+    "endurance": 4,
+    "spirit": 5
+   },
+   "hp": 90,
+   "alive": true,
+   "zoneId": "glass-towers",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "calm-under-sirens",
+   "timesMet": 0
+  },
+  {
+   "id": "s-36",
+   "name": "Teodor Vasquez",
+   "personality": "cautious",
+   "stats": {
+    "strength": 3,
+    "agility": 9,
+    "endurance": 7,
+    "spirit": 4
+   },
+   "hp": 120,
+   "alive": true,
+   "zoneId": "clocktower-square",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "loose-change",
+   "timesMet": 0
+  },
+  {
+   "id": "s-37",
+   "name": "Dagny Holmqvist",
+   "personality": "brave",
+   "stats": {
+    "strength": 7,
+    "agility": 5,
+    "endurance": 9,
+    "spirit": 7
+   },
+   "hp": 140,
+   "alive": true,
+   "zoneId": "glass-towers",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  },
+  {
+   "id": "s-38",
+   "name": "Ruslan Achterberg",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 6,
+    "agility": 6,
+    "endurance": 4,
+    "spirit": 5
+   },
+   "hp": 90,
+   "alive": true,
+   "zoneId": "riverside-park",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "heavy-hands",
+   "timesMet": 0
+  },
+  {
+   "id": "s-39",
+   "name": "Viggo Strand",
+   "personality": "ruthless",
+   "stats": {
+    "strength": 5,
+    "agility": 5,
+    "endurance": 5,
+    "spirit": 5
+   },
+   "hp": 100,
+   "alive": true,
+   "zoneId": "riverside-park",
+   "partyId": null,
+   "met": false,
+   "attitude": 0,
+   "memories": [],
+   "points": 0,
+   "attributeId": "scrapper",
+   "timesMet": 0
+  }
+ ],
+ "constellations": {
+  "lantern-that-will-not-go-out": {
+   "interest": 10,
+   "contract": "none",
+   "demandMetThisScenario": false
+  },
+  "smile-behind-the-velvet-knife": {
+   "interest": 2,
+   "contract": "none",
+   "demandMetThisScenario": false
+  },
+  "butcher-who-hums-lullabies": {
+   "interest": 1,
+   "contract": "none",
+   "demandMetThisScenario": false
+  },
+  "gardener-of-second-chances": {
+   "interest": 0,
+   "contract": "none",
+   "demandMetThisScenario": false
+  },
+  "peacock-who-swallowed-the-sun": {
+   "interest": 14,
+   "contract": "none",
+   "demandMetThisScenario": false
+  },
+  "saint-of-open-doors": {
+   "interest": 0,
+   "contract": "none",
+   "demandMetThisScenario": false
+  },
+  "ledger-with-golden-teeth": {
+   "interest": 0,
+   "contract": "none",
+   "demandMetThisScenario": false
+  },
+  "dog-that-waits-at-the-gate": {
+   "interest": 10,
+   "contract": "none",
+   "demandMetThisScenario": false
+  }
+ },
+ "rankingOpen": false,
+ "log": [
+  {
+   "id": 1,
+   "kind": "system",
+   "text": "[Attribute assigned: Heavy Hands (common).]\nEverything you pick up becomes a weapon eventually. Even the kettle.",
+   "inGameHour": 0
+  },
+  {
+   "id": 2,
+   "kind": "system",
+   "text": "[Main Scenario #1: First Light]\n[Objective: Stay alive for 24 hours.]\n[Time limit: 24 hours.]\n[Reward: 50 coins. 2 Bandages.]\n[Failure: Death.]\n[When the time limit ends, one final challenger will arrive. Please remain available.]",
+   "inGameHour": 0
+  },
+  {
+   "id": 3,
+   "kind": "system",
+   "text": "«ANNOUNCER»: \"Good morning, «CITY»! Your city is a stage now, and every one of you has a part. Small parts, mostly. Do try to be memorable. The forgettable ones tend to go first.\"",
+   "inGameHour": 0
+  },
+  {
+   "id": 4,
+   "kind": "player",
+   "text": "The sky has words in it. Everyone in the street is reading them at the same time, lips moving, and nobody is reading them aloud.",
+   "inGameHour": 0
+  },
+  {
+   "id": 5,
+   "kind": "survivor",
+   "text": "Rafael Quispe whispers a rumor: \"A sign on the university gate says the library is accepting returns. Nobody alive put it there.\"",
+   "inGameHour": 0
+  },
+  {
+   "id": 6,
+   "kind": "survivor",
+   "text": "Sunniva Okafor is stitching someone's coat with fishing line. \"Sit. You are bleeding a little.\"",
+   "inGameHour": 1
+  },
+  {
+   "id": 7,
+   "kind": "fight",
+   "text": "Rat Swarm blocks your way. Fight!",
+   "inGameHour": 2
+  },
+  {
+   "id": 8,
+   "kind": "fight",
+   "text": "You hit Rat Swarm for 20.",
+   "inGameHour": 2
+  },
+  {
+   "id": 9,
+   "kind": "fight",
+   "text": "Rat Swarm hits you twice for 10.",
+   "inGameHour": 2
+  },
+  {
+   "id": 10,
+   "kind": "fight",
+   "text": "You hit Rat Swarm for 28. Critical!",
+   "inGameHour": 2
+  },
+  {
+   "id": 11,
+   "kind": "fight",
+   "text": "Rat Swarm goes down.",
+   "inGameHour": 2
+  },
+  {
+   "id": 12,
+   "kind": "player",
+   "text": "+5 coins.",
+   "inGameHour": 2
+  },
+  {
+   "id": 13,
+   "kind": "player",
+   "text": "You scavenge the Old Market: 14 coins.",
+   "inGameHour": 4
+  },
+  {
+   "id": 14,
+   "kind": "system",
+   "text": "Not enough coins: Quick Strike costs 40.",
+   "inGameHour": 4
+  },
+  {
+   "id": 15,
+   "kind": "player",
+   "text": "You rest in the Old Market. +10 HP.",
+   "inGameHour": 9
+  },
+  {
+   "id": 16,
+   "kind": "fight",
+   "text": "Ambush! Something was waiting for you.",
+   "inGameHour": 9
+  },
+  {
+   "id": 17,
+   "kind": "fight",
+   "text": "Rat Swarm blocks your way. Fight!",
+   "inGameHour": 9
+  },
+  {
+   "id": 18,
+   "kind": "fight",
+   "text": "You hit Rat Swarm for 17.",
+   "inGameHour": 9
+  },
+  {
+   "id": 19,
+   "kind": "fight",
+   "text": "Rat Swarm hits you for 6.",
+   "inGameHour": 9
+  },
+  {
+   "id": 20,
+   "kind": "fight",
+   "text": "You hit Rat Swarm for 20.",
+   "inGameHour": 9
+  },
+  {
+   "id": 21,
+   "kind": "fight",
+   "text": "Rat Swarm goes down.",
+   "inGameHour": 9
+  },
+  {
+   "id": 22,
+   "kind": "player",
+   "text": "+4 coins, found Bandage.",
+   "inGameHour": 9
+  },
+  {
+   "id": 23,
+   "kind": "player",
+   "text": "You leave the Old Market for Riverside Park.",
+   "inGameHour": 10
+  },
+  {
+   "id": 24,
+   "kind": "fight",
+   "text": "Feral Hound blocks your way. Fight!",
+   "inGameHour": 11
+  },
+  {
+   "id": 25,
+   "kind": "fight",
+   "text": "You hit Feral Hound for 17.",
+   "inGameHour": 11
+  },
+  {
+   "id": 26,
+   "kind": "fight",
+   "text": "Feral Hound hits you for 9.",
+   "inGameHour": 11
+  },
+  {
+   "id": 27,
+   "kind": "fight",
+   "text": "You hit Feral Hound for 18.",
+   "inGameHour": 11
+  },
+  {
+   "id": 28,
+   "kind": "fight",
+   "text": "Feral Hound goes down.",
+   "inGameHour": 11
+  },
+  {
+   "id": 29,
+   "kind": "player",
+   "text": "+7 coins, found Bandage.",
+   "inGameHour": 11
+  },
+  {
+   "id": 30,
+   "kind": "player",
+   "text": "You rest in Riverside Park. +15 HP.",
+   "inGameHour": 15
+  }
+ ],
+ "nextLogId": 31,
+ "digest": null
+}

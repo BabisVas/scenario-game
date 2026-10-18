@@ -43,3 +43,19 @@ test('a save from before the Final Wave (schema 2) is treated as unreadable', ()
   const st = memoryStorage(); st.setItem(SAVE_KEY, JSON.stringify({ ...baseState(), schemaVersion: 2 }));
   expect(loadGame(st)).toEqual({ ok: false, reason: 'version' });
 });
+test('loading an older save runs its migrations, and leaves the stored save as it was', async () => {
+  const { baseState } = await import('../test/fixtures');
+  const st = memoryStorage();
+  const old = JSON.stringify({ ...baseState(), schemaVersion: 2, oldField: true });
+  st.setItem(SAVE_KEY, old);
+  const migrations = { 2: (s: Record<string, unknown>) => { const { oldField: _, ...rest } = s; return { ...rest, schemaVersion: 3 }; } };
+  const r = loadGame(st, { migrations, current: 3, first: 2 });
+  expect(r.ok && r.state.schemaVersion).toBe(3);
+  expect(r.ok && 'oldField' in r.state).toBe(false);
+  expect(st.getItem(SAVE_KEY)).toBe(old);
+});
+test('a save whose migration fails is unreadable, not half-migrated', () => {
+  const st = memoryStorage();
+  st.setItem(SAVE_KEY, JSON.stringify({ ...baseState(), schemaVersion: 2 }));
+  expect(loadGame(st, { migrations: {}, current: 3, first: 2 })).toEqual({ ok: false, reason: 'version' });
+});

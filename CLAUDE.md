@@ -26,12 +26,25 @@ A single-player, menu-driven browser game: an ordinary survivor lives through de
 - `src/ui/` — screens only. Screens read state and dispatch actions through the `useGame` store.
 - `src/save/` — saving, loading and the one-tab guard.
 
+## Saves
+
+Updates must never make an existing save unreadable.
+
+- **A change to the save format** (anything stored in `GameState`: a field added, removed, renamed or retyped) must:
+  1. bump `SCHEMA_VERSION` in `src/engine/config.ts` (and the `schemaVersion` type in `src/engine/types.ts`);
+  2. add a migration from the previous version to the new one in `MIGRATIONS` in `src/save/migrate.ts`;
+  3. run `npm run save:fixtures` to record the new version's saved game and save shape in `src/save/fixtures/`, and commit them.
+  The tests load the real saved game of every version from `FIRST_SUPPORTED_VERSION` up (the previous version's file is the test of the new migration), and fail if the save format changes without a new version.
+- **Never edit or delete a shipped `save-v<N>.json` or `shape-v<N>.json`.** They are the saves players have.
+- **Content-only updates must not change the save version.** Content may add anything, but must keep every id an existing save can refer to (items, skills, stigmas, attributes, zones, scenarios, hidden and sub-scenarios, enemies, constellations, backgrounds). The save tests check the recorded saves against the content.
+
 ## Commands
 
 - `npm run dev` — play locally
 - `npm test` — run all tests
 - `npm run typecheck` — type-check
 - `npm run build` — production build
+- `npm run save:fixtures` — record the current save version's saved game and shape (after a save-format change)
 
 ## Working rules
 

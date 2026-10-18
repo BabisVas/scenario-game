@@ -10,7 +10,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b --noEmit",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "save:fixtures": "vitest run src/save/fixtures.write.test.ts --mode fixtures"
   },
   "dependencies": {
     "react": "^18.3.1",

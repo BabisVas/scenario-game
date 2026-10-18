@@ -1,0 +1,167 @@
+{
+ "actionCounts": {
+  "*": "number"
+ },
+ "clearedScenarioIds": {
+  "[]": "string"
+ },
+ "constellations": {
+  "*": {
+   "contract": "string",
+   "demandMetThisScenario": "boolean",
+   "interest": "number"
+  }
+ },
+ "createdAt": "number",
+ "digest": {
+  "[]": {
+   "id": "number",
+   "inGameHour": "number",
+   "kind": "string",
+   "text": "string"
+  }
+ },
+ "energy": "number",
+ "energyUpdatedAt": "number",
+ "fight": {
+  "cooldowns": {
+   "quick-strike": "number"
+  },
+  "damageTaken": "number",
+  "enemy": {
+   "armorPower": "number",
+   "behavior": "string",
+   "hp": "number",
+   "maxHp": "number",
+   "name": "string",
+   "stats": {
+    "agility": "number",
+    "endurance": "number",
+    "spirit": "number",
+    "strength": "number"
+   },
+   "weaponPower": "number"
+  },
+  "enemyId": "string",
+  "loot": "string",
+  "origin": "string",
+  "round": "number",
+  "survivorId": "string"
+ },
+ "foundHiddenIds": {
+  "[]": "string"
+ },
+ "hiddenScenario": {
+  "defId": "string",
+  "hoursLeft": "number",
+  "progress": "number"
+ },
+ "inGameHour": "number",
+ "lastSeenAt": "number",
+ "log": {
+  "[]": {
+   "id": "number",
+   "inGameHour": "number",
+   "kind": "string",
+   "text": "string"
+  }
+ },
+ "nextLogId": "number",
+ "pendingChoice": {
+  "scenarioId": "string",
+  "source": "string"
+ },
+ "phase": {
+  "finalWaveBeaten": "boolean",
+  "groupIds": {
+   "[]": "string"
+  },
+  "hoursLeft": "number",
+  "killsAtStart": "number",
+  "kind": "string",
+  "progress": "number",
+  "protectedSurvivorId": "string",
+  "scenarioId": "string",
+  "wardWounds": "number"
+ },
+ "player": {
+  "attributeId": "string",
+  "backgroundId": "string",
+  "coins": "number",
+  "equipped": {
+   "weapon": "string"
+  },
+  "hp": "number",
+  "inventory": {
+   "[]": {
+    "itemId": "string",
+    "qty": "number"
+   }
+  },
+  "kills": "number",
+  "name": "string",
+  "points": "number",
+  "skills": {
+   "[]": {
+    "level": "number",
+    "skillId": "string",
+    "uses": "number"
+   }
+  },
+  "stats": {
+   "agility": "number",
+   "endurance": "number",
+   "spirit": "number",
+   "strength": "number"
+  },
+  "stigma": {
+   "constellationId": "string",
+   "level": "number",
+   "sealed": "boolean",
+   "stigmaId": "string",
+   "uses": "number"
+  }
+ },
+ "rankingOpen": "boolean",
+ "rngState": "number",
+ "schemaVersion": "number",
+ "subScenario": {
+  "defId": "string",
+  "hoursLeft": "number",
+  "progress": "number"
+ },
+ "survivors": {
+  "[]": {
+   "alive": "boolean",
+   "attitude": "number",
+   "attributeId": "string",
+   "deathNote": "string",
+   "hp": "number",
+   "id": "string",
+   "memories": {
+    "[]": "empty"
+   },
+   "met": "boolean",
+   "name": "string",
+   "partyId": "null|string",
+   "personality": "string",
+   "points": "number",
+   "stats": {
+    "agility": "number",
+    "endurance": "number",
+    "spirit": "number",
+    "strength": "number"
+   },
+   "timesMet": "number",
+   "zoneId": "string"
+  }
+ },
+ "worldTickAt": "number",
+ "zoneId": "string",
+ "zones": {
+  "*": {
+   "dangerBonus": "number",
+   "sealed": "boolean"
+  }
+ }
+}

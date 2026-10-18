@@ -6,7 +6,8 @@ Read this first, then `CLAUDE.md`, the plan (`docs/superpowers/plans/2026-10-10-
 
 ## State at handoff
 
-- Branch `main`, not pushed anywhere yet (no remote). 480/480 tests pass; typecheck and build are clean. `SCHEMA_VERSION` is 3.
+- Branch `main`, pushed to https://github.com/BabisVas/scenario-game (public). Every push to `main` deploys to https://babisvas.github.io/scenario-game/ (Pages source: GitHub Actions). 490 tests pass (1 skipped: the fixture writer); typecheck and build are clean. `SCHEMA_VERSION` is 3.
+- **Save migration is in place** (`src/save/migrate.ts`). Babis has started playing: follow the "Saves" rule in CLAUDE.md for every change to the save format.
 - Execution skill: **superpowers:executing-plans**, inline. Ledger with every ruling: `.superpowers/sdd/2026-10-10-scenario-game/progress.md` (git-ignored; first line names the plan).
 - Locally excluded (`.git/info/exclude`, never commit): `review-notes.md`, `review-notes-2.md` (reviewer-only; Babis must not read them) and the root `SKILL.md`.
 
@@ -15,7 +16,7 @@ Read this first, then `CLAUDE.md`, the plan (`docs/superpowers/plans/2026-10-10-
 | Task | Status |
 | --- | --- |
 | 1–15 | **Done.** Each has a `Task N: complete` line in the ledger. All content data files are written (8 zones, 15 enemies, 25 items, 12 skills, 8 stigmas, 16 attributes, 6 hidden, 8 sub-scenarios, 8 constellations, 40 survivors, greetings, flavor, s01–s10). |
-| 16: Publish | **Steps 1–3 done** (`.github/workflows/deploy.yml`, `README.md`, commit `ci: deploy to GitHub Pages`). **Step 4 is the STOP**: waiting for Babis to give a repo URL or to allow creating one with `gh` (logged in as BabisVas). Then add the remote, push `main`, tell him to set Settings → Pages → Source to "GitHub Actions", and report the URL once the workflow succeeds. |
+| 16: Publish | **Done.** Repo created with gh, Pages enabled via the API, first deploy succeeded. |
 | Final review | **Done** before the push (fresh reviewer, opus). Critical and Important findings fixed test-first; deferred minors and rulings are in the ledger under `Final:`. |
 
 ## Review rounds
@@ -39,9 +40,7 @@ Read this first, then `CLAUDE.md`, the plan (`docs/superpowers/plans/2026-10-10-
 
 ## Exact next step
 
-1. Babis answers the Task 16 STOP (repo URL, or permission to create one with `gh`).
-2. Add the remote, push `main`, ask him to set Pages → Source to "GitHub Actions", watch the workflow, report the game's URL.
-3. Then use superpowers:finishing-a-development-branch and delete the plan workspace.
+Nothing is pending. Wait for Babis or his reviewer. Use superpowers:finishing-a-development-branch when he says the build is finished, then delete the plan workspace.
 
 ## Tooling notes
 
